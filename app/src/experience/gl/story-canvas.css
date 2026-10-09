@@ -1,0 +1,14 @@
+.story-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-gl);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.story-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

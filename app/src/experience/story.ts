@@ -125,3 +125,57 @@ export function resetStory() {
   snapshot = { frame: null, chapter: null, theme: snapshot.theme };
   emitChange();
 }
+
+/* ------------------------------------------------------------------ */
+/* Roast model (frame 03). Shared by the WebGL beans and the DOM labels. */
+
+export const ROAST_STAGES = [
+  { id: "drying", label: "Drying", note: "Green to pale yellow", from: 0, to: 0.28 },
+  { id: "browning", label: "Browning", note: "Yellow to tan", from: 0.28, to: 0.56 },
+  { id: "first-crack", label: "First crack", note: "An audible pop", from: 0.56, to: 0.72 },
+  { id: "development", label: "Development", note: "Chestnut brown, then the tray", from: 0.72, to: 1 },
+] as const;
+
+/** f03 progress at which first crack happens (chaff flash, crackle sound, hard cut allowed). */
+export const FIRST_CRACK_AT = 0.56;
+
+/** Bean temperature in °C for f03 progress (drop at 208°C, before second crack: medium roast). */
+export function roastTemperature(p: number) {
+  const x = Math.min(1, Math.max(0, p));
+  const keys: [number, number][] = [
+    [0, 96],
+    [0.28, 160],
+    [0.56, 196],
+    [0.72, 202],
+    [1, 208],
+  ];
+  for (let i = 1; i < keys.length; i += 1) {
+    const [p1, t1] = keys[i];
+    const [p0, t0] = keys[i - 1];
+    if (x <= p1) return t0 + ((x - p0) / (p1 - p0)) * (t1 - t0);
+  }
+  return 208;
+}
+
+/** Roast colour ramp, linear sRGB 0..1: green bean -> pale yellow -> tan -> chestnut (matte medium roast). */
+const RAMP: [number, [number, number, number]][] = [
+  [0, [0.56, 0.63, 0.42]],
+  [0.2, [0.74, 0.74, 0.5]],
+  [0.36, [0.85, 0.78, 0.55]],
+  [0.56, [0.72, 0.53, 0.35]],
+  [0.72, [0.46, 0.29, 0.17]],
+  [1, [0.35, 0.2, 0.12]],
+];
+
+export function roastColor(p: number): [number, number, number] {
+  const x = Math.min(1, Math.max(0, p));
+  for (let i = 1; i < RAMP.length; i += 1) {
+    const [p1, c1] = RAMP[i];
+    const [p0, c0] = RAMP[i - 1];
+    if (x <= p1) {
+      const t = (x - p0) / (p1 - p0);
+      return [c0[0] + (c1[0] - c0[0]) * t, c0[1] + (c1[1] - c0[1]) * t, c0[2] + (c1[2] - c0[2]) * t];
+    }
+  }
+  return RAMP[RAMP.length - 1][1];
+}
