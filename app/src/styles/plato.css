@@ -1,0 +1,368 @@
+/* PLATŌ token layer. The site's own brand system (design-brief.md).
+ * Colour is driven by the story theme on <html data-story="roast|paper|forest">.
+ * Components read the semantic vars (--bg, --fg, --accent, ...), never raw hex. */
+
+@font-face {
+  font-family: "Jost";
+  src: url("/fonts/jost-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("/fonts/instrument-serif-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("/fonts/instrument-serif-normal-ext.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("/fonts/instrument-serif-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("/fonts/instrument-serif-italic-ext.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  /* Brand primitives (locked palette) */
+  --plato-roast: #0e0d0b;
+  --plato-roast-2: #171512;
+  --plato-green: #003c2f;
+  --plato-green-2: #0b4a3b;
+  --plato-forest: #062a21;
+  --plato-forest-2: #0a3529;
+  --plato-paper: #fbfbf8;
+  --plato-paper-warm: #f6f5f0;
+  --plato-stone: #e7e5df;
+  --plato-stone-deep: #cfcbc2;
+  --plato-peach: #f2b9a3;
+  --plato-sage: #c9dccd;
+  --plato-burgundy: #6e1f2c;
+  --plato-ink: #0f1d18;
+  --plato-cream: #efeee2;
+  --plato-bean-green: #8fa06b;
+  --plato-chestnut: #5a3420;
+
+  /* Type */
+  --font-sans: "Jost", "Futura", "Avenir Next", system-ui, sans-serif;
+  --font-serif: "Instrument Serif", "Times New Roman", serif;
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
+  --ease-in-quart: cubic-bezier(0.5, 0, 0.75, 0);
+  --dur-micro: 220ms;
+  --dur-ui: 420ms;
+  --dur-reveal: 1200ms;
+
+  /* Layout */
+  --gutter: clamp(20px, 4vw, 64px);
+  --header-h: 76px;
+  --maxw: 1600px;
+
+  /* Layers */
+  --z-gl: 0;
+  --z-content: 1;
+  --z-float: 40;
+  --z-header: 60;
+  --z-drawer: 80;
+  --z-menu: 90;
+  --z-loader: 100;
+
+  /* Semantic theme vars: default is paper (subpages). */
+  --bg: var(--plato-paper);
+  --bg-2: var(--plato-paper-warm);
+  --fg: var(--plato-ink);
+  --fg-muted: color-mix(in srgb, var(--plato-ink) 64%, transparent);
+  --fg-faint: color-mix(in srgb, var(--plato-ink) 42%, transparent);
+  --line: color-mix(in srgb, var(--plato-ink) 12%, transparent);
+  --accent: var(--plato-green);
+  --accent-ink: var(--plato-paper);
+  --surface: var(--plato-stone);
+}
+
+:root[data-story="roast"] {
+  --bg: var(--plato-roast);
+  --bg-2: var(--plato-roast-2);
+  --fg: #f3f1ea;
+  --fg-muted: color-mix(in srgb, #f3f1ea 66%, transparent);
+  --fg-faint: color-mix(in srgb, #f3f1ea 40%, transparent);
+  --line: color-mix(in srgb, #f3f1ea 14%, transparent);
+  --accent: var(--plato-sage);
+  --accent-ink: var(--plato-roast);
+  --surface: #1d1b17;
+}
+
+:root[data-story="forest"] {
+  --bg: var(--plato-forest);
+  --bg-2: var(--plato-forest-2);
+  --fg: #f3f1ea;
+  --fg-muted: color-mix(in srgb, #f3f1ea 68%, transparent);
+  --fg-faint: color-mix(in srgb, #f3f1ea 42%, transparent);
+  --line: color-mix(in srgb, #f3f1ea 15%, transparent);
+  --accent: var(--plato-sage);
+  --accent-ink: var(--plato-forest);
+  --surface: #0d3a2e;
+}
+
+/* Tailwind utilities for the brand (bg-plato-green, text-plato-ink, font-serif ...) */
+@theme {
+  --color-plato-roast: #0e0d0b;
+  --color-plato-green: #003c2f;
+  --color-plato-forest: #062a21;
+  --color-plato-paper: #fbfbf8;
+  --color-plato-stone: #e7e5df;
+  --color-plato-peach: #f2b9a3;
+  --color-plato-sage: #c9dccd;
+  --color-plato-burgundy: #6e1f2c;
+  --color-plato-ink: #0f1d18;
+  --color-plato-cream: #efeee2;
+  --color-story-bg: var(--bg);
+  --color-story-fg: var(--fg);
+  --color-story-muted: var(--fg-muted);
+  --color-story-faint: var(--fg-faint);
+  --color-story-line: var(--line);
+  --color-story-accent: var(--accent);
+  --font-serif: "Instrument Serif", "Times New Roman", serif;
+  --font-plato: "Jost", "Futura", "Avenir Next", system-ui, sans-serif;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    background-color: var(--bg);
+    color: var(--fg);
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition:
+      background-color 700ms var(--ease-out-quart),
+      color 700ms var(--ease-out-quart);
+  }
+
+  html[data-story="roast"],
+  html[data-story="forest"] {
+    color-scheme: dark;
+  }
+
+  body {
+    min-height: 100dvh;
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.6;
+    transition:
+      background-color 700ms var(--ease-out-quart),
+      color 700ms var(--ease-out-quart);
+  }
+
+  * {
+    border-color: var(--line);
+  }
+
+  ::selection {
+    background: var(--plato-sage);
+    color: var(--plato-forest);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  img,
+  video,
+  canvas {
+    display: block;
+    max-width: 100%;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Typographic primitives (shared). Bespoke components may extend, never restyle globally. */
+.t-display {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(3.5rem, 9.2vw, 11rem);
+  line-height: 0.92;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.t-statement {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 6.2vw, 7.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.t-title {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(2rem, 3.6vw, 3.75rem);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.t-label {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+.t-label-lg {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.3;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+.t-body {
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 1.15vw, 1.125rem);
+  line-height: 1.62;
+  color: var(--fg-muted);
+  text-wrap: pretty;
+}
+.t-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Soft film grain for dark chapters (decorative, pointer-free). */
+.plato-grain {
+  position: absolute;
+  inset: -50%;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: plato-grain 1.2s steps(6) infinite;
+}
+@keyframes plato-grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -4%); }
+  60% { transform: translate(-4%, -1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 200;
+  padding: 0.75rem 1rem;
+  background: var(--plato-green);
+  color: var(--plato-paper);
+  transform: translateY(-200%);
+  transition: transform var(--dur-micro) var(--ease-out-expo);
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plato-grain {
+    animation: none;
+  }
+  html,
+  body {
+    transition: none;
+  }
+}
+
+/* Root error state */
+.root-error {
+  display: grid;
+  gap: 1.25rem;
+  align-content: center;
+  min-height: 100svh;
+  padding: calc(var(--header-h) + 2rem) var(--gutter) 4rem;
+  max-width: 60rem;
+}
+.root-error__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.root-error__actions > * {
+  padding: 0.9rem 1.4rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+}

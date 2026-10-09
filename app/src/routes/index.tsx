@@ -1,24 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { ScrollScrub } from "@/components/scroll-scrub/scroll-scrub";
-import { scrollScrubScenes, scrollScrubTheme } from "@/scroll-scrub-scenes";
+import { StoryChapters } from "@/experience/chapters/story-chapters";
+import { StoryCanvas } from "@/experience/gl/story-canvas";
+import { HomeAcademy, HomeEquipment, HomeShop, HomeVoices } from "@/experience/sections";
 
 export const Route = createFileRoute("/")({
-  // No title/description here on purpose: the home page inherits the site's
-  // editable page metadata from the root route (title/favicon/og), so a shared
-  // link to "/" shows the owner's values. Add a `head` here only to give a
-  // SPECIFIC page its own title/description.
+  // The home page inherits the site's page metadata from the root route.
   component: Index,
 });
 
-// The whole page IS the journey: the scrub controller owns media time, while
-// every chapter stays server-rendered in ordinary semantic flow. Compose the
-// site's own nav and bespoke CTAs around <ScrollScrub />; the engine
-// deliberately ships no header, no shared button system, and no scroll hint.
+// The page IS the journey: a persistent WebGL layer behind fourteen storyboard
+// frames (four chapters), then the shop, equipment, academy and testimonials.
 function Index() {
   return (
-    <main>
-      <ScrollScrub scenes={scrollScrubScenes} theme={scrollScrubTheme} />
+    <main id="main" className="home">
+      <StoryCanvas />
+      <StoryChapters />
+      <HomeShop />
+      <HomeEquipment />
+      <HomeAcademy />
+      <HomeVoices />
     </main>
   );
 }

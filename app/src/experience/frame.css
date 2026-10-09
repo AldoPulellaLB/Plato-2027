@@ -1,0 +1,29 @@
+.frame {
+  position: relative;
+  z-index: var(--z-content);
+  height: calc(var(--frame-vh, 100) * 1svh);
+}
+
+.frame--pinned > .frame__stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.frame--flow > .frame__stage {
+  position: relative;
+  min-height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame {
+    height: auto;
+    min-height: 100svh;
+  }
+  .frame--pinned > .frame__stage {
+    position: relative;
+    height: auto;
+    min-height: 100svh;
+  }
+}

@@ -1,0 +1,118 @@
+/* Ghost headline: a sharp line plus a blurred ghost double that settles into it. */
+.ghost {
+  position: relative;
+  margin: 0;
+}
+.ghost__sharp {
+  display: block;
+  transition:
+    opacity 1200ms var(--ease-out-expo) var(--reveal-delay, 0ms),
+    filter 1200ms var(--ease-out-expo) var(--reveal-delay, 0ms),
+    transform 1200ms var(--ease-out-expo) var(--reveal-delay, 0ms);
+}
+.ghost__ghost {
+  position: absolute;
+  inset: 0;
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  transition:
+    opacity 1200ms var(--ease-out-expo) var(--reveal-delay, 0ms),
+    filter 1200ms var(--ease-out-expo) var(--reveal-delay, 0ms),
+    transform 1200ms var(--ease-out-expo) var(--reveal-delay, 0ms);
+}
+.ghost[data-reveal="idle"] .ghost__sharp {
+  opacity: 0;
+  filter: blur(10px);
+  transform: translateY(6px);
+  transition: none;
+}
+.ghost[data-reveal="idle"] .ghost__ghost {
+  opacity: 0.3;
+  filter: blur(3px);
+  transform: translateY(-12px);
+  transition: none;
+}
+.ghost[data-reveal="play"] .ghost__ghost {
+  opacity: 0;
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+/* Split words */
+.split__w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+.split__i {
+  display: inline-block;
+  transition: transform 1000ms var(--ease-out-expo) calc(var(--reveal-delay, 0ms) + var(--i) * var(--split-stagger, 38ms));
+}
+.split[data-reveal="idle"] .split__i {
+  transform: translateY(108%);
+  transition: none;
+}
+
+/* Rolling letters */
+.roll {
+  display: inline-flex;
+  white-space: nowrap;
+}
+.roll__c {
+  display: inline-block;
+  height: 1.12em;
+  overflow: hidden;
+  line-height: 1.12;
+  vertical-align: top;
+}
+.roll__c > span {
+  display: block;
+  transition: transform 560ms var(--ease-out-expo) calc(var(--i) * 16ms);
+}
+:is(a, button, [data-roll]):is(:hover, :focus-visible) .roll__c > span {
+  transform: translateY(-100%);
+}
+
+/* Media mask */
+.reveal-media {
+  overflow: hidden;
+  transition: clip-path 1300ms var(--ease-out-expo) var(--reveal-delay, 0ms);
+  clip-path: inset(0 0 0 0);
+}
+.reveal-media > * {
+  transition: transform 1600ms var(--ease-out-expo) var(--reveal-delay, 0ms);
+}
+.reveal-media[data-reveal="idle"] {
+  transition: none;
+}
+.reveal-media[data-reveal="idle"][data-from="bottom"] {
+  clip-path: inset(100% 0 0 0);
+}
+.reveal-media[data-reveal="idle"][data-from="top"] {
+  clip-path: inset(0 0 100% 0);
+}
+.reveal-media[data-reveal="idle"][data-from="left"] {
+  clip-path: inset(0 100% 0 0);
+}
+.reveal-media[data-reveal="idle"][data-from="right"] {
+  clip-path: inset(0 0 0 100%);
+}
+.reveal-media[data-reveal="idle"] > * {
+  transform: scale(1.12);
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ghost__sharp,
+  .ghost__ghost,
+  .split__i,
+  .roll__c > span,
+  .reveal-media,
+  .reveal-media > * {
+    transition: none !important;
+  }
+}

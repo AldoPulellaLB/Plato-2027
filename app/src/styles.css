@@ -23,6 +23,8 @@
 @import "tw-animate-css";
 /* shadcn v4 base (scrollbar/scroll-fade utilities, toast base) for src/components/ui */
 @import "shadcn/tailwind.css";
+/* PLATŌ brand layer (tokens, fonts, story themes, type primitives). */
+@import "./styles/plato.css";
 
 @custom-variant dark (&:where([data-theme="default-dark"], [data-theme="default-dark"] *));
 
@@ -164,21 +166,4 @@
   --radius: 0.625rem;
 }
 
-@layer base {
-  html {
-    background-color: var(--hf-color-background-primary);
-    color: var(--hf-color-text-primary);
-    color-scheme: dark;
-  }
-
-  body {
-    min-height: 100vh;
-    background-color: var(--hf-color-background-primary);
-    color: var(--hf-color-text-primary);
-    font-family: var(--hf-type-family-secondary);
-  }
-
-  * {
-    border-color: var(--hf-color-border-default);
-  }
-}
+/* The site's html/body base lives in styles/plato.css (brand layer). */
