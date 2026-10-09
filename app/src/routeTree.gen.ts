@@ -9,12 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StoresRouteImport } from './routes/stores'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as OurStoryRouteImport } from './routes/our-story'
+import { Route as MenuRouteImport } from './routes/menu'
+import { Route as EquipmentRouteImport } from './routes/equipment'
+import { Route as CartRouteImport } from './routes/cart'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ShopIndexRouteImport } from './routes/shop/index'
+import { Route as ShopHandleRouteImport } from './routes/shop/$handle'
+import { Route as CheckoutSuccessRouteImport } from './routes/checkout/success'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe-webhook'
 
+const StoresRoute = StoresRouteImport.update({
+  id: '/stores',
+  path: '/stores',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -25,14 +40,59 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   path: '/robots.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OurStoryRoute = OurStoryRouteImport.update({
+  id: '/our-story',
+  path: '/our-story',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MenuRoute = MenuRouteImport.update({
+  id: '/menu',
+  path: '/menu',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquipmentRoute = EquipmentRouteImport.update({
+  id: '/equipment',
+  path: '/equipment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AcademyRoute = AcademyRouteImport.update({
+  id: '/academy',
+  path: '/academy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopIndexRoute = ShopIndexRouteImport.update({
+  id: '/shop/',
+  path: '/shop/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopHandleRoute = ShopHandleRouteImport.update({
+  id: '/shop/$handle',
+  path: '/shop/$handle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
+  id: '/checkout/success',
+  path: '/checkout/success',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
@@ -43,51 +103,137 @@ const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/academy': typeof AcademyRoute
+  '/account': typeof AccountRoute
   '/app': typeof AppRoute
+  '/cart': typeof CartRoute
+  '/equipment': typeof EquipmentRoute
+  '/menu': typeof MenuRoute
+  '/our-story': typeof OurStoryRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/stores': typeof StoresRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
+  '/shop/$handle': typeof ShopHandleRoute
+  '/shop/': typeof ShopIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/academy': typeof AcademyRoute
+  '/account': typeof AccountRoute
   '/app': typeof AppRoute
+  '/cart': typeof CartRoute
+  '/equipment': typeof EquipmentRoute
+  '/menu': typeof MenuRoute
+  '/our-story': typeof OurStoryRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/stores': typeof StoresRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
+  '/shop/$handle': typeof ShopHandleRoute
+  '/shop': typeof ShopIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/academy': typeof AcademyRoute
+  '/account': typeof AccountRoute
   '/app': typeof AppRoute
+  '/cart': typeof CartRoute
+  '/equipment': typeof EquipmentRoute
+  '/menu': typeof MenuRoute
+  '/our-story': typeof OurStoryRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/stores': typeof StoresRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
+  '/shop/$handle': typeof ShopHandleRoute
+  '/shop/': typeof ShopIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/app' | '/robots.txt' | '/sitemap.xml' | '/api/stripe-webhook'
+    | '/'
+    | '/academy'
+    | '/account'
+    | '/app'
+    | '/cart'
+    | '/equipment'
+    | '/menu'
+    | '/our-story'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/stores'
+    | '/api/stripe-webhook'
+    | '/checkout/success'
+    | '/shop/$handle'
+    | '/shop/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/robots.txt' | '/sitemap.xml' | '/api/stripe-webhook'
+  to:
+    | '/'
+    | '/academy'
+    | '/account'
+    | '/app'
+    | '/cart'
+    | '/equipment'
+    | '/menu'
+    | '/our-story'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/stores'
+    | '/api/stripe-webhook'
+    | '/checkout/success'
+    | '/shop/$handle'
+    | '/shop'
   id:
     | '__root__'
     | '/'
+    | '/academy'
+    | '/account'
     | '/app'
+    | '/cart'
+    | '/equipment'
+    | '/menu'
+    | '/our-story'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/stores'
     | '/api/stripe-webhook'
+    | '/checkout/success'
+    | '/shop/$handle'
+    | '/shop/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AcademyRoute: typeof AcademyRoute
+  AccountRoute: typeof AccountRoute
   AppRoute: typeof AppRoute
+  CartRoute: typeof CartRoute
+  EquipmentRoute: typeof EquipmentRoute
+  MenuRoute: typeof MenuRoute
+  OurStoryRoute: typeof OurStoryRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StoresRoute: typeof StoresRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
+  CheckoutSuccessRoute: typeof CheckoutSuccessRoute
+  ShopHandleRoute: typeof ShopHandleRoute
+  ShopIndexRoute: typeof ShopIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/stores': {
+      id: '/stores'
+      path: '/stores'
+      fullPath: '/stores'
+      preLoaderRoute: typeof StoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -102,6 +248,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RobotsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/our-story': {
+      id: '/our-story'
+      path: '/our-story'
+      fullPath: '/our-story'
+      preLoaderRoute: typeof OurStoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/menu': {
+      id: '/menu'
+      path: '/menu'
+      fullPath: '/menu'
+      preLoaderRoute: typeof MenuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipment': {
+      id: '/equipment'
+      path: '/equipment'
+      fullPath: '/equipment'
+      preLoaderRoute: typeof EquipmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app': {
       id: '/app'
       path: '/app'
@@ -109,11 +283,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/academy': {
+      id: '/academy'
+      path: '/academy'
+      fullPath: '/academy'
+      preLoaderRoute: typeof AcademyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/': {
+      id: '/shop/'
+      path: '/shop'
+      fullPath: '/shop/'
+      preLoaderRoute: typeof ShopIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/$handle': {
+      id: '/shop/$handle'
+      path: '/shop/$handle'
+      fullPath: '/shop/$handle'
+      preLoaderRoute: typeof ShopHandleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/success': {
+      id: '/checkout/success'
+      path: '/checkout/success'
+      fullPath: '/checkout/success'
+      preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/stripe-webhook': {
@@ -128,10 +337,20 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AcademyRoute: AcademyRoute,
+  AccountRoute: AccountRoute,
   AppRoute: AppRoute,
+  CartRoute: CartRoute,
+  EquipmentRoute: EquipmentRoute,
+  MenuRoute: MenuRoute,
+  OurStoryRoute: OurStoryRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StoresRoute: StoresRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
+  CheckoutSuccessRoute: CheckoutSuccessRoute,
+  ShopHandleRoute: ShopHandleRoute,
+  ShopIndexRoute: ShopIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

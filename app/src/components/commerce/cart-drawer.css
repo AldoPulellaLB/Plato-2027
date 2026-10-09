@@ -1,0 +1,262 @@
+/* Cart drawer. The panel is always paper, whatever chapter the page is in,
+ * so the semantic tokens are pinned to the paper theme inside it. */
+.cd {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-drawer);
+  pointer-events: none;
+  visibility: hidden;
+  transition: visibility 0s 900ms;
+}
+.cd[data-open="true"] {
+  pointer-events: auto;
+  visibility: visible;
+  transition: none;
+}
+
+.cd-scrim {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--plato-ink) 46%, transparent);
+  opacity: 0;
+  transition: opacity 640ms var(--ease-out-quart) 120ms;
+}
+.cd[data-open="true"] .cd-scrim {
+  opacity: 1;
+  transition-delay: 0ms;
+}
+
+.cd-panel {
+  --bg: var(--plato-paper);
+  --bg-2: var(--plato-paper-warm);
+  --fg: var(--plato-ink);
+  --fg-muted: color-mix(in srgb, var(--plato-ink) 64%, transparent);
+  --fg-faint: color-mix(in srgb, var(--plato-ink) 42%, transparent);
+  --line: color-mix(in srgb, var(--plato-ink) 12%, transparent);
+  --accent: var(--plato-green);
+  --accent-ink: var(--plato-paper);
+  --surface: var(--plato-stone);
+  --cd-pad: clamp(20px, 2.4vw, 32px);
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(520px, 100%);
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: -40px 0 80px -40px color-mix(in srgb, var(--plato-ink) 40%, transparent);
+  transform: translateX(104%);
+  transition: transform 640ms var(--ease-in-quart);
+  will-change: transform;
+}
+.cd[data-open="true"] .cd-panel {
+  transform: translateX(0);
+  transition: transform 1000ms var(--ease-out-expo);
+}
+/* A thin sage edge, like the cup's colour split catching the light. */
+.cd-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: var(--plato-sage);
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition: transform 300ms var(--ease-in-quart);
+}
+.cd[data-open="true"] .cd-panel::before {
+  transform: scaleY(1);
+  transition: transform 1400ms var(--ease-out-expo) 260ms;
+}
+
+.cd[data-open="true"] .cd-stagger,
+.cd[data-open="true"] .cl,
+.cd[data-open="true"] .ce-stagger {
+  animation: cd-in 900ms var(--ease-out-expo) backwards;
+  animation-delay: calc(200ms + var(--i, 0) * 70ms);
+}
+.cd[data-open="true"] .cl {
+  animation-delay: calc(280ms + var(--i, 0) * 70ms);
+}
+@keyframes cd-in {
+  from {
+    opacity: 0;
+    transform: translateX(36px);
+  }
+}
+
+.cd-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: var(--header-h);
+  padding: 0 calc(var(--cd-pad) - 10px) 0 var(--cd-pad);
+  border-bottom: 1px solid var(--line);
+}
+.cd-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 2.6vw, 2.5rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+.cd-count {
+  display: inline-block;
+  overflow: hidden;
+  top: 0;
+  margin-top: 0.1em;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  vertical-align: top;
+}
+.cd-count > span {
+  display: inline-block;
+  animation: cd-count 520ms var(--ease-out-expo) backwards;
+}
+@keyframes cd-count {
+  from {
+    transform: translateY(100%);
+  }
+}
+.cd-close {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--fg);
+  isolation: isolate;
+}
+.cd-close::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  border-radius: 50%;
+  background: var(--plato-stone);
+  transform: scale(0.4);
+  opacity: 0;
+  transition:
+    transform 500ms var(--ease-out-expo),
+    opacity 240ms var(--ease-out-quart);
+}
+.cd-close svg {
+  transition: transform 600ms var(--ease-out-expo);
+}
+.cd-close:is(:hover, :focus-visible)::before {
+  transform: scale(1);
+  opacity: 1;
+}
+.cd-close:is(:hover, :focus-visible) svg {
+  transform: rotate(90deg);
+}
+.cd-close:focus-visible {
+  outline-offset: 0;
+  border-radius: 50%;
+}
+
+.cd-body {
+  flex: 1;
+  min-height: 0;
+  padding: 4px var(--cd-pad) 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.cd-lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cd-lines .cl {
+  --cl-bleed: var(--cd-pad);
+}
+.cd-lines .cl:last-child {
+  border-bottom: 0;
+}
+.cd-body .ce {
+  padding-top: clamp(24px, 4vh, 48px);
+}
+
+.cd-foot {
+  display: grid;
+  gap: 14px;
+  padding: 20px var(--cd-pad) max(20px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+}
+.cd-sub {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+.cd-sub .t-label {
+  color: var(--fg-muted);
+}
+.cd-sub__value {
+  overflow: hidden;
+  font-size: 1.375rem;
+  font-weight: 500;
+}
+.cd-sub__value > span {
+  display: inline-block;
+  animation: cd-count 560ms var(--ease-out-expo) backwards;
+}
+.cd-full {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+.cd-full:hover {
+  color: var(--fg);
+}
+
+@media (max-width: 560px) {
+  .cd-panel {
+    width: 100%;
+  }
+  .cd-head {
+    min-height: 68px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cd,
+  .cd-scrim,
+  .cd-panel,
+  .cd-panel::before,
+  .cd-close::before,
+  .cd-close svg {
+    transition: none !important;
+  }
+  .cd[data-open="true"] .cd-stagger,
+  .cd[data-open="true"] .cl,
+  .cd[data-open="true"] .ce-stagger,
+  .cd-count > span,
+  .cd-sub__value > span {
+    animation: none !important;
+  }
+}

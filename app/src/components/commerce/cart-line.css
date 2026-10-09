@@ -1,0 +1,227 @@
+.cl {
+  --cl-tile: color-mix(in srgb, var(--plato-stone) 46%, var(--plato-paper));
+  --cl-thumb: 92px;
+  --cl-bleed: 0px;
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--cl-thumb) minmax(0, 1fr) auto;
+  grid-template-areas:
+    "thumb info total"
+    "thumb actions actions";
+  align-items: start;
+  gap: 4px 18px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+  isolation: isolate;
+  transition:
+    opacity 320ms var(--ease-in-quart),
+    transform 340ms var(--ease-in-quart);
+}
+.cl[data-size="lg"] {
+  --cl-thumb: clamp(96px, 11vw, 148px);
+  gap: 6px clamp(18px, 2.4vw, 32px);
+  padding: clamp(22px, 2.4vw, 32px) 0;
+}
+
+/* Just added: a sage wash that settles away. */
+.cl::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(var(--cl-bleed) * -1);
+  z-index: -1;
+  background: var(--plato-sage);
+  opacity: 0;
+  pointer-events: none;
+}
+.cl[data-new]::before {
+  animation: cl-wash 2800ms var(--ease-out-quart) both;
+}
+@keyframes cl-wash {
+  0% {
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.cl[data-leaving] {
+  opacity: 0;
+  transform: translateX(28px);
+}
+
+.cl-thumb {
+  grid-area: thumb;
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background: var(--cl-tile);
+  isolation: isolate;
+}
+.cl-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  transition: transform 800ms var(--ease-out-expo);
+}
+.cl[data-fit="cover"] .cl-thumb img {
+  object-fit: cover;
+  mix-blend-mode: normal;
+}
+.cl:hover .cl-thumb img {
+  transform: scale(1.05);
+}
+
+.cl-info {
+  grid-area: info;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.cl-tag {
+  justify-self: start;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--plato-green);
+  color: var(--plato-paper);
+  font-size: 0.5625rem;
+  animation: cl-tag 700ms var(--ease-out-expo) backwards;
+}
+@keyframes cl-tag {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+}
+.cl-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.cl[data-size="lg"] .cl-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+.cl-title a {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0 1px;
+}
+.cl-title a:hover {
+  background-size: 100% 1px;
+}
+.cl-sub,
+.cl-variant,
+.cl-unit {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+.cl[data-size="lg"] :is(.cl-sub, .cl-variant, .cl-unit) {
+  font-size: 0.9rem;
+}
+.cl[data-size="lg"] .cl-sub {
+  margin-top: 4px;
+}
+.cl-warn {
+  margin: 6px 0 0;
+  color: var(--plato-burgundy);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.cl-total {
+  grid-area: total;
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-align: right;
+  white-space: nowrap;
+}
+.cl[data-size="lg"] .cl-total {
+  font-size: 1.0625rem;
+}
+.cl-total > span {
+  display: inline-block;
+  animation: cl-total 520ms var(--ease-out-expo) backwards;
+}
+@keyframes cl-total {
+  from {
+    opacity: 0;
+    transform: translateY(60%);
+  }
+}
+
+.cl-actions {
+  grid-area: actions;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+.cl-remove {
+  position: relative;
+  min-height: 44px;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+}
+.cl-remove::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 11px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0.35);
+  transform-origin: left center;
+  transition: transform var(--dur-ui) var(--ease-out-expo);
+}
+.cl-remove:hover {
+  color: var(--plato-burgundy);
+}
+.cl-remove:hover::after {
+  transform: scaleX(1);
+}
+
+@media (max-width: 480px) {
+  .cl {
+    --cl-thumb: 76px;
+    gap: 4px 14px;
+  }
+  .cl[data-size="lg"] {
+    --cl-thumb: 88px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cl,
+  .cl-thumb img,
+  .cl-remove::after {
+    transition: none;
+  }
+  .cl[data-new]::before,
+  .cl-tag,
+  .cl-total > span {
+    animation: none;
+  }
+}

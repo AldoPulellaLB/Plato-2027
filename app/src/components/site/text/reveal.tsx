@@ -1,7 +1,7 @@
 // Shared type motion. Server-rendered text is always fully visible; the client
 // arms the "idle" state only for elements still below the fold, then plays the
 // reveal when they enter. Reduced motion never arms anything.
-import { createElement, useEffect, useRef } from "react";
+import { Fragment, createElement, useEffect, useRef } from "react";
 import type { CSSProperties, ElementType, ReactNode } from "react";
 
 import "./reveal.css";
@@ -23,6 +23,7 @@ export function useReveal(trigger: Trigger, delay = 0, play?: boolean) {
     const el = ref.current;
     if (!el || reduced()) return;
     if (trigger === "manual") {
+      el.style.setProperty("--reveal-delay", `${delay}ms`);
       el.dataset.reveal = play ? "play" : "idle";
       return;
     }
@@ -108,14 +109,23 @@ export function SplitReveal({ as = "p", children, className, trigger = "view", p
   const words = children.split(/\s+/).filter(Boolean);
   return createElement(
     as,
-    { className: ["split", className].filter(Boolean).join(" "), ref, style: { ...style, "--split-stagger": `${stagger}ms` }, id, "aria-label": children },
+    { className: ["split", className].filter(Boolean).join(" "), ref, style: { ...style, "--split-stagger": `${stagger}ms` }, id },
+    // The accessible text is a real (visually hidden) node: aria-label is not
+    // honoured on paragraphs or generic elements by every screen reader.
+    <span className="sr-only" key="sr">
+      {children}
+    </span>,
+    // The space sits between the inline-block word masks, never inside one,
+    // where the browser would trim it and run the words together.
     words.map((word, i) => (
-      <span aria-hidden="true" className="split__w" key={`${word}-${i}`}>
-        <span className="split__i" style={{ "--i": i } as CSSProperties}>
-          {word}
+      <Fragment key={`${word}-${i}`}>
+        <span aria-hidden="true" className="split__w">
+          <span className="split__i" style={{ "--i": i } as CSSProperties}>
+            {word}
+          </span>
         </span>
         {i < words.length - 1 ? " " : null}
-      </span>
+      </Fragment>
     )),
   );
 }
@@ -124,7 +134,8 @@ export function SplitReveal({ as = "p", children, className, trigger = "view", p
 export function RollText({ children, className }: { children: string; className?: string }) {
   const chars = Array.from(children);
   return (
-    <span aria-label={children} className={["roll", className].filter(Boolean).join(" ")} role="text">
+    <span className={["roll", className].filter(Boolean).join(" ")}>
+      <span className="sr-only">{children}</span>
       {chars.map((c, i) => {
         const ch = c === " " ? " " : c;
         return (

@@ -1,0 +1,216 @@
+.cos {
+  display: grid;
+  gap: 12px;
+}
+
+.cos-slab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 72px;
+  padding: 0 0 0 26px;
+  border: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--plato-green);
+  color: var(--plato-paper);
+  text-align: left;
+  isolation: isolate;
+  transition: transform 300ms var(--ease-out-expo);
+}
+/* A deeper green pours up from the base on hover. */
+.cos-slab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--plato-forest);
+  transform: translateY(101%);
+  transition: transform 760ms var(--ease-out-expo);
+}
+.cos-slab:is(:hover, :focus-visible):not([data-unavailable])::before {
+  transform: translateY(0);
+}
+.cos-slab:active:not([data-unavailable]) {
+  transform: scale(0.992);
+}
+.cos-slab:focus-visible {
+  outline: 2px solid var(--plato-green);
+  outline-offset: 3px;
+}
+
+.cos-slab__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.cos-slab__total {
+  margin-left: auto;
+  font-size: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.cos-slab__arrow {
+  display: grid;
+  flex: none;
+  align-self: stretch;
+  place-items: center;
+  width: 72px;
+  border-left: 1px solid color-mix(in srgb, var(--plato-paper) 18%, transparent);
+}
+.cos-slab__arrow svg {
+  transition: transform 640ms var(--ease-out-expo);
+}
+.cos-slab:is(:hover, :focus-visible):not([data-unavailable]) .cos-slab__arrow svg {
+  transform: translateX(5px);
+}
+
+.cos-slab__progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--plato-sage);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.cos-slab[data-busy] {
+  cursor: progress;
+}
+.cos-slab[data-busy] .cos-slab__progress {
+  animation: cos-progress 1500ms var(--ease-in-out-expo) infinite;
+}
+.cos-slab[data-busy] .cos-slab__busy {
+  display: inline-block;
+  animation: cos-pulse 1100ms var(--ease-in-out-expo) infinite alternate;
+}
+.cos-slab[data-busy] .cos-slab__arrow svg {
+  animation: cos-nudge 1100ms var(--ease-in-out-expo) infinite alternate;
+}
+.cos-slab[data-unavailable]:not([data-busy]) {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+@keyframes cos-progress {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+  50% {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+  50.01% {
+    transform-origin: right center;
+  }
+  100% {
+    transform: scaleX(0);
+    transform-origin: right center;
+  }
+}
+@keyframes cos-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.55;
+  }
+}
+@keyframes cos-nudge {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(6px);
+  }
+}
+
+.cos-live:empty {
+  display: none;
+}
+.cos-msg {
+  padding: 14px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  animation: cos-msg 600ms var(--ease-out-expo) backwards;
+}
+.cos-msg p {
+  margin: 0;
+}
+.cos-msg[data-tone="info"] {
+  background: var(--plato-sage);
+  color: var(--plato-ink);
+}
+.cos-msg[data-tone="error"] {
+  border: 1px solid color-mix(in srgb, var(--plato-burgundy) 28%, transparent);
+  background: color-mix(in srgb, var(--plato-burgundy) 7%, var(--plato-paper));
+  color: var(--plato-burgundy);
+}
+.cos-msg__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 8px;
+  margin-top: 4px !important;
+}
+.cos-msg__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+@keyframes cos-msg {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.cos-secure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 400px) {
+  .cos-slab {
+    padding-left: 20px;
+  }
+  .cos-slab__label {
+    letter-spacing: 0.18em;
+  }
+  .cos-slab__arrow {
+    width: 60px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cos-slab,
+  .cos-slab::before,
+  .cos-slab__arrow svg {
+    transition: none;
+  }
+  .cos-slab[data-busy] .cos-slab__progress,
+  .cos-slab[data-busy] .cos-slab__busy,
+  .cos-slab[data-busy] .cos-slab__arrow svg,
+  .cos-msg {
+    animation: none;
+  }
+  .cos-slab[data-busy] .cos-slab__progress {
+    transform: scaleX(1);
+    opacity: 0.6;
+  }
+}

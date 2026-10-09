@@ -867,5 +867,15 @@ export const findVariant = (variantId: string) => {
   return null;
 };
 
-export const formatRand = (cents: number) =>
-  "R" + (cents / 100).toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+/**
+ * "R170", "R40 503", "R12.50". Plain string maths (no Intl), so the server,
+ * the Worker and every browser print exactly the same characters. Whole rand
+ * drop the cents; thousands are grouped with a non-breaking space.
+ */
+export const formatRand = (cents: number) => {
+  const sign = cents < 0 ? "-" : "";
+  const abs = Math.round(Math.abs(cents));
+  const whole = String(Math.floor(abs / 100)).replace(/\B(?=(\d{3})+(?!\d))/g, "\u00a0");
+  const rest = abs % 100;
+  return `${sign}R${whole}${rest ? `.${String(rest).padStart(2, "0")}` : ""}`;
+};

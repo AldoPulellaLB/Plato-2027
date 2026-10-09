@@ -1,0 +1,1030 @@
+/* Chapter three: the brand (f10 to f12). White, bright and clean. */
+
+/* ================= f10 the cup family ================= */
+.ch-f10__inner {
+  position: relative;
+  height: 100%;
+}
+.ch-f10__label {
+  position: absolute;
+  top: var(--ch-top);
+  left: 0;
+}
+.ch-f10__head {
+  position: absolute;
+  top: calc(var(--ch-top) + clamp(2.5rem, 6svh, 4rem));
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+.ch-f10__h {
+  max-width: 13ch;
+  color: var(--fg);
+}
+.ch-cups {
+  position: absolute;
+  inset: 0 calc(-1 * max(var(--gutter), env(safe-area-inset-right))) 0
+    calc(-1 * max(var(--gutter), env(safe-area-inset-left)));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+.ch-cup {
+  position: absolute;
+  top: 80%;
+  left: var(--x);
+  width: 12rem;
+  margin-left: -6rem;
+  text-align: center;
+  color: var(--fg);
+}
+.ch-cup__slide {
+  display: block;
+}
+.ch-cup__in {
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+  transition:
+    opacity 900ms var(--ease-out-quart) calc(520ms + var(--i) * 80ms),
+    transform 1100ms var(--ease-out-expo) calc(520ms + var(--i) * 80ms);
+}
+.ch-cups[data-armed]:not([data-in]) .ch-cup__in {
+  opacity: 0;
+  transform: translateY(18px);
+  transition-duration: 250ms;
+  transition-delay: 0ms;
+}
+.ch-cup__dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-bottom: 0.35rem;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--plato-stone) 70%, transparent);
+}
+.ch-cup[data-tone="sage"] .ch-cup__dot {
+  background: var(--plato-sage);
+}
+.ch-cup[data-tone="peach"] .ch-cup__dot {
+  background: var(--plato-peach);
+}
+.ch-cup[data-tone="green"] .ch-cup__dot {
+  background: var(--plato-green);
+}
+.ch-cup__size {
+  color: var(--fg-muted);
+}
+.ch-cup__name {
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 1.9vw, 2rem);
+  line-height: 1;
+}
+
+/* ================= f11 same store, local twist ================= */
+.ch-f11__stage {
+  background: var(--bg);
+}
+.ch-f11__inner {
+  position: relative;
+  height: 100%;
+  --ch-row: 1.25em;
+}
+.ch-f11__head {
+  position: absolute;
+  z-index: 4;
+  top: var(--ch-top);
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  pointer-events: none;
+}
+.ch-f11__head > * {
+  transition:
+    opacity 900ms var(--ease-out-quart),
+    transform 1200ms var(--ease-out-expo);
+}
+.ch-f11__head > :last-child {
+  transition-delay: 140ms;
+}
+.ch-f11__head[data-armed]:not([data-in]) > * {
+  opacity: 0;
+  transform: translateY(22px);
+  transition-duration: 250ms;
+  transition-delay: 0ms;
+}
+.ch-f11__kicker {
+  margin: 0 0 0.85rem;
+  color: var(--fg-muted);
+}
+.ch-f11__h {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(2rem, 3.4vw, 3.6rem);
+  line-height: 1;
+  letter-spacing: -0.015em;
+  color: var(--fg);
+}
+.ch-f11__note {
+  max-width: 32ch;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  text-align: right;
+}
+
+.ch-track-wrap {
+  position: absolute;
+  inset: 0 calc(-1 * max(var(--gutter), env(safe-area-inset-right))) 0
+    calc(-1 * max(var(--gutter), env(safe-area-inset-left)));
+  z-index: 1;
+}
+.ch-track-wrap:focus-visible {
+  outline-offset: -6px;
+}
+.ch-track {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(1rem, 1.8vw, 2rem);
+  height: 100%;
+  margin: 0;
+  padding: 0 0 0 max(var(--gutter), env(safe-area-inset-left));
+  list-style: none;
+  will-change: transform;
+}
+.ch-panel {
+  --ph: 52svh;
+  position: relative;
+  flex: none;
+  width: calc(var(--ph) * 1.46);
+  height: var(--ph);
+  margin-top: 23.5svh;
+}
+.ch-panel__frame {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--surface);
+}
+.ch-panel__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.16);
+}
+.ch-panel__tag {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.85rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--plato-paper) 92%, transparent);
+  color: var(--plato-ink);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.ch-panel__since {
+  color: color-mix(in srgb, var(--plato-ink) 60%, transparent);
+}
+/* The counter band names the active store; captions stay for screen readers. */
+.ch-panel__caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  margin: 0;
+}
+.ch-panel__name {
+  display: block;
+}
+
+/* The shelf of bags: the last panel, where the gallery zooms in. */
+.ch-shelf {
+  position: relative;
+  flex: none;
+  width: 100vw;
+  height: 100%;
+  overflow: hidden;
+}
+.ch-shelf__zoom {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 52%;
+}
+.ch-shelf__wall {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 60% 50% at 50% 40%,
+      color-mix(in srgb, var(--plato-paper) 55%, transparent),
+      transparent 70%
+    ),
+    var(--plato-stone);
+}
+/* No transform here: the bags multiply onto the wall (a transform would isolate them). */
+.ch-shelf__bags {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 31%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.ch-shelf__sign {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 17%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 0;
+  color: var(--plato-green);
+}
+.ch-shelf__sign svg {
+  width: 1.6rem;
+}
+.ch-shelf__sign span {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--plato-ink) 70%, transparent);
+}
+.ch-shelf__bag {
+  display: block;
+  width: auto;
+  max-width: none;
+  height: 40svh;
+  /* The packshots carry white space under the bag: seat each bag on the ledge. */
+  margin: 0 -7svh -6.6svh;
+  mix-blend-mode: multiply;
+}
+.ch-shelf__bag--lg {
+  height: 50svh;
+  margin-bottom: -6.9svh;
+}
+.ch-shelf__bag--far {
+  opacity: 0.9;
+}
+.ch-shelf__ledge {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: calc(31% - 14px);
+  height: 14px;
+  background: var(--plato-paper);
+  box-shadow:
+    0 1px 0 var(--plato-stone-deep),
+    0 26px 40px -18px color-mix(in srgb, var(--plato-ink) 30%, transparent);
+}
+
+/* The counter band (fixed on screen). */
+.ch-band {
+  position: absolute;
+  z-index: 3;
+  left: calc(-1 * max(var(--gutter), env(safe-area-inset-left)));
+  right: calc(-1 * max(var(--gutter), env(safe-area-inset-right)));
+  bottom: calc(clamp(4.5rem, 10svh, 6.25rem) + env(safe-area-inset-bottom));
+  padding: clamp(1rem, 2.2svh, 1.5rem) max(var(--gutter), env(safe-area-inset-right))
+    clamp(1.1rem, 2.4svh, 1.6rem) max(var(--gutter), env(safe-area-inset-left));
+  background: var(--plato-paper);
+  color: var(--plato-ink);
+  box-shadow:
+    0 -1px 0 color-mix(in srgb, var(--plato-ink) 8%, transparent),
+    0 -30px 50px -36px color-mix(in srgb, var(--plato-ink) 40%, transparent);
+}
+.ch-band__edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 12px;
+  background: linear-gradient(to bottom, var(--plato-stone-deep), var(--plato-stone));
+  box-shadow: 0 18px 30px -16px color-mix(in srgb, var(--plato-ink) 28%, transparent);
+}
+.ch-band__top {
+  display: grid;
+  grid-template-columns: auto minmax(10rem, 15rem) 1fr auto;
+  align-items: center;
+  gap: clamp(0.85rem, 1.6vw, 1.5rem);
+}
+.ch-band__mark {
+  width: 22px;
+  height: 22px;
+  color: var(--plato-green);
+}
+.ch-band__roll {
+  display: block;
+  height: var(--ch-row);
+  overflow: hidden;
+  line-height: var(--ch-row);
+}
+.ch-band__rows {
+  display: flex;
+  flex-direction: column;
+  transform: translate3d(0, calc(var(--ch-i) * -1 * var(--ch-row)), 0);
+  transition: transform 900ms var(--ease-out-expo);
+}
+.ch-band__rows > span {
+  display: block;
+  height: var(--ch-row);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ch-band__roll--name {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 2vw, 2.1rem);
+}
+.ch-band__roll--line {
+  font-size: 0.95rem;
+  color: color-mix(in srgb, var(--plato-ink) 66%, transparent);
+}
+.ch-band__roll--line .ch-band__rows {
+  transition-delay: 60ms;
+}
+.ch-band__index {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+}
+.ch-band__of {
+  color: color-mix(in srgb, var(--plato-ink) 45%, transparent);
+}
+.ch-route {
+  margin-top: clamp(0.9rem, 2svh, 1.3rem);
+  padding: 0 0.5rem 1.35rem;
+}
+.ch-route__line {
+  position: relative;
+  height: 1px;
+  background: color-mix(in srgb, var(--plato-ink) 16%, transparent);
+}
+.ch-route__tick {
+  position: absolute;
+  top: -3px;
+  left: calc(var(--u) * 100%);
+  width: 1px;
+  height: 7px;
+  background: color-mix(in srgb, var(--plato-ink) 30%, transparent);
+}
+.ch-route__tick-label {
+  position: absolute;
+  top: 0.85rem;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--plato-ink) 38%, transparent);
+  transition: color 500ms var(--ease-out-quart);
+}
+.ch-route__tick:first-child .ch-route__tick-label {
+  left: 0;
+  transform: none;
+}
+.ch-route__tick:nth-last-child(2) .ch-route__tick-label {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+.ch-route__tick[data-active] .ch-route__tick-label {
+  color: var(--plato-ink);
+}
+/* Narrower screens: only the active stop is named on the route. */
+@media (max-width: 1279px) {
+  .ch-route__tick .ch-route__tick-label {
+    opacity: 0;
+    transition:
+      opacity 400ms var(--ease-out-quart),
+      color 500ms var(--ease-out-quart);
+  }
+  .ch-route__tick[data-active] .ch-route__tick-label {
+    opacity: 1;
+  }
+}
+.ch-route__pin {
+  position: absolute;
+  left: -9px;
+  bottom: 1px;
+  width: 18px;
+  height: 22px;
+  color: var(--plato-green);
+  will-change: transform;
+}
+.ch-route__pin svg {
+  width: 18px;
+  height: 22px;
+  filter: drop-shadow(0 4px 6px color-mix(in srgb, var(--plato-ink) 22%, transparent));
+}
+
+/* ================= f12 take Platō home ================= */
+.ch-f12__stage {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 100%;
+}
+.ch-f12__copy {
+  width: min(44vw, 40rem);
+  margin-right: clamp(0rem, 3vw, 4rem);
+  padding: 14svh 0 12svh;
+}
+.ch-f12__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  color: var(--fg-muted);
+}
+.ch-f12__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--plato-green);
+}
+.ch-f12__h {
+  margin: 1.1rem 0 1.5rem;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(2.5rem, 4.4vw, 4.75rem);
+  line-height: 1;
+  letter-spacing: -0.018em;
+  color: var(--fg);
+}
+.ch-f12__body {
+  max-width: 40ch;
+  margin: 0;
+  font-size: clamp(1rem, 1.15vw, 1.125rem);
+  line-height: 1.62;
+  color: var(--fg-muted);
+}
+.ch-f12__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: clamp(1.75rem, 4svh, 2.5rem);
+}
+.ch-f12__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  margin-top: 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+.ch-f12__more-text {
+  background: linear-gradient(currentColor, currentColor) left bottom / 100% 1px no-repeat;
+  padding-bottom: 0.2rem;
+}
+.ch-f12__more-arrow {
+  width: 18px;
+  height: 18px;
+  transition: transform var(--dur-ui) var(--ease-out-expo);
+}
+.ch-f12__more:hover .ch-f12__more-arrow,
+.ch-f12__more:focus-visible .ch-f12__more-arrow {
+  transform: translateX(5px);
+}
+
+/* Choreography: copy rises in order, the Academy card slides up last. */
+.ch-f12__copy > .ch-f12__kicker,
+.ch-f12__copy > .ch-f12__body,
+.ch-f12__copy > .ch-f12__chips,
+.ch-f12__copy > .ch-f12__more,
+.ch-f12__copy > .ch-academy {
+  transition:
+    opacity 900ms var(--ease-out-quart) var(--d, 0ms),
+    transform 1200ms var(--ease-out-expo) var(--d, 0ms);
+}
+.ch-f12__copy > .ch-f12__body {
+  --d: 260ms;
+}
+.ch-f12__copy > .ch-f12__chips {
+  --d: 380ms;
+}
+.ch-f12__copy > .ch-f12__more {
+  --d: 470ms;
+}
+.ch-f12__copy > .ch-academy {
+  --d: 760ms;
+}
+.ch-f12__copy[data-armed]:not([data-in])
+  > :is(.ch-f12__kicker, .ch-f12__body, .ch-f12__chips, .ch-f12__more) {
+  opacity: 0;
+  transform: translateY(24px);
+  transition-duration: 250ms;
+  transition-delay: 0ms;
+}
+.ch-f12__copy[data-armed]:not([data-in]) > .ch-academy {
+  opacity: 0;
+  transform: translateY(72px);
+  transition-duration: 250ms;
+  transition-delay: 0ms;
+}
+
+/* PriceChip: fills green from the left on hover; a bean drops in on add. */
+.ch-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-height: 56px;
+  padding: 0 0.5rem 0 1.4rem;
+  border: 1px solid var(--fg);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  transition:
+    color var(--dur-ui) var(--ease-out-quart),
+    border-color var(--dur-ui) var(--ease-out-quart),
+    transform var(--dur-micro) var(--ease-out-quart);
+}
+.ch-chip > :not(.ch-chip__fill) {
+  position: relative;
+  z-index: 1;
+}
+.ch-chip__fill {
+  position: absolute;
+  inset: -1px;
+  border-radius: 999px;
+  background: var(--plato-green);
+  clip-path: inset(0 100% 0 0 round 999px);
+  transition: clip-path 640ms var(--ease-out-expo);
+}
+.ch-chip:hover,
+.ch-chip:focus-visible,
+.ch-chip[data-added] {
+  color: var(--plato-paper);
+  border-color: var(--plato-green);
+}
+.ch-chip:hover .ch-chip__fill,
+.ch-chip:focus-visible .ch-chip__fill,
+.ch-chip[data-added] .ch-chip__fill {
+  clip-path: inset(0 0 0 0 round 999px);
+}
+.ch-chip:active {
+  transform: scale(0.97);
+}
+.ch-chip:focus-visible {
+  outline: 2px solid var(--plato-green);
+  outline-offset: 4px;
+}
+.ch-chip__size {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.ch-chip__sep {
+  width: 1px;
+  height: 1rem;
+  background: currentColor;
+  opacity: 0.32;
+}
+.ch-chip__price {
+  font-size: 1.0625rem;
+  font-weight: 400;
+}
+.ch-chip__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-left: 0.35rem;
+  border-radius: 50%;
+  background: var(--fg);
+  color: var(--bg);
+  transition:
+    background-color var(--dur-ui) var(--ease-out-quart),
+    color var(--dur-ui) var(--ease-out-quart),
+    transform 600ms var(--ease-out-expo);
+}
+.ch-chip__icon svg {
+  width: 18px;
+  height: 18px;
+}
+.ch-chip:hover .ch-chip__icon,
+.ch-chip:focus-visible .ch-chip__icon,
+.ch-chip[data-added] .ch-chip__icon {
+  background: var(--plato-paper);
+  color: var(--plato-green);
+}
+.ch-chip:hover .ch-chip__icon {
+  transform: rotate(90deg);
+}
+.ch-chip__plus,
+.ch-chip__check {
+  transition:
+    opacity 300ms var(--ease-out-quart),
+    stroke-dashoffset 500ms var(--ease-out-expo) 120ms;
+}
+.ch-chip__check {
+  opacity: 0;
+  stroke-dasharray: 16;
+  stroke-dashoffset: 16;
+}
+.ch-chip[data-added] .ch-chip__plus {
+  opacity: 0;
+}
+.ch-chip[data-added] .ch-chip__check {
+  opacity: 1;
+  stroke-dashoffset: 0;
+}
+.ch-chip[data-added] .ch-chip__icon {
+  transform: rotate(0deg);
+}
+.ch-chip__drop {
+  position: absolute;
+  right: calc(0.5rem + 13px);
+  top: -30px;
+  width: 14px;
+  height: 20px;
+  color: var(--plato-chestnut);
+  pointer-events: none;
+  animation: ch-bean-drop 760ms var(--ease-in-quart) forwards;
+}
+.ch-chip__drop svg {
+  width: 100%;
+  height: 100%;
+}
+@keyframes ch-bean-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) rotate(-35deg);
+  }
+  25% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(46px) rotate(50deg) scale(0.55);
+  }
+}
+
+/* Academy card: slides up last; row-wide hover with the image easing in. */
+.ch-academy {
+  display: grid;
+  grid-template-columns: clamp(5.5rem, 8vw, 7.5rem) 1fr auto;
+  align-items: center;
+  gap: clamp(1rem, 1.8vw, 1.6rem);
+  margin-top: clamp(2.5rem, 6.5svh, 4.25rem);
+  padding: 1rem 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: var(--fg);
+}
+.ch-academy__media {
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--surface);
+}
+.ch-academy__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1100ms var(--ease-out-expo);
+}
+.ch-academy__body {
+  display: grid;
+  gap: 0.35rem;
+}
+.ch-academy__kicker {
+  color: var(--fg-muted);
+}
+.ch-academy__title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 1.8vw, 1.85rem);
+  line-height: 1.08;
+}
+.ch-academy__text {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--fg-muted);
+}
+.ch-academy__go {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  overflow: hidden;
+  transition:
+    background-color var(--dur-ui) var(--ease-out-quart),
+    border-color var(--dur-ui) var(--ease-out-quart),
+    color var(--dur-ui) var(--ease-out-quart);
+}
+.ch-academy__go svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 600ms var(--ease-out-expo);
+}
+.ch-academy:hover .ch-academy__media img,
+.ch-academy:focus-visible .ch-academy__media img {
+  transform: scale(1.08);
+}
+.ch-academy:hover .ch-academy__go,
+.ch-academy:focus-visible .ch-academy__go {
+  background: var(--plato-green);
+  border-color: var(--plato-green);
+  color: var(--plato-paper);
+}
+.ch-academy:hover .ch-academy__go svg,
+.ch-academy:focus-visible .ch-academy__go svg {
+  animation: ch-arrow-travel 700ms var(--ease-out-expo);
+}
+@keyframes ch-arrow-travel {
+  0% {
+    transform: translateX(0);
+  }
+  45% {
+    transform: translateX(30px);
+  }
+  46% {
+    transform: translateX(-30px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* ================= mobile ================= */
+@media (max-width: 819px) {
+  .ch-cup {
+    top: 76%;
+    left: var(--mx);
+    width: 8rem;
+    margin-left: -4rem;
+  }
+  .ch-cup__in {
+    gap: 0.3rem;
+  }
+  .ch-cup__dot {
+    margin-bottom: 0.2rem;
+  }
+  .ch-cup__size {
+    font-size: 0.625rem;
+    letter-spacing: 0.18em;
+  }
+  .ch-f10__h {
+    max-width: 11ch;
+  }
+
+  /* Stores: native sideways swipe with snap points. */
+  .frame.ch-f11 {
+    height: auto;
+  }
+  .frame.ch-f11 > .frame__stage {
+    position: relative;
+    height: auto;
+    overflow: visible;
+  }
+  .ch-f11__inner {
+    height: auto;
+    padding: calc(var(--header-h) + 2.5rem) 0 4rem;
+  }
+  .ch-f11__head {
+    position: static;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    pointer-events: auto;
+  }
+  .ch-f11__note {
+    text-align: left;
+  }
+  .ch-track-wrap {
+    position: relative;
+    inset: auto;
+    margin: 2rem calc(-1 * var(--gutter)) 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .ch-track-wrap::-webkit-scrollbar {
+    display: none;
+  }
+  .ch-track {
+    gap: 0.75rem;
+    height: auto;
+    padding: 0 var(--gutter);
+    transform: none !important;
+  }
+  .ch-panel,
+  .ch-shelf {
+    --ph: auto;
+    width: min(80vw, 46svh);
+    height: auto;
+    margin-top: 0;
+    aspect-ratio: 4 / 5;
+    scroll-snap-align: center;
+  }
+  .ch-shelf__bag {
+    height: 30vw;
+    margin: 0 -4vw -5.1vw;
+  }
+  .ch-shelf__bag--lg {
+    height: 38vw;
+    margin-bottom: -5.3vw;
+  }
+  .ch-band {
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    margin: -2.25rem calc(-1 * var(--gutter)) 0;
+  }
+  .ch-band__top {
+    grid-template-columns: auto 1fr auto;
+    row-gap: 0.25rem;
+  }
+  .ch-band__roll--line {
+    grid-column: 2 / -1;
+    grid-row: 2;
+    font-size: 0.875rem;
+  }
+  .ch-route__tick-label {
+    display: none;
+  }
+  .ch-route {
+    padding-bottom: 0.25rem;
+  }
+
+  .ch-f12__stage {
+    align-items: flex-end;
+  }
+  /* The copy rises over the bag like a sheet of paper. */
+  .ch-f12__copy {
+    position: relative;
+    width: 100%;
+    margin: 54svh 0 0;
+    padding: 2.5rem 0 10svh;
+  }
+  .ch-f12__copy::before {
+    position: absolute;
+    z-index: -1;
+    top: -5rem;
+    bottom: 0;
+    left: calc(-1 * var(--gutter));
+    right: calc(-1 * var(--gutter));
+    content: "";
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--bg) 0%, transparent) 0,
+      var(--bg) 5rem
+    );
+    pointer-events: none;
+  }
+
+  .ch-academy {
+    grid-template-columns: 5rem 1fr auto;
+  }
+  .ch-academy__text {
+    display: none;
+  }
+}
+
+@media (max-width: 519px) {
+  .ch-f12__chips {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ch-chip {
+    justify-content: space-between;
+  }
+  .ch-chip__price {
+    margin-right: auto;
+  }
+}
+
+/* ================= reduced motion ================= */
+@media (prefers-reduced-motion: reduce) {
+  .ch-cup__in,
+  .ch-f11__head > *,
+  .ch-band__rows,
+  .ch-f12__copy > *,
+  .ch-chip__fill,
+  .ch-academy__media img {
+    transition: none;
+  }
+  .ch-chip__drop,
+  .ch-academy:hover .ch-academy__go svg {
+    animation: none;
+    display: none;
+  }
+  .ch-f10__head,
+  .ch-f10__label {
+    position: relative;
+    top: auto;
+  }
+  .ch-f10__inner {
+    min-height: 100svh;
+    padding-top: calc(var(--header-h) + 2rem);
+  }
+  /* Stores: a static row of cards the visitor can swipe. */
+  .frame.ch-f11 > .frame__stage {
+    overflow: visible;
+  }
+  .ch-f11__inner {
+    height: auto;
+    padding: calc(var(--header-h) + 2.5rem) 0 4rem;
+  }
+  .ch-f11__head {
+    position: static;
+  }
+  .ch-track-wrap {
+    position: relative;
+    inset: auto;
+    margin: 2rem calc(-1 * var(--gutter)) 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+  .ch-track {
+    height: auto;
+    padding: 0 var(--gutter);
+    transform: none !important;
+  }
+  .ch-panel,
+  .ch-shelf {
+    width: min(80vw, 34rem);
+    height: auto;
+    margin-top: 0;
+    aspect-ratio: auto;
+    scroll-snap-align: start;
+  }
+  .ch-panel__frame {
+    height: auto;
+    aspect-ratio: 3 / 2;
+  }
+  .ch-shelf {
+    aspect-ratio: 3 / 2;
+  }
+  .ch-shelf__bag {
+    height: 9rem;
+    margin: 0 -1.75rem -1.55rem;
+  }
+  .ch-shelf__bag--lg {
+    height: 11rem;
+    margin-bottom: -1.55rem;
+  }
+  .ch-panel__img {
+    transform: none;
+  }
+  .ch-panel__caption {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    margin-top: 0.75rem;
+  }
+  .ch-panel__name {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+  }
+  .ch-panel__line {
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+  }
+  .ch-band {
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    margin: 2rem calc(-1 * var(--gutter)) 0;
+  }
+}

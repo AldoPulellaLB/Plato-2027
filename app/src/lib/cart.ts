@@ -25,22 +25,37 @@ const EMPTY: CartState = { lines: [], open: false, bump: 0, lastAdded: null };
 
 let state: CartState = EMPTY;
 let hydrated = false;
+let syncing = false;
 const listeners = new Set<() => void>();
+
+function readStoredLines(): CartLine[] | null {
+  try {
+    const raw = window.localStorage.getItem(KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as { lines?: CartLine[] };
+    return (parsed.lines ?? []).filter(
+      (l) => typeof l.variantId === "string" && Number.isInteger(l.quantity) && l.quantity > 0 && findVariant(l.variantId),
+    );
+  } catch {
+    // Unreadable or blocked storage: keep whatever is in memory.
+    return null;
+  }
+}
 
 function hydrate() {
   if (hydrated || typeof window === "undefined") return;
   hydrated = true;
-  try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) return;
-    const parsed = JSON.parse(raw) as { lines?: CartLine[] };
-    const lines = (parsed.lines ?? []).filter(
-      (l) => typeof l.variantId === "string" && Number.isInteger(l.quantity) && l.quantity > 0 && findVariant(l.variantId),
-    );
-    state = { ...state, lines };
-  } catch {
-    // Ignore unreadable storage; the cart simply starts empty.
-  }
+  const lines = readStoredLines();
+  if (lines) state = { ...state, lines };
+}
+
+/** Another tab changed the bag: adopt its lines (never write them back). */
+function onStorage(e: StorageEvent) {
+  if (e.key !== null && e.key !== KEY) return;
+  const lines = readStoredLines();
+  if (!lines) return;
+  state = { ...state, lines };
+  for (const listener of listeners) listener();
 }
 
 function persist() {
@@ -52,14 +67,21 @@ function persist() {
   }
 }
 
+/** Only line changes are persisted, so opening or closing the drawer in one
+ *  tab can never overwrite the bag another tab just changed. */
 function set(next: CartState) {
+  const linesChanged = next.lines !== state.lines;
   state = next;
-  persist();
+  if (linesChanged) persist();
   for (const listener of listeners) listener();
 }
 
 function subscribe(listener: () => void) {
   hydrate();
+  if (!syncing && typeof window !== "undefined") {
+    syncing = true;
+    window.addEventListener("storage", onStorage);
+  }
   listeners.add(listener);
   // Notify once after hydration so subscribers pick up the stored cart.
   queueMicrotask(listener);
@@ -79,6 +101,7 @@ export const cart = {
     set({ ...state, lines, bump: state.bump + 1, lastAdded: variantId, open: options.open ?? state.open });
   },
   setQuantity(variantId: string, quantity: number) {
+    hydrate();
     const lines =
       quantity <= 0
         ? state.lines.filter((l) => l.variantId !== variantId)
@@ -86,18 +109,24 @@ export const cart = {
     set({ ...state, lines });
   },
   remove(variantId: string) {
+    hydrate();
     set({ ...state, lines: state.lines.filter((l) => l.variantId !== variantId) });
   },
   clear() {
+    hydrate();
     set({ ...state, lines: [], lastAdded: null });
   },
   open() {
+    hydrate();
     set({ ...state, open: true });
   },
   close() {
+    hydrate();
+    if (!state.open) return;
     set({ ...state, open: false });
   },
   toggle() {
+    hydrate();
     set({ ...state, open: !state.open });
   },
 };

@@ -10,7 +10,8 @@ export const Route = createFileRoute("/")({
 });
 
 // The page IS the journey: a persistent WebGL layer behind fourteen storyboard
-// frames (four chapters), then the shop, equipment, academy and testimonials.
+// frames (four chapters; the ScrollScrub film plays frames 06 to 08 inside
+// StoryChapters), then the shop, equipment, academy and testimonials.
 function Index() {
   return (
     <main id="main" className="home">

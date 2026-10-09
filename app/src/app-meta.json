@@ -1,8 +1,8 @@
 {
-  "og_title": null,
-  "og_description": null,
-  "og_image_url": null,
-  "favicon_url": null,
+  "og_title": "PLATŌ Coffee",
+  "og_description": "Follow one cup from the roast to the regular, then shop House Blend coffee, pods, matcha, equipment and Academy courses.",
+  "og_image_url": "/assets/brand/plato-og.jpg",
+  "favicon_url": "/assets/brand/favicon.svg",
   "og_video_url": null,
-  "marketplace_cover_url": null
+  "marketplace_cover_url": "/assets/brand/plato-og.jpg"
 }

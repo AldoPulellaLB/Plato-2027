@@ -52,6 +52,9 @@ export interface ScrollScrubProps {
   theme: ScrollScrubTheme;
   className?: string;
   onActiveSectionChange?: (index: number) => void;
+  /** Heading level of the first scene title. Defaults to h1 for a standalone
+   *  film; pass "h2" when the film sits inside a page that owns its h1. */
+  firstHeading?: "h1" | "h2";
 }
 
 interface Segment {
@@ -172,6 +175,7 @@ export function ScrollScrub({
   theme,
   className,
   onActiveSectionChange,
+  firstHeading = "h1",
 }: ScrollScrubProps) {
   const rootRef = useRef<HTMLElement>(null);
   const controllerRef = useRef<Controller | null>(null);
@@ -670,7 +674,7 @@ export function ScrollScrub({
           if (!scene) {
             return null;
           }
-          const Heading = segment.sectionIndex === 0 ? "h1" : "h2";
+          const Heading = segment.sectionIndex === 0 ? firstHeading : "h2";
 
           return (
             <article

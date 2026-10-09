@@ -1,0 +1,426 @@
+/* Chapter two: the pour (f05, the film f06 to f08, f09). */
+
+/* ================= f05 one taste ================= */
+.ch-f05__stage {
+  position: relative;
+}
+.ch-f05__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ch-f05__scrim {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+  width: min(84vw, 82rem);
+  height: 92svh;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 78% 86% at 0% 100%,
+    color-mix(in srgb, var(--plato-roast) 97%, transparent) 0%,
+    color-mix(in srgb, var(--plato-roast) 92%, transparent) 52%,
+    color-mix(in srgb, var(--plato-roast) 62%, transparent) 76%,
+    color-mix(in srgb, var(--plato-roast) 0%, transparent) 100%
+  );
+}
+.ch-f05__inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  padding-top: var(--ch-top);
+  padding-bottom: calc(clamp(5.5rem, 11svh, 7.5rem) + env(safe-area-inset-bottom));
+  transform-origin: 20% 80%;
+}
+.ch-f05__label {
+  align-self: start;
+  justify-self: start;
+}
+.ch-f05__copy {
+  position: relative;
+  align-self: end;
+  justify-self: start;
+  display: grid;
+  gap: clamp(1.25rem, 3svh, 2.25rem);
+  max-width: min(64rem, 70vw);
+}
+/* A close backdrop that follows the copy, so it reads over any cup. */
+.ch-f05__copy::before {
+  position: absolute;
+  z-index: -1;
+  inset: -22% -18% -30% -12%;
+  content: "";
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--plato-roast) 88%, transparent) 0%,
+    color-mix(in srgb, var(--plato-roast) 78%, transparent) 62%,
+    color-mix(in srgb, var(--plato-roast) 0%, transparent) 100%
+  );
+  pointer-events: none;
+}
+.ch-f05__title {
+  margin: 0;
+  color: var(--fg);
+}
+.ch-f05__line {
+  display: block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+.ch-f05__in {
+  display: inline-block;
+  transition: transform 1200ms var(--ease-out-expo) var(--d, 0ms);
+}
+.ch-f05__title[data-armed]:not([data-in]) .ch-f05__in {
+  transform: translateY(108%);
+  transition-duration: 300ms;
+  transition-delay: 0ms;
+}
+.ch-f05__count {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(1rem, 2vw, 1.75rem);
+}
+.ch-f05__num {
+  display: block;
+  min-width: 3ch;
+  font-family: var(--font-sans);
+  font-weight: 200;
+  font-size: clamp(5.5rem, 15vw, 15rem);
+  line-height: 0.78;
+  letter-spacing: -0.05em;
+  color: var(--fg);
+  transform-origin: left bottom;
+}
+.ch-f05__zeros {
+  color: var(--fg-faint);
+  opacity: 0.55;
+}
+.ch-f05__count[data-full] .ch-f05__num {
+  animation: ch-count-pulse 900ms var(--ease-out-expo);
+}
+@keyframes ch-count-pulse {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.035);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.ch-f05__of {
+  display: grid;
+  gap: 0.4rem;
+  padding-bottom: 0.35rem;
+  color: var(--fg-muted);
+}
+.ch-f05__of .t-label {
+  color: var(--accent);
+}
+.ch-f05__of-note {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* ================= film: f06 to f08 (scroll-scrub engine) ================= */
+.ch-film {
+  position: relative;
+  --ss-white: 0;
+  --ss-wash: 0;
+  --ss-veil: 1;
+  --ss-line: 0;
+  --ss-line-in: 0;
+  --ss-line-out: 0;
+  --ss-f08: 1;
+  --ss-cover: 4;
+}
+
+/* The film rises over the WebGL dive's dark-coffee hand-over: feather its top
+ * edge so the seam between the canvas and the film never reads as a line. */
+@media (prefers-reduced-motion: no-preference) {
+  .ch-film::before {
+    position: absolute;
+    z-index: 1;
+    right: 0;
+    bottom: 100%;
+    left: 0;
+    height: 16svh;
+    content: "";
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--bg) 0%, transparent), var(--bg));
+    pointer-events: none;
+  }
+}
+
+/* ================= f09 community included ================= */
+.ch-f09 {
+  /* Slow layers start above their resting place: never let them spill into the film. */
+  overflow: clip;
+}
+.ch-f09__stage {
+  height: 100%;
+  background-color: var(--bg);
+}
+.ch-f09__field {
+  position: relative;
+  height: 100%;
+  min-height: 195svh;
+}
+.ch-f09__head {
+  position: absolute;
+  z-index: 3;
+  top: 12svh;
+  left: max(var(--gutter), env(safe-area-inset-left));
+  width: min(56vw, 56rem);
+}
+.ch-f09__title {
+  max-width: 10ch;
+  color: var(--fg);
+}
+.ch-f09__note {
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+  margin: clamp(1.5rem, 3.5svh, 2.5rem) 0 0 0.2rem;
+  color: var(--fg-muted);
+}
+.ch-f09__note .t-label {
+  flex: none;
+  color: var(--accent);
+}
+.ch-f09__note-body {
+  max-width: 30ch;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Four depths: windows slowest, the counter, the room, the people in front fastest. */
+.ch-shot {
+  position: absolute;
+  z-index: var(--z, 0);
+  margin: 0;
+}
+.ch-shot__move {
+  will-change: transform;
+}
+.ch-shot__frame {
+  overflow: hidden;
+  aspect-ratio: var(--ar);
+  background: var(--surface);
+}
+.ch-shot__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ch-shot--bg {
+  top: 6svh;
+  right: max(var(--gutter), env(safe-area-inset-right));
+  width: 34vw;
+}
+.ch-shot--subject {
+  top: 54svh;
+  left: 41vw;
+  width: 28vw;
+}
+.ch-shot--mid {
+  top: 90svh;
+  left: max(var(--gutter), env(safe-area-inset-left));
+  width: 25vw;
+}
+.ch-shot--fg {
+  top: 122svh;
+  right: 5vw;
+  width: 30vw;
+  z-index: 6;
+}
+
+.ch-quotes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ch-quote {
+  position: absolute;
+  z-index: 5;
+  width: clamp(17rem, 25vw, 24rem);
+}
+.ch-quote--1 {
+  top: 58svh;
+  left: 6vw;
+}
+.ch-quote--2 {
+  top: 92svh;
+  left: 56vw;
+}
+.ch-quote--3 {
+  top: 126svh;
+  left: 15vw;
+}
+.ch-quote--4 {
+  top: 153svh;
+  left: 42vw;
+}
+.ch-quote__card {
+  position: relative;
+  margin: 0;
+  padding: clamp(1.6rem, 2.1vw, 2.1rem) clamp(1.5rem, 2vw, 2rem) clamp(1.3rem, 1.6vw, 1.6rem);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  box-shadow: 0 30px 70px -36px color-mix(in srgb, var(--plato-ink) 38%, transparent);
+}
+.ch-quote__mark {
+  position: absolute;
+  top: -0.32em;
+  left: 0.4em;
+  font-family: var(--font-serif);
+  font-size: 4.5rem;
+  line-height: 1;
+  color: var(--accent);
+}
+.ch-quote__text {
+  margin: 0;
+}
+.ch-quote__text p {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.2rem, 1.4vw, 1.45rem);
+  line-height: 1.28;
+  letter-spacing: -0.005em;
+  color: var(--fg);
+  text-wrap: pretty;
+}
+.ch-quote__who {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.1rem;
+  color: var(--fg-muted);
+}
+.ch-quote__who::before {
+  content: "";
+  width: 1.5rem;
+  height: 1px;
+  background: currentColor;
+}
+
+/* ---- mobile: two layers, quotes as a settling stack ---- */
+@media (max-width: 819px) {
+  .frame.ch-f09 {
+    height: auto;
+    min-height: 150svh;
+  }
+  .ch-quote__card {
+    padding: 1.6rem 1.4rem 1.3rem;
+  }
+  .ch-f09__field {
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+    min-height: 0;
+    padding: 14svh max(var(--gutter), env(safe-area-inset-right)) 18svh
+      max(var(--gutter), env(safe-area-inset-left));
+  }
+  .ch-f09__head,
+  .ch-shot,
+  .ch-quote {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: auto;
+  }
+  .ch-f09__head {
+    order: 0;
+    width: auto;
+    left: 0;
+  }
+  .ch-f09__note {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .ch-shot--mid,
+  .ch-shot--subject {
+    display: none;
+  }
+  .ch-shot--bg {
+    order: 1;
+    margin: 0 calc(-1 * var(--gutter));
+  }
+  .ch-quotes {
+    display: contents;
+  }
+  .ch-quote--1 {
+    order: 2;
+  }
+  .ch-quote--2 {
+    order: 3;
+    margin-left: 12%;
+  }
+  .ch-shot--fg {
+    order: 4;
+    width: 86%;
+    margin-left: auto;
+  }
+  .ch-quote--3 {
+    order: 5;
+  }
+  .ch-quote--4 {
+    order: 6;
+    margin-left: 12%;
+  }
+}
+
+/* ---- reduced motion: a still, with the quotes as a list ---- */
+@media (prefers-reduced-motion: reduce) {
+  .ch-f05__in {
+    transition: none;
+  }
+  .ch-f05__inner {
+    min-height: 100svh;
+  }
+  .ch-f09__field {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
+    min-height: 0;
+    padding: calc(var(--header-h) + 3rem) var(--gutter) 4rem;
+  }
+  .ch-f09__head,
+  .ch-shot,
+  .ch-quote {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: auto;
+    transform: none;
+  }
+  .ch-f09__head {
+    grid-column: 1 / -1;
+  }
+  .ch-shot--mid,
+  .ch-shot--subject,
+  .ch-shot--fg {
+    display: none;
+  }
+  .ch-shot--bg {
+    grid-column: 1 / -1;
+  }
+  .ch-quotes {
+    display: contents;
+  }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 819px) {
+  .ch-f09__field {
+    grid-template-columns: 1fr;
+  }
+}

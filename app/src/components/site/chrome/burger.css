@@ -1,0 +1,83 @@
+/* Burger glyph: two hairlines that slide together, then rotate into a cross. */
+.chr-burger {
+  position: relative;
+  display: block;
+  width: 24px;
+  height: 14px;
+}
+
+.chr-burger__l {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1.5px;
+  margin-top: -0.75px;
+  /* Closing: rotate back first, then spread apart. */
+  transition: transform 360ms var(--ease-out-expo) 200ms;
+}
+.chr-burger__l--1 {
+  transform: translateY(-4px);
+}
+.chr-burger__l--2 {
+  transform: translateY(4px);
+}
+
+.chr-burger__l::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 420ms var(--ease-out-expo);
+}
+.chr-burger__l--1::before {
+  transform-origin: 100% 50%;
+}
+.chr-burger__l--2::before {
+  transform-origin: 0 50%;
+}
+
+/* Hover (closed): the lines shift past each other, a small breath of motion. */
+@media (hover: hover) {
+  :is(a, button):hover .chr-burger[data-open="false"] .chr-burger__l--1::before {
+    transform: scaleX(0.62);
+  }
+  :is(a, button):hover .chr-burger[data-open="false"] .chr-burger__l--2::before {
+    transform: scaleX(0.62);
+  }
+}
+
+/* Open: slide together, then rotate. */
+.chr-burger[data-open="true"] .chr-burger__l {
+  transform: translateY(0);
+  transition-delay: 0ms;
+}
+.chr-burger[data-open="true"] .chr-burger__l::before {
+  transform-origin: 50% 50%;
+  transition: transform 520ms var(--ease-out-expo) 180ms;
+}
+.chr-burger[data-open="true"] .chr-burger__l--1::before {
+  transform: rotate(45deg);
+}
+.chr-burger[data-open="true"] .chr-burger__l--2::before {
+  transform: rotate(-45deg);
+}
+@media (hover: hover) {
+  :is(a, button):hover .chr-burger[data-open="true"] .chr-burger__l::before {
+    transition-delay: 0ms;
+  }
+  :is(a, button):hover .chr-burger[data-open="true"] .chr-burger__l--1::before {
+    transform: rotate(135deg);
+  }
+  :is(a, button):hover .chr-burger[data-open="true"] .chr-burger__l--2::before {
+    transform: rotate(45deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chr-burger__l,
+  .chr-burger__l::before {
+    transition: none !important;
+  }
+}

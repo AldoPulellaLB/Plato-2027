@@ -1,0 +1,395 @@
+/* Product card: a stone-tinted plinth for packshots, a photo swap on hover,
+ * and the QuickAdd capsule. */
+.pc {
+  --pc-tile: color-mix(in srgb, var(--plato-stone) 46%, var(--plato-paper));
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  transition:
+    transform 1100ms var(--ease-out-expo) var(--reveal-delay, 0ms),
+    opacity 800ms var(--ease-out-quart) var(--reveal-delay, 0ms);
+}
+.pc[data-reveal="idle"] {
+  opacity: 0;
+  transform: translateY(56px);
+  transition: none;
+}
+.pc[data-reveal="idle"] .pc-tile {
+  clip-path: inset(14% 0 0 0);
+  transition: none;
+}
+
+.pc-media {
+  position: relative;
+}
+
+.pc-tile {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  border-radius: 6px;
+  background: var(--pc-tile);
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 1300ms var(--ease-out-expo) var(--reveal-delay, 0ms);
+  isolation: isolate;
+}
+
+.pc-imgs {
+  position: absolute;
+  inset: 0;
+  display: block;
+  /* The white of the packshots melts into the plinth as one group, so the
+   * hover photo fully covers the packshot beneath it. */
+  mix-blend-mode: multiply;
+}
+.pc[data-fit="cover"] .pc-imgs {
+  mix-blend-mode: normal;
+}
+.pc-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.pc-img--a {
+  object-fit: contain;
+  transform: scale(1);
+  transition: transform 1100ms var(--ease-out-expo);
+}
+.pc[data-fit="cover"] .pc-img--a {
+  object-fit: cover;
+}
+.pc-img--b {
+  object-fit: cover;
+  clip-path: inset(100% 0 0 0);
+  transform: scale(1.14);
+  transition:
+    clip-path 900ms var(--ease-out-expo),
+    transform 1300ms var(--ease-out-expo);
+}
+
+.pc-index {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  z-index: 2;
+  color: var(--fg-faint);
+  transition:
+    opacity var(--dur-ui) var(--ease-out-quart),
+    transform var(--dur-ui) var(--ease-out-expo);
+}
+.pc[data-fit="cover"] .pc-index {
+  color: var(--plato-paper);
+  opacity: 0.86;
+}
+
+.pc-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  background: var(--plato-paper);
+  color: var(--plato-ink);
+  font-size: 0.625rem;
+}
+
+.pc-chips {
+  position: absolute;
+  left: 12px;
+  right: 72px;
+  bottom: 12px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  pointer-events: none;
+}
+.pc-chip {
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--plato-paper) 92%, transparent);
+  color: var(--plato-ink);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 360ms var(--ease-out-quart) calc(var(--i, 0) * 40ms),
+    transform 620ms var(--ease-out-expo) calc(var(--i, 0) * 40ms);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pc:hover .pc-img--a {
+    transform: scale(0.94);
+  }
+  .pc[data-swap]:hover .pc-img--b {
+    clip-path: inset(0 0 0 0);
+    transform: scale(1);
+  }
+  .pc:hover .pc-index {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  .pc:hover .pc-chip {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.pc:focus-within .pc-chip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* First paint from the server: the cards already on screen rise in with CSS
+ * only (no JS, no flash). Client mounts use data-reveal instead. */
+[data-intro] > .pc:nth-child(-n + 8) {
+  animation: pc-intro 1200ms var(--ease-out-expo) backwards;
+  animation-delay: calc(420ms + var(--slot, 0) * 90ms);
+}
+[data-intro] > .pc:nth-child(-n + 8) .pc-tile {
+  animation: pc-intro-tile 1500ms var(--ease-out-expo) backwards;
+  animation-delay: calc(420ms + var(--slot, 0) * 90ms);
+}
+@keyframes pc-intro {
+  from {
+    opacity: 0;
+    transform: translateY(56px);
+  }
+}
+@keyframes pc-intro-tile {
+  from {
+    clip-path: inset(14% 0 0 0);
+  }
+}
+
+/* Meta */
+.pc-meta {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+  padding-top: 1rem;
+}
+.pc-title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.005em;
+  text-wrap: balance;
+}
+.pc-link {
+  display: inline;
+  outline: none;
+}
+.pc-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+}
+.pc-link:focus-visible::after {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.pc-sub {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+.pc-blurb {
+  margin: 0.25rem 0 0.4rem;
+  max-width: 34ch;
+  color: var(--fg-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+.pc-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+.pc-kind {
+  color: var(--fg-muted);
+  letter-spacing: 0.02em;
+}
+.pc-price {
+  flex: none;
+  color: var(--fg);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+/* Feature card */
+@media (min-width: 1024px) {
+  .pc[data-feature] {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+  .pc[data-feature] .pc-media {
+    flex: 1;
+    min-height: 0;
+  }
+  .pc[data-feature] .pc-tile {
+    height: 100%;
+    min-height: 420px;
+    aspect-ratio: auto;
+  }
+  .pc[data-feature] .pc-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 2.6vw, 2.75rem);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+  }
+  .pc[data-feature] .pc-sub {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    letter-spacing: 0;
+  }
+  .pc[data-feature] .pc-chip {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 1023px) {
+  .pc[data-feature] {
+    grid-column: 1 / -1;
+  }
+  .pc[data-feature] .pc-tile {
+    aspect-ratio: 5 / 4;
+  }
+}
+
+/* QuickAdd: the button is clipped to a circle (clip-path also clips hit
+ * testing), and opens to a capsule on hover or focus. */
+.pc-qa {
+  --qa-size: 48px;
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 3;
+  width: 112px;
+  height: var(--qa-size);
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--plato-green);
+  color: var(--plato-paper);
+  clip-path: inset(0 0 0 calc(100% - var(--qa-size)) round calc(var(--qa-size) / 2));
+  transition: clip-path 560ms var(--ease-out-expo);
+}
+.pc-qa::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--plato-sage);
+  clip-path: inset(0 0 0 100%);
+  transition: clip-path 620ms var(--ease-out-expo);
+}
+.pc-qa__label {
+  position: absolute;
+  top: 50%;
+  left: 22px;
+  z-index: 1;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translate(12px, -50%);
+  transition:
+    opacity 300ms var(--ease-out-quart),
+    transform 560ms var(--ease-out-expo);
+}
+.pc-qa__icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--qa-size);
+  height: var(--qa-size);
+}
+.pc-qa__icon svg {
+  grid-area: 1 / 1;
+  transition:
+    transform 560ms var(--ease-out-expo),
+    opacity 260ms var(--ease-out-quart);
+}
+.pc-qa__check {
+  opacity: 0;
+  transform: scale(0.4) rotate(-30deg);
+}
+
+.pc-qa:is(:hover, :focus-visible),
+.pc-qa[data-added] {
+  clip-path: inset(0 0 0 0 round calc(var(--qa-size) / 2));
+}
+.pc-qa:is(:hover, :focus-visible) .pc-qa__label,
+.pc-qa[data-added] .pc-qa__label {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+.pc-qa:is(:hover, :focus-visible) .pc-qa__plus {
+  transform: rotate(90deg);
+}
+.pc-qa:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 2px var(--plato-green),
+    inset 0 0 0 4px var(--plato-paper);
+}
+.pc-qa:active {
+  transform: scale(0.96);
+}
+
+.pc-qa[data-added] {
+  color: var(--plato-ink);
+}
+.pc-qa[data-added]::after {
+  clip-path: inset(0 0 0 0);
+}
+.pc-qa[data-added] .pc-qa__plus {
+  opacity: 0;
+  transform: scale(0.4) rotate(90deg);
+}
+.pc-qa[data-added] .pc-qa__check {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-intro] > .pc,
+  [data-intro] > .pc .pc-tile {
+    animation: none !important;
+  }
+  .pc,
+  .pc-tile,
+  .pc-img--a,
+  .pc-img--b,
+  .pc-index,
+  .pc-chip,
+  .pc-qa,
+  .pc-qa::after,
+  .pc-qa__label,
+  .pc-qa__icon svg {
+    transition: none !important;
+  }
+}

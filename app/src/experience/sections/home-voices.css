@@ -1,0 +1,398 @@
+/* Voices (single-statement carousel). Airy rhythm: one quote, a lot of paper. */
+
+.hvoice {
+  position: relative;
+  z-index: var(--z-content);
+  display: grid;
+  align-items: center;
+  min-height: 100svh;
+  padding-block: clamp(120px, 13vw, 224px) clamp(120px, 14vw, 240px);
+  background-color: var(--bg);
+  color: var(--fg);
+  overflow: clip;
+}
+
+/* A giant sage opening mark drifting behind the quote. */
+.hvoice-mark {
+  position: absolute;
+  top: clamp(24px, 6vw, 96px);
+  right: calc(var(--gutter) - 0.04em);
+  z-index: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(18rem, 40vw, 46rem);
+  line-height: 0.72;
+  color: var(--plato-sage);
+  pointer-events: none;
+  user-select: none;
+  will-change: transform;
+}
+
+.hvoice-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.hvoice-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.hvoice-title {
+  margin: 0;
+  color: var(--fg-muted);
+}
+.hvoice-count {
+  display: inline-flex;
+  gap: 0.6em;
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+}
+.hvoice-count__now {
+  display: inline-block;
+  animation: hvoice-tick 700ms var(--ease-out-expo) both;
+}
+.hvoice-count__of {
+  color: var(--fg-faint);
+}
+@keyframes hvoice-tick {
+  from {
+    transform: translate3d(0, 100%, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* Stage: every review sits in the same cell, so the height never jumps. */
+.hvoice-stage {
+  display: grid;
+  margin-top: clamp(56px, 7vw, 120px);
+}
+.hvoice-quote {
+  grid-area: 1 / 1;
+  margin: 0;
+  visibility: hidden;
+}
+.hvoice-quote[data-state="active"],
+.hvoice-quote[data-state="leaving"] {
+  visibility: visible;
+}
+.hvoice-quote[data-state="leaving"] {
+  pointer-events: none;
+}
+.hvoice-text {
+  margin: 0;
+}
+.hvoice-text p {
+  max-width: 15.5em;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(2rem, 4.6vw, 5.25rem);
+  line-height: 1.04;
+  letter-spacing: -0.022em;
+  text-wrap: pretty;
+}
+.hvoice-w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+.hvoice-wi {
+  display: inline-block;
+}
+.hvoice-quote[data-state="active"] .hvoice-wi {
+  animation: hvoice-in 1150ms var(--ease-out-expo) both;
+  animation-delay: calc(var(--i) * 22ms + 280ms);
+}
+.hvoice-quote[data-state="leaving"] .hvoice-wi {
+  animation: hvoice-out 560ms var(--ease-in-quart) both;
+  animation-delay: calc(var(--i) * 7ms);
+}
+@keyframes hvoice-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 108%, 0) rotate(2.5deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hvoice-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -108%, 0);
+  }
+}
+
+.hvoice-cite {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: clamp(28px, 3vw, 44px);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1.2rem, 1.5vw, 1.5rem);
+  color: var(--fg-muted);
+}
+.hvoice-cite__rule {
+  width: 48px;
+  height: 1px;
+  background-color: currentColor;
+  transform-origin: 0 50%;
+}
+.hvoice-quote[data-state="active"] .hvoice-cite__rule {
+  animation: hvoice-rule 1100ms var(--ease-out-expo) 700ms both;
+}
+.hvoice-quote[data-state="active"] .hvoice-cite__who {
+  animation: hvoice-fade 900ms var(--ease-out-quart) 820ms both;
+}
+.hvoice-quote[data-state="leaving"] .hvoice-cite {
+  animation: hvoice-fade-out 400ms var(--ease-in-quart) both;
+}
+@keyframes hvoice-rule {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes hvoice-fade {
+  from {
+    opacity: 0;
+    transform: translate3d(12px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hvoice-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* Not revealed yet: hold the first review below its mask. */
+.hvoice-stage[data-inview="idle"] .hvoice-wi {
+  animation: none !important;
+  opacity: 0;
+  transform: translate3d(0, 108%, 0);
+}
+.hvoice-stage[data-inview="idle"] .hvoice-cite__rule {
+  animation: none !important;
+  transform: scaleX(0);
+}
+.hvoice-stage[data-inview="idle"] .hvoice-cite__who {
+  animation: none !important;
+  opacity: 0;
+}
+
+/* Controls */
+.hvoice-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px 40px;
+  margin-top: clamp(56px, 6.4vw, 112px);
+}
+.hvoice-index {
+  display: flex;
+  gap: clamp(12px, 1.6vw, 28px);
+}
+.hvoice-dot {
+  display: grid;
+  gap: 12px;
+  width: clamp(64px, 7.5vw, 128px);
+  min-height: 44px;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  color: var(--fg-faint);
+}
+.hvoice-dot__no {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  transition: transform 520ms var(--ease-out-expo);
+}
+.hvoice-dot__track {
+  position: relative;
+  height: 1px;
+  overflow: hidden;
+  background-color: var(--line);
+}
+.hvoice-dot__fill {
+  position: absolute;
+  inset: 0;
+  background-color: var(--fg);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+.hvoice-dot[data-state="past"] .hvoice-dot__fill {
+  transform: scaleX(1) !important;
+}
+.hvoice-dot[data-state="future"] .hvoice-dot__fill {
+  transform: scaleX(0) !important;
+}
+.hvoice[data-static] .hvoice-dot[data-state="active"] .hvoice-dot__fill {
+  transform: scaleX(1) !important;
+}
+.hvoice-dot[data-state="active"] {
+  color: var(--fg);
+}
+.hvoice-dot:is(:hover, :focus-visible) .hvoice-dot__no {
+  transform: translate3d(0, -3px, 0);
+}
+.hvoice-dot:hover {
+  color: var(--fg);
+}
+.hvoice-dot:focus-visible {
+  outline-offset: 4px;
+}
+
+.hvoice-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Review arrows: a peach disc swells in and the arrow nudges the way it points. */
+.hvoice-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--fg);
+  transition: transform 420ms var(--ease-out-expo);
+}
+.hvoice-btn::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: 50%;
+  background-color: var(--plato-peach);
+  transform: scale(0);
+  transition: transform 620ms var(--ease-out-expo);
+}
+.hvoice-btn svg {
+  grid-area: 1 / 1;
+  transition:
+    transform 620ms var(--ease-out-expo),
+    opacity 300ms var(--ease-out-quart);
+}
+.hvoice-btn__b {
+  opacity: 0;
+}
+.hvoice-btn[data-dir="next"] .hvoice-btn__b {
+  transform: translateX(-12px);
+}
+.hvoice-btn[data-dir="prev"] .hvoice-btn__b {
+  transform: translateX(12px);
+}
+.hvoice-btn:is(:hover, :focus-visible)::before {
+  transform: scale(1);
+}
+.hvoice-btn[data-dir="next"]:is(:hover, :focus-visible) .hvoice-btn__a {
+  opacity: 0;
+  transform: translateX(14px);
+}
+.hvoice-btn[data-dir="prev"]:is(:hover, :focus-visible) .hvoice-btn__a {
+  opacity: 0;
+  transform: translateX(-14px);
+}
+.hvoice-btn:is(:hover, :focus-visible) .hvoice-btn__b {
+  opacity: 1;
+  transform: translateX(0);
+}
+.hvoice-btn:active {
+  transform: scale(0.92);
+}
+.hvoice-btn--toggle {
+  width: 44px;
+  height: 44px;
+  margin-right: 8px;
+}
+.hvoice-btn--toggle::before {
+  background-color: var(--plato-sage);
+}
+
+@media (max-width: 767px) {
+  .hvoice {
+    min-height: 0;
+    padding-block: 112px 120px;
+  }
+  .hvoice-mark {
+    top: 72px;
+    font-size: 15rem;
+  }
+  .hvoice-stage {
+    margin-top: 48px;
+  }
+  .hvoice-text p {
+    font-size: clamp(1.9rem, 8.4vw, 2.4rem);
+    line-height: 1.08;
+  }
+  .hvoice-controls {
+    margin-top: 48px;
+  }
+  .hvoice-index {
+    width: 100%;
+  }
+  .hvoice-dot {
+    flex: 1;
+    width: auto;
+  }
+  .hvoice-buttons {
+    margin-left: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hvoice-mark {
+    will-change: auto;
+  }
+  .hvoice-quote .hvoice-wi,
+  .hvoice-quote .hvoice-cite,
+  .hvoice-quote .hvoice-cite__rule,
+  .hvoice-quote .hvoice-cite__who,
+  .hvoice-count__now {
+    animation: none !important;
+  }
+  .hvoice-quote[data-state="leaving"] {
+    visibility: hidden;
+  }
+  .hvoice-btn,
+  .hvoice-btn::before,
+  .hvoice-btn svg,
+  .hvoice-dot__no {
+    transition: none !important;
+  }
+}

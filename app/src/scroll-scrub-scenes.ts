@@ -23,9 +23,9 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
   {
     id: "f06",
     label: "The shot",
-    kicker: "Frame 06",
+    kicker: "The ristretto",
     title: "Three ristretto shots. Every time.",
-    body: "Every signature drink is built on ristretto: the short, dense first pull of the shot. Aristotle, Platō and Socrates all start here.",
+    body: "Our signature drinks are built on ristretto: the short, dense first part of the shot. Aristotle and Platō both start with three.",
     tags: ["Ristretto", "100% Arabica"],
     clip: "/assets/world/pour-shot.mp4",
     poster: "/assets/world/pour-shot-poster.webp",
@@ -37,9 +37,9 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
   {
     id: "f07",
     label: "The pour",
-    kicker: "Frame 07",
     title: "Then it's handed over.",
-    body: "Milk meets the shot, the art blooms, and the cup is ready for someone.",
+    // No words during the pour: the line appears in ink once the white covers the frame.
+    body: "",
     clip: "/assets/world/pour-milk.mp4",
     poster: "/assets/world/pour-milk-poster.webp",
     mobileClip: "/assets/world/pour-milk-mobile.mp4",
@@ -51,9 +51,9 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
   {
     id: "f08",
     label: "The counter",
-    kicker: "Frame 08",
+    kicker: "The counter",
     title: "They know your name. And your order.",
-    body: "Regulars are the heart of every Platō. The people behind the counter remember how you take it, and ask how your day is going.",
+    body: "Regulars are the heart of every Platō. The people behind the counter remember how you take it, and love a chat while they make it.",
     clip: "/assets/world/counter.mp4",
     poster: "/assets/world/counter-poster.webp",
     mobileClip: "/assets/world/counter-mobile.mp4",

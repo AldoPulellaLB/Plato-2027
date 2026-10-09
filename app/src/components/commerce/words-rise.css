@@ -1,0 +1,29 @@
+.wr-w {
+  display: inline-block;
+  overflow: clip;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+  vertical-align: top;
+}
+.wr-i {
+  display: inline-block;
+  animation: wr-rise 1200ms var(--ease-out-expo) backwards;
+  animation-delay: calc(var(--wr-delay, 120ms) + var(--i, 0) * 40ms);
+}
+.wr-i[data-italic] {
+  font-style: italic;
+}
+@keyframes wr-rise {
+  from {
+    transform: translateY(108%) rotate(3deg);
+    filter: blur(6px);
+  }
+  60% {
+    filter: blur(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wr-i {
+    animation: none;
+  }
+}

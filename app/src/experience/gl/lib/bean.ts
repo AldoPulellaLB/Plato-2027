@@ -27,7 +27,7 @@ export function createBeanGeometry({
   const v = new THREE.Vector3();
   for (let i = 0; i < pos.count; i += 1) {
     v.fromBufferAttribute(pos, i);
-    let x = v.x * length;
+    const x = v.x * length;
     let y = v.y * width;
     let z = v.z * thickness;
     // Flatten the front face (z > 0) into a gentle dome.

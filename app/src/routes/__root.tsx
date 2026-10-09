@@ -61,8 +61,10 @@ function toOwnAssetUrl(value: string | null | undefined): string | null {
   }
 }
 
-function buildHead(meta: AppMeta) {
-  const title = meta.og_title ?? DEFAULT_TITLE;
+const NOT_FOUND_TITLE = "Page not found | PLATŌ Coffee";
+
+function buildHead(meta: AppMeta, notFound = false) {
+  const title = notFound ? NOT_FOUND_TITLE : (meta.og_title ?? DEFAULT_TITLE);
   const description = meta.og_description ?? DEFAULT_DESCRIPTION;
   const ogImage = toOwnAssetUrl(meta.og_image_url);
   const favicon = toOwnAssetUrl(meta.favicon_url) ?? "/assets/brand/favicon.svg";
@@ -128,7 +130,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => buildHead(appMeta),
+  // An unknown URL (or a loader that throws notFound) gets a real "not found"
+  // title in the server HTML, not the home page's.
+  head: ({ match, matches }) =>
+    buildHead(appMeta, Boolean(match.globalNotFound) || matches.some((m) => m.status === "notFound")),
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundPage,

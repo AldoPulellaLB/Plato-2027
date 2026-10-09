@@ -148,7 +148,7 @@
 
 .scroll-scrub__copy {
   position: relative;
-  width: min(40rem, 48vw);
+  width: min(36rem, 42vw);
   pointer-events: auto;
 }
 
@@ -167,49 +167,72 @@
 }
 
 .scroll-scrub__kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
   max-width: 30ch;
-  margin: 0 0 1rem;
-  color: var(--ss-accent);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  margin: 0 0 1.4rem;
+  color: var(--ss-ink);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
 }
 
+.scroll-scrub__kicker::before {
+  width: 2.5rem;
+  height: 1px;
+  content: "";
+  background: var(--ss-accent);
+}
+
 .scroll-scrub__title {
-  max-width: 13ch;
+  max-width: 13.5ch;
   margin: 0;
   color: var(--ss-ink);
-  font: inherit;
-  font-size: clamp(2.75rem, 6vw, 6.75rem);
-  font-weight: 700;
-  line-height: 0.94;
-  letter-spacing: -0.045em;
+  font-family: var(--font-serif);
+  font-size: clamp(2.75rem, 5.6vw, 6.5rem);
+  font-weight: 400;
+  line-height: 0.96;
+  letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
 .scroll-scrub__body {
-  max-width: 42ch;
-  margin: 1.5rem 0 0;
+  max-width: 38ch;
+  margin: 1.6rem 0 0;
   color: var(--ss-muted);
-  font-size: clamp(1rem, 1.35vw, 1.2rem);
-  line-height: 1.55;
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 1.15vw, 1.125rem);
+  line-height: 1.62;
+  text-wrap: pretty;
+}
+
+.scroll-scrub__body:empty {
+  display: none;
 }
 
 .scroll-scrub__tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
-  margin: 1.5rem 0 0;
+  margin: 1.75rem 0 0;
   padding: 0;
   list-style: none;
 }
 
 .scroll-scrub__tags li {
-  padding: 0.45rem 0.7rem;
-  border: 1px solid color-mix(in srgb, var(--ss-ink) 20%, transparent);
+  padding: 0.5rem 0.95rem 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--ss-ink) 24%, transparent);
+  border-radius: 999px;
   color: var(--ss-ink);
-  font-size: 0.82rem;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 
 .scroll-scrub__actions {
@@ -217,6 +240,83 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 2rem;
+}
+
+/* ---- PLATŌ composition ---------------------------------------------------
+ * The site header owns chapter navigation and the progress line, so the
+ * engine's own route nav and progress bar are not shown. */
+.scroll-scrub__progress,
+.scroll-scrub__route {
+  display: none;
+}
+
+/* The white-out (frame 07): a radial white disc grows from the cup centre,
+ * scale-driven (--ss-white 0..1 x --ss-cover), above the film and below the copy.
+ * A flat wash finishes the corners; --ss-veil dissolves both into frame 08. */
+.scroll-scrub__stage::after {
+  position: absolute;
+  z-index: 4;
+  top: 52%;
+  left: 50%;
+  width: 50vmax;
+  height: 50vmax;
+  margin: -25vmax 0 0 -25vmax;
+  content: "";
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side,
+    var(--plato-paper) 0%,
+    var(--plato-paper) 72%,
+    color-mix(in srgb, var(--plato-paper) 0%, transparent) 100%
+  );
+  opacity: var(--ss-veil, 1);
+  transform: scale(calc(var(--ss-white, 0) * var(--ss-cover, 4)));
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.scroll-scrub__media::after {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  content: "";
+  background: var(--plato-paper);
+  opacity: calc(var(--ss-wash, 0) * var(--ss-veil, 1));
+  pointer-events: none;
+}
+
+/* No words during the pour: once the screen is white, one ink line,
+ * held in the middle of the screen while the white resolves into the counter. */
+.scroll-scrub__chapter[data-ss-line] .scroll-scrub__copy {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(88vw, 64rem);
+  text-align: center;
+  opacity: var(--ss-line, 0);
+  transform: translate3d(
+    -50%,
+    calc(-50% + (1 - var(--ss-line-in, 0)) * 16px - var(--ss-line-out, 0) * 48px),
+    0
+  );
+  filter: blur(calc((1 - var(--ss-line-in, 0)) * 10px + var(--ss-line-out, 0) * 6px));
+  pointer-events: none;
+}
+
+.scroll-scrub__chapter[data-ss-line] .scroll-scrub__copy::before {
+  display: none;
+}
+
+.scroll-scrub__chapter[data-ss-line] .scroll-scrub__title {
+  max-width: none;
+  color: var(--plato-ink);
+}
+
+/* Frame 08's line waits for the white to resolve before it is read. */
+.scroll-scrub__chapter[data-ss-late] .scroll-scrub__copy {
+  opacity: var(--ss-f08, 1);
+  transform: translate3d(0, calc((1 - var(--ss-f08, 1)) * 32px), 0);
+  filter: blur(calc((1 - var(--ss-f08, 1)) * 8px));
 }
 
 @media (max-width: 860px) {
@@ -243,8 +343,7 @@
     align-items: flex-end;
     justify-content: flex-start;
     padding: 6.5rem max(1.25rem, env(safe-area-inset-right))
-      calc(4rem + env(safe-area-inset-bottom))
-      max(1.25rem, env(safe-area-inset-left));
+      calc(5.75rem + env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
   }
 
   .scroll-scrub__copy {
@@ -263,11 +362,25 @@
 
   .scroll-scrub__title {
     max-width: 14ch;
-    font-size: clamp(2.3rem, 11vw, 4.5rem);
+    font-size: clamp(2.4rem, 11vw, 4.25rem);
+  }
+
+  .scroll-scrub__chapter[data-ss-line] .scroll-scrub__copy {
+    padding: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .scroll-scrub,
+  .scroll-scrub__stage {
+    transition: background-color 400ms var(--ease-out-quart);
+  }
+
+  .scroll-scrub__stage::after,
+  .scroll-scrub__media::after {
+    display: none;
+  }
+
   .scroll-scrub__chapter {
     min-height: 100dvh !important;
   }

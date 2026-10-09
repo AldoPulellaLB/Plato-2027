@@ -1,0 +1,126 @@
+/* StoreFinderPill: an inverse capsule (theme fg as fill), so it reads on roast, paper and forest. */
+.sfp {
+  position: fixed;
+  right: var(--gutter);
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: var(--z-float);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 22px 0 16px;
+  border-radius: 999px;
+  background: var(--fg);
+  color: var(--bg);
+  box-shadow: 0 14px 36px -16px color-mix(in srgb, var(--plato-ink) 55%, transparent);
+  opacity: 0;
+  transform: translateY(28px) scale(0.96);
+  pointer-events: none;
+  transition:
+    opacity 520ms var(--ease-out-quart),
+    transform 900ms var(--ease-out-expo),
+    background-color 700ms var(--ease-out-quart),
+    color 700ms var(--ease-out-quart);
+}
+.sfp[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.sfp:focus-visible {
+  outline-offset: 4px;
+}
+
+.sfp-pin {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+}
+.sfp-pin__svg {
+  position: relative;
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  transform-origin: 50% 100%;
+}
+.sfp-pin__ring {
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 14px;
+  height: 5px;
+  margin-left: -7px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.3);
+}
+@media (hover: hover) {
+  .sfp:hover .sfp-pin__svg {
+    animation: sfp-hop 760ms var(--ease-out-expo);
+  }
+  .sfp:hover .sfp-pin__ring {
+    animation: sfp-ring 900ms var(--ease-out-expo) 140ms;
+  }
+}
+.sfp:focus-visible .sfp-pin__ring {
+  animation: sfp-ring 900ms var(--ease-out-expo);
+}
+@keyframes sfp-hop {
+  0% {
+    transform: translateY(0);
+  }
+  32% {
+    transform: translateY(-5px);
+  }
+  62% {
+    transform: translateY(0) scaleY(0.92);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes sfp-ring {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+.sfp-label {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* Small screens: just the pin, a 48px target. */
+@media (max-width: 639.98px) {
+  .sfp {
+    width: 48px;
+    padding: 0;
+    justify-content: center;
+  }
+  .sfp-label {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sfp {
+    transform: none;
+    transition: opacity 300ms var(--ease-out-quart);
+  }
+  .sfp-pin__svg,
+  .sfp-pin__ring {
+    animation: none !important;
+  }
+}

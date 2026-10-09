@@ -1,0 +1,292 @@
+/* Preloader. Server rendered; hides itself with CSS if JavaScript never arrives. */
+.pl {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-loader);
+  color: var(--plato-paper);
+  cursor: progress;
+  animation: pl-failsafe 700ms var(--ease-out-quart) 3400ms forwards;
+}
+html[data-pl="skip"] .pl {
+  display: none;
+}
+.pl[data-js="on"] {
+  animation: none;
+}
+@keyframes pl-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Two layers: the roast panel lifts first, a sage trail follows it out. */
+.pl-trail,
+.pl-panel {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 0 0 0);
+}
+.pl-trail {
+  background: var(--plato-sage);
+}
+.pl-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  background: var(--plato-roast);
+}
+.pl[data-phase="exit"] .pl-panel {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 1000ms var(--ease-in-out-expo) 420ms;
+}
+.pl[data-phase="exit"] .pl-trail {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 1000ms var(--ease-in-out-expo) 560ms;
+}
+.pl-grain {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Top labels */
+.pl-top {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: calc(28px + env(safe-area-inset-top)) var(--gutter) 0;
+  color: color-mix(in srgb, var(--plato-paper) 52%, transparent);
+}
+.pl-top__item {
+  animation: pl-fade 1200ms var(--ease-out-quart) 300ms both;
+}
+
+/* Wordmark: the SVG viewport masks each letter as it rises. */
+.pl-center {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0 var(--gutter);
+}
+.pl-mark {
+  display: block;
+  width: min(60vw, 720px);
+  height: auto;
+  overflow: hidden;
+}
+.pl-letter {
+  transform-box: view-box;
+  animation: pl-rise 1250ms var(--ease-out-expo) both;
+}
+.pl-letter:nth-child(1) {
+  animation-delay: 180ms;
+}
+.pl-letter:nth-child(2) {
+  animation-delay: 290ms;
+}
+.pl-letter:nth-child(3) {
+  animation-delay: 400ms;
+}
+.pl-letter:nth-child(4) {
+  animation-delay: 510ms;
+}
+.pl-letter:nth-child(5) {
+  animation-delay: 620ms;
+}
+/* The macron settles onto the Ō last. */
+.pl-letter[data-letter="Ō"] path:nth-child(2) {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  animation: pl-macron 1000ms var(--ease-out-expo) 1100ms both;
+}
+
+/* Foot: counter + roast stage */
+.pl-foot {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 var(--gutter) calc(34px + env(safe-area-inset-bottom));
+}
+.pl-count-mask {
+  display: block;
+  overflow: hidden;
+}
+.pl-count {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: clamp(4.5rem, 13vw, 12rem);
+  font-weight: 300;
+  line-height: 0.84;
+  letter-spacing: -0.045em;
+  animation: pl-rise-y 1100ms var(--ease-out-expo) 120ms both;
+}
+.pl-stage {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  padding-bottom: 0.4rem;
+  text-align: right;
+  animation: pl-fade 1100ms var(--ease-out-quart) 500ms both;
+}
+.pl-stage__mask {
+  display: block;
+  overflow: hidden;
+}
+.pl-stage__label {
+  display: block;
+  color: var(--plato-paper);
+}
+.pl-stage__temp {
+  color: color-mix(in srgb, var(--plato-paper) 52%, transparent);
+  letter-spacing: 0.16em;
+}
+.pl-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--plato-sage);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  /* Without JavaScript the line still fills while the failsafe waits. */
+  animation: pl-line 3200ms var(--ease-out-quart) forwards;
+}
+.pl[data-js="on"] .pl-line {
+  animation: none;
+}
+
+/* Exit: everything leaves upward, then the curtain lifts. */
+.pl[data-phase="exit"] .pl-letter {
+  animation: pl-out 760ms var(--ease-in-quart) forwards;
+}
+.pl[data-phase="exit"] .pl-letter:nth-child(2) {
+  animation-delay: 45ms;
+}
+.pl[data-phase="exit"] .pl-letter:nth-child(3) {
+  animation-delay: 90ms;
+}
+.pl[data-phase="exit"] .pl-letter:nth-child(4) {
+  animation-delay: 135ms;
+}
+.pl[data-phase="exit"] .pl-letter:nth-child(5) {
+  animation-delay: 180ms;
+}
+.pl[data-phase="exit"] .pl-count {
+  animation: pl-out-y 700ms var(--ease-in-quart) 60ms forwards;
+}
+.pl[data-phase="exit"] .pl-top__item,
+.pl[data-phase="exit"] .pl-stage {
+  animation: pl-fade-out 420ms var(--ease-out-quart) forwards;
+}
+
+@keyframes pl-rise {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes pl-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-105%);
+  }
+}
+@keyframes pl-rise-y {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes pl-out-y {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+@keyframes pl-macron {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes pl-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pl-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes pl-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(0.86);
+  }
+}
+
+@media (max-width: 639.98px) {
+  .pl-top {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .pl-mark {
+    width: min(78vw, 420px);
+  }
+  .pl-count {
+    font-size: clamp(4rem, 24vw, 6.5rem);
+  }
+}
+
+/* Reduced motion: no rising, no wipe. A still card that fades away. */
+@media (prefers-reduced-motion: reduce) {
+  .pl-letter,
+  .pl-letter path,
+  .pl-count,
+  .pl-top__item,
+  .pl-stage,
+  .pl[data-phase="exit"] .pl-letter,
+  .pl[data-phase="exit"] .pl-count,
+  .pl[data-phase="exit"] .pl-top__item,
+  .pl[data-phase="exit"] .pl-stage {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1;
+  }
+  .pl-trail {
+    display: none;
+  }
+  .pl[data-phase="exit"] .pl-panel {
+    clip-path: none;
+    transition: none;
+  }
+  .pl[data-phase="exit"] {
+    opacity: 0;
+    transition: opacity 480ms var(--ease-out-quart);
+  }
+}

@@ -1,0 +1,241 @@
+/* 404 (namespace: nf-) */
+
+.nf-hero {
+  display: grid;
+  align-items: center;
+  min-height: 100svh;
+  padding-top: calc(var(--header-h) + clamp(24px, 4vw, 64px));
+  padding-bottom: clamp(64px, 8vw, 128px);
+}
+.nf-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(12px, 1.6vw, 24px);
+  align-items: center;
+}
+.nf-copy {
+  grid-column: 1 / span 7;
+  position: relative;
+  z-index: 1;
+}
+.nf-code {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 clamp(24px, 3vw, 40px);
+  color: var(--fg-muted);
+}
+.nf-code__rule {
+  width: 48px;
+  height: 1px;
+  background: currentColor;
+}
+.nf-title {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(3.75rem, 9.4vw, 11rem);
+  line-height: 0.88;
+  letter-spacing: -0.04em;
+}
+.nf-lede {
+  margin: clamp(24px, 3vw, 40px) 0 0;
+  max-width: 40ch;
+  color: var(--fg-muted);
+  font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+  line-height: 1.55;
+}
+.nf-links {
+  list-style: none;
+  margin: clamp(32px, 4vw, 56px) 0 0;
+  padding: 0;
+  max-width: 640px;
+  border-top: 1px solid var(--fg);
+}
+
+/* CTA rows: a sage wash slides in from the left, the label rolls, the arrow leaves. */
+.nf-link {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 84px;
+  padding: 12px 12px 12px 4px;
+  border-bottom: 1px solid var(--line);
+}
+.nf-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--plato-sage);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 700ms var(--ease-out-expo);
+}
+.nf-link:is(:hover, :focus-visible)::before {
+  transform: scaleX(1);
+}
+.nf-link__num {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+}
+.nf-link__text {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.nf-link__label {
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 2.4vw, 2.25rem);
+  line-height: 1;
+}
+.nf-link__note {
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+}
+.nf-link__arrow {
+  transition: transform 700ms var(--ease-out-expo);
+}
+.nf-link:is(:hover, :focus-visible) .nf-link__arrow {
+  transform: translateX(8px);
+}
+
+/* The empty cup, seen from above. */
+.nf-visual {
+  grid-column: 8 / -1;
+  display: grid;
+  place-items: center;
+}
+.nf-cup {
+  position: relative;
+  width: min(100%, 520px);
+  aspect-ratio: 1;
+}
+.nf-cup > span {
+  position: absolute;
+  border-radius: 50%;
+}
+.nf-cup__saucer {
+  inset: 0;
+  background: var(--plato-stone);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--plato-ink) 6%, transparent);
+}
+.nf-cup__handle {
+  top: 44%;
+  right: 6%;
+  width: 22%;
+  height: 12%;
+  border-radius: 999px !important;
+  background: var(--plato-paper);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--plato-ink) 8%, transparent),
+    0 14px 24px -16px color-mix(in srgb, var(--plato-ink) 40%, transparent);
+}
+.nf-cup__rim {
+  inset: 17%;
+  background: var(--plato-paper);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--plato-ink) 8%, transparent),
+    0 30px 50px -28px color-mix(in srgb, var(--plato-ink) 45%, transparent);
+}
+.nf-cup__well {
+  inset: 23%;
+  background: radial-gradient(circle at 50% 42%, var(--plato-paper) 0%, var(--plato-paper-warm) 46%, var(--plato-stone) 100%);
+  box-shadow: inset 0 10px 24px -10px color-mix(in srgb, var(--plato-ink) 22%, transparent);
+}
+.nf-cup__stain {
+  inset: 31%;
+  border: 2px solid color-mix(in srgb, var(--plato-stone-deep) 75%, transparent);
+  opacity: 0.8;
+}
+.nf-cup__ripple {
+  top: 50%;
+  left: 50%;
+  width: 14%;
+  height: 14%;
+  margin: -7% 0 0 -7%;
+  border: 1px solid var(--plato-green);
+  opacity: 0;
+}
+.nf-cup__drop {
+  top: 50%;
+  left: 50%;
+  width: 3%;
+  height: 3%;
+  margin: -1.5% 0 0 -1.5%;
+  background: var(--plato-green);
+  opacity: 0;
+}
+
+/* The last drop, on a slow loop. */
+@media (prefers-reduced-motion: no-preference) {
+  .nf-cup__drop {
+    animation: nf-drop 5s var(--ease-in-quart) 1.6s infinite;
+  }
+  .nf-cup__ripple {
+    animation: nf-ripple 5s var(--ease-out-expo) 1.6s infinite;
+  }
+}
+@keyframes nf-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-1100%) scale(0.6);
+  }
+  8% {
+    opacity: 1;
+  }
+  22% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  26%,
+  100% {
+    opacity: 0;
+    transform: translateY(0) scale(0.2);
+  }
+}
+@keyframes nf-ripple {
+  0%,
+  22% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  24% {
+    opacity: 0.7;
+  }
+  60%,
+  100% {
+    opacity: 0;
+    transform: scale(3.2);
+  }
+}
+
+@media (max-width: 860px) {
+  .nf-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .nf-copy,
+  .nf-visual {
+    grid-column: 1;
+  }
+  .nf-visual {
+    grid-row: 1;
+    justify-items: end;
+    margin-bottom: 8px;
+  }
+  .nf-cup {
+    width: 46%;
+  }
+  .nf-title {
+    font-size: clamp(3.25rem, 15vw, 6rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf-link::before,
+  .nf-link__arrow {
+    transition: none !important;
+  }
+}

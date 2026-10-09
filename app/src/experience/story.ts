@@ -139,6 +139,17 @@ export const ROAST_STAGES = [
 /** f03 progress at which first crack happens (chaff flash, crackle sound, hard cut allowed). */
 export const FIRST_CRACK_AT = 0.56;
 
+/* ------------------------------------------------------------------ */
+/* Shared timing between the DOM chapters and the WebGL layer.          */
+
+/** f05 progress: the counter runs 1 to 150 over this window, and the WebGL
+ *  cup grid fills over the same window (the last cup lands at `to`). */
+export const CUP_COUNT_WINDOW = { from: 0.05, to: 0.62 } as const;
+
+/** f07 progress: the white disc grows from `from`; at `cover` the screen is
+ *  fully white and the theme flips to paper ("pour-white" fires). */
+export const POUR_WHITE_WINDOW = { from: 0.56, cover: 0.72 } as const;
+
 /** Bean temperature in °C for f03 progress (drop at 208°C, before second crack: medium roast). */
 export function roastTemperature(p: number) {
   const x = Math.min(1, Math.max(0, p));

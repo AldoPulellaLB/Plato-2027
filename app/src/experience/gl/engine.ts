@@ -76,7 +76,8 @@ export function createEngine(container: HTMLElement, modules: SceneModule[]): En
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // three r18x removed PCFSoftShadowMap (it logged a warning and fell back to PCF).
+  renderer.shadowMap.type = THREE.PCFShadowMap;
   const canvas = renderer.domElement;
   canvas.setAttribute("aria-hidden", "true");
   container.appendChild(canvas);

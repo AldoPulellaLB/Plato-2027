@@ -1,0 +1,137 @@
+/* SoundToggle: an equaliser glyph that wakes up when sound is on. */
+.snd {
+  position: fixed;
+  left: calc(var(--gutter) - 12px);
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  z-index: var(--z-float);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--fg);
+  transition:
+    color 700ms var(--ease-out-quart),
+    opacity 600ms var(--ease-out-quart),
+    transform 800ms var(--ease-out-expo);
+}
+.snd[data-hidden="true"] {
+  opacity: 0;
+  transform: translateY(18px);
+  pointer-events: none;
+}
+.snd:focus-visible {
+  outline-offset: -2px;
+}
+/* Stepped aside for the footer, but a keyboard visit brings it back. */
+.snd[data-hidden="true"]:focus-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.snd-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 14px;
+}
+.snd-eq i {
+  display: block;
+  width: 2px;
+  height: 100%;
+  border-radius: 1px;
+  background: currentColor;
+  transform: scaleY(0.16);
+  transform-origin: 50% 100%;
+  transition: transform 520ms var(--ease-out-expo);
+}
+.snd[data-on="true"] .snd-eq i {
+  animation: snd-bar var(--d) cubic-bezier(0.45, 0, 0.2, 1) var(--delay) infinite alternate;
+}
+@keyframes snd-bar {
+  from {
+    transform: scaleY(var(--lo));
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@media (hover: hover) {
+  .snd[data-on="false"]:hover .snd-eq i {
+    transform: scaleY(0.42);
+  }
+  .snd[data-on="false"]:hover .snd-eq i:nth-child(2) {
+    transform: scaleY(0.7);
+    transition-delay: 40ms;
+  }
+  .snd[data-on="false"]:hover .snd-eq i:nth-child(3) {
+    transform: scaleY(0.3);
+    transition-delay: 80ms;
+  }
+  .snd[data-on="false"]:hover .snd-eq i:nth-child(4) {
+    transform: scaleY(0.55);
+    transition-delay: 120ms;
+  }
+}
+
+.snd-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.snd-label {
+  color: var(--fg-muted);
+  transition: color 700ms var(--ease-out-quart);
+}
+.snd-state {
+  display: block;
+  height: 1em;
+  overflow: hidden;
+}
+.snd-state__roll {
+  display: grid;
+  transition: transform 560ms var(--ease-out-expo);
+}
+.snd-state__roll > span {
+  display: block;
+  height: 1em;
+}
+.snd[data-on="true"] .snd-state__roll {
+  transform: translateY(-1em);
+}
+
+@media (max-width: 639.98px) {
+  .snd-label {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .snd,
+  .snd-eq i,
+  .snd-state__roll {
+    transition: none;
+  }
+  .snd[data-on="true"] .snd-eq i {
+    animation: none;
+    transform: scaleY(0.75);
+  }
+  .snd[data-on="true"] .snd-eq i:nth-child(2) {
+    transform: scaleY(1);
+  }
+  .snd[data-on="true"] .snd-eq i:nth-child(3) {
+    transform: scaleY(0.5);
+  }
+  .snd[data-hidden="true"] {
+    transform: none;
+  }
+}

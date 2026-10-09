@@ -1,0 +1,126 @@
+/* Shared content-page primitives (namespace: pg-). Paper theme by default. */
+
+.pg {
+  position: relative;
+  overflow-x: clip;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.pg-wrap {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Scroll reveal: rise + fade, staggered by --reveal-delay (set by useReveal). */
+.pg-rise {
+  transition:
+    opacity 900ms var(--ease-out-quart) var(--reveal-delay, 0ms),
+    transform 1200ms var(--ease-out-expo) var(--reveal-delay, 0ms);
+}
+.pg-rise[data-reveal="idle"] {
+  opacity: 0;
+  transform: translate3d(0, 48px, 0);
+  transition: none;
+}
+
+/* Hairline that draws from the left. */
+.pg-rule {
+  display: block;
+  height: 1px;
+  width: 100%;
+  background: var(--line);
+  transform-origin: 0 50%;
+  transition: transform 1400ms var(--ease-out-expo) var(--reveal-delay, 0ms);
+}
+.pg-rule[data-reveal="idle"] {
+  transform: scaleX(0);
+  transition: none;
+}
+
+/* Hero entrance, driven by data-pg-hero="idle|play" on the hero root.
+ * Children opt in with .pg-in (rise) or .pg-wipe (clip-path wipe) and a --d delay. */
+.pg-in {
+  transition:
+    opacity 1000ms var(--ease-out-quart) var(--d, 0ms),
+    transform 1300ms var(--ease-out-expo) var(--d, 0ms);
+}
+[data-pg-hero="idle"] .pg-in {
+  opacity: 0;
+  transform: translate3d(0, 36px, 0);
+  transition: none;
+}
+.pg-wipe {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 1500ms var(--ease-in-out-expo) var(--d, 0ms);
+}
+.pg-wipe > * {
+  transition: transform 2000ms var(--ease-out-expo) var(--d, 0ms);
+}
+[data-pg-hero="idle"] .pg-wipe {
+  clip-path: inset(100% 0 0 0);
+  transition: none;
+}
+[data-pg-hero="idle"] .pg-wipe[data-from="left"] {
+  clip-path: inset(0 100% 0 0);
+}
+[data-pg-hero="idle"] .pg-wipe[data-from="right"] {
+  clip-path: inset(0 0 0 100%);
+}
+[data-pg-hero="idle"] .pg-wipe > * {
+  transform: scale(1.18);
+  transition: none;
+}
+
+/* Image frame: fills its box, parallax child is oversized so edges never show. */
+.pg-frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+}
+.pg-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pg-frame > [data-pg-speed],
+.pg-frame > * > [data-pg-speed] {
+  position: absolute;
+  left: 0;
+  top: -8%;
+  width: 100%;
+  height: 116%;
+}
+
+.pg-fill {
+  position: absolute;
+  inset: 0;
+}
+
+/* Sticky-safe in-page anchor offset under the fixed header. */
+.pg-anchor {
+  scroll-margin-top: calc(var(--header-h) + 24px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-rise,
+  .pg-rule,
+  .pg-in,
+  .pg-wipe,
+  .pg-wipe > * {
+    transition: none !important;
+  }
+}
+
+/* SplitReveal keeps the space between words inside each inline-block word,
+ * where it would collapse; `pre` keeps it so words never run together. */
+.pg .split__w {
+  white-space: pre;
+}
+
+/* Jump targets take focus programmatically; no ring on the whole section. */
+.pg [tabindex="-1"]:focus {
+  outline: none;
+}

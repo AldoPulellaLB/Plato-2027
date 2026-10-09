@@ -1,0 +1,227 @@
+/* /checkout/success */
+.cks {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  justify-items: start;
+  gap: clamp(28px, 3vw, 44px);
+  min-height: 100svh;
+  padding: calc(var(--header-h) + clamp(40px, 6vw, 96px)) var(--gutter) clamp(80px, 10vw, 160px);
+  overflow: clip;
+}
+
+.cks-mark {
+  width: clamp(72px, 7vw, 112px);
+  color: var(--plato-green);
+}
+.cks-symbol {
+  width: 72%;
+  height: auto;
+  animation: cks-breathe 2600ms var(--ease-in-out-expo) infinite alternate;
+}
+.cks[data-state="paid"] .cks-mark {
+  width: clamp(88px, 8vw, 128px);
+}
+.cks-check {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.cks-check circle,
+.cks-check path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.cks-check circle {
+  transform: rotate(-90deg);
+  transform-origin: center;
+  animation: cks-draw 1300ms var(--ease-out-expo) 150ms forwards;
+}
+.cks-check path {
+  animation: cks-draw 900ms var(--ease-out-expo) 760ms forwards;
+}
+@keyframes cks-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes cks-breathe {
+  from {
+    transform: translateY(-4px) rotate(-4deg);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateY(4px) rotate(4deg);
+    opacity: 1;
+  }
+}
+
+.cks-copy {
+  display: grid;
+  justify-items: start;
+  gap: 22px;
+  max-width: 72rem;
+}
+.cks-kicker {
+  margin: 0;
+  color: var(--fg-muted);
+  animation: cks-in 900ms var(--ease-out-expo) 60ms backwards;
+}
+.cks-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(3.25rem, 9vw, 10rem);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.cks-title .wr-i[data-italic] {
+  color: var(--plato-green);
+}
+.cks-body {
+  max-width: 50ch;
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: clamp(1rem, 1.2vw, 1.1875rem);
+  line-height: 1.6;
+  animation: cks-in 1000ms var(--ease-out-expo) 520ms backwards;
+}
+.cks-body strong {
+  color: var(--fg);
+  font-weight: 500;
+}
+.cks-body a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+.cks-progress {
+  position: relative;
+  display: block;
+  width: min(320px, 70vw);
+  height: 1px;
+  overflow: hidden;
+  background: var(--line);
+}
+.cks-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--plato-green);
+  transform-origin: left center;
+  animation: cks-load 1600ms var(--ease-in-out-expo) infinite;
+}
+@keyframes cks-load {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+  50% {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+  50.01% {
+    transform-origin: right center;
+  }
+  100% {
+    transform: scaleX(0);
+    transform-origin: right center;
+  }
+}
+@keyframes cks-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+.cks-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 28px;
+  margin-top: 6px;
+  animation: cks-in 1000ms var(--ease-out-expo) 680ms backwards;
+}
+/* Ink capsule; the arrow leaves and a fresh one arrives on hover. */
+.cks-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 0 26px 0 30px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--plato-ink);
+  color: var(--plato-paper);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  isolation: isolate;
+}
+.cks-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--plato-green);
+  border-radius: inherit;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 700ms var(--ease-out-expo);
+}
+.cks-cta svg {
+  transition: transform 700ms var(--ease-out-expo);
+}
+.cks-cta:is(:hover, :focus-visible)::before {
+  transform: scaleX(1);
+}
+.cks-cta:is(:hover, :focus-visible) svg {
+  transform: translateX(6px);
+}
+.cks-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 500;
+}
+.cks-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9px;
+  height: 1px;
+  background: currentColor;
+  transform-origin: right center;
+  transition: transform 600ms var(--ease-out-expo);
+}
+.cks-link:hover::after {
+  transform: scaleX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cks-symbol,
+  .cks-kicker,
+  .cks-body,
+  .cks-actions,
+  .cks-progress::after {
+    animation: none !important;
+  }
+  .cks-check circle,
+  .cks-check path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .cks-cta::before,
+  .cks-cta svg,
+  .cks-link::after {
+    transition: none;
+  }
+}

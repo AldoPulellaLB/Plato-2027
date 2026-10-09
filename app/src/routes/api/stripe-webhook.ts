@@ -13,12 +13,23 @@ export const Route = createFileRoute("/api/stripe-webhook")({
         const valid = await verifyStripeSignature(payload, request.headers.get("stripe-signature"), secret);
         if (!valid) return new Response("Invalid signature", { status: 400 });
 
-        const event = JSON.parse(payload) as { type: string; data: { object: StripeSession } };
+        let event: { type: string; data: { object: StripeSession } };
+        try {
+          event = JSON.parse(payload) as { type: string; data: { object: StripeSession } };
+        } catch {
+          return new Response("Invalid payload", { status: 400 });
+        }
         if (
           (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") &&
-          event.data.object.payment_status === "paid"
+          event.data?.object?.payment_status === "paid"
         ) {
-          await recordPaidSession(event.data.object);
+          try {
+            await recordPaidSession(event.data.object);
+          } catch (error) {
+            // A 500 makes Stripe retry the event later.
+            console.error("Webhook order recording failed", error);
+            return new Response("Could not record order", { status: 500 });
+          }
         }
         return new Response("ok");
       },
