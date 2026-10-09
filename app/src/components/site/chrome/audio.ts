@@ -27,13 +27,15 @@ class AmbientEngine {
   private noise: AudioBuffer | null = null;
   private enabled = false;
   private hidden = false;
+  /** Out of the story (other pages, the home sections after it): silent, preference kept. */
+  private suspended = false;
   private bed: Bed = "roaster";
   private suspendTimer = 0;
 
   /** Create (or wake) the context. Call from inside a user gesture when possible. */
   unlock() {
     if (!this.ensure()) return;
-    if (this.ctx && this.ctx.state === "suspended" && this.enabled && !this.hidden) {
+    if (this.ctx && this.ctx.state === "suspended" && this.audible()) {
       void this.ctx.resume().catch(() => undefined);
     }
   }
@@ -54,11 +56,22 @@ class AmbientEngine {
     this.apply();
   }
 
+  /** Ramp to silence and sleep the context while the visitor is outside the story; wake on return. */
+  setSuspended(suspended: boolean) {
+    if (suspended === this.suspended) return;
+    this.suspended = suspended;
+    this.apply();
+  }
+
+  private audible() {
+    return this.enabled && !this.hidden && !this.suspended;
+  }
+
   /** One soft crackle: the beans' first crack. */
   crackle() {
     const ctx = this.ctx;
     const master = this.master;
-    if (!ctx || !master || !this.enabled || this.hidden || ctx.state !== "running") return;
+    if (!ctx || !master || !this.audible() || ctx.state !== "running") return;
     const noise = this.noiseBuffer(ctx);
     const t0 = ctx.currentTime + 0.03;
     const pops = 16 + Math.floor(Math.random() * 10);
@@ -149,7 +162,7 @@ class AmbientEngine {
     const ctx = this.ctx;
     const master = this.master;
     if (!ctx || !master) return;
-    const audible = this.enabled && !this.hidden;
+    const audible = this.audible();
     const now = ctx.currentTime;
     window.clearTimeout(this.suspendTimer);
 
@@ -173,7 +186,7 @@ class AmbientEngine {
     if (!audible) {
       // Let the fade finish, then sleep the context to save battery.
       this.suspendTimer = window.setTimeout(() => {
-        if (!(this.enabled && !this.hidden) && this.ctx?.state === "running")
+        if (!this.audible() && this.ctx?.state === "running")
           void this.ctx.suspend().catch(() => undefined);
       }, 1400);
     }

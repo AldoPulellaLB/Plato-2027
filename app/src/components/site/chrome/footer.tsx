@@ -13,13 +13,16 @@ import type { LinkItem } from "@/lib/site";
 
 import { ArrowRightIcon, ArrowUpIcon, ArrowUpRightIcon } from "./icons";
 import { ChromeLink } from "./link";
-import { FOOTER_ID } from "./shared";
+import { FOOTER_ID, focusJumpTarget } from "./shared";
 import "./footer.css";
 
 const SHOP_LINKS: LinkItem[] = CATEGORIES.map((c) => ({ label: c.label, href: `/shop?c=${c.id}` }));
 
 /** Per-letter window inside the scrub: each letter rises over 58% of the range, staggered evenly. */
 const LETTER_SPAN = 0.58;
+/** Small screens set the mark vertically (reading bottom to top), so its top letter
+ *  enters the view first: the stagger runs from Ō down to P there. */
+const VERTICAL_MARK = "(max-width: 639.98px)";
 
 function easeOutQuart(t: number) {
   return 1 - Math.pow(1 - t, 4);
@@ -41,6 +44,7 @@ export function SiteFooter() {
 
     const n = letters.length;
     const step = n > 1 ? (1 - LETTER_SPAN) / (n - 1) : 0;
+    const vertical = window.matchMedia(VERTICAL_MARK);
     let raf = 0;
     let near = false;
     let last = -1;
@@ -56,8 +60,10 @@ export function SiteFooter() {
       if (Math.abs(p - last) < 0.0005) return;
       last = p;
       mark.dataset.done = p >= 1 ? "true" : "false";
+      const reverse = vertical.matches;
       for (let i = 0; i < n; i += 1) {
-        const local = Math.min(1, Math.max(0, (p - i * step) / LETTER_SPAN));
+        const order = reverse ? n - 1 - i : i;
+        const local = Math.min(1, Math.max(0, (p - order * step) / LETTER_SPAN));
         const y = (1 - easeOutQuart(local)) * 106;
         letters[i].style.transform = y < 0.01 ? "" : `translateY(${y.toFixed(3)}%)`;
       }
@@ -65,6 +71,11 @@ export function SiteFooter() {
     const schedule = () => {
       if (!raf) raf = requestAnimationFrame(apply);
     };
+    const onLayoutChange = () => {
+      last = -1;
+      schedule();
+    };
+    vertical.addEventListener("change", onLayoutChange);
 
     // Only listen while the footer is close to the viewport.
     const io = new IntersectionObserver(
@@ -91,6 +102,7 @@ export function SiteFooter() {
 
     return () => {
       io.disconnect();
+      vertical.removeEventListener("change", onLayoutChange);
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
@@ -167,11 +179,7 @@ export function SiteFooter() {
 
       <div className="ftr-base">
         <p className="ftr-legal">© 2026 Platō Coffee. Coffee sculpted. Community included.</p>
-        <button
-          className="ftr-up"
-          onClick={() => scrollToTarget(0, { duration: 2.4 })}
-          type="button"
-        >
+        <button className="ftr-up" onClick={backToTop} type="button">
           <span className="ftr-up__label">Back to top</span>
           <span aria-hidden="true" className="ftr-up__icon">
             <ArrowUpIcon className="ftr-up__arrow ftr-up__arrow--out" />
@@ -185,6 +193,13 @@ export function SiteFooter() {
       </div>
     </footer>
   );
+}
+
+/** Scroll home and take keyboard focus with it, so the next Tab starts at the top. */
+function backToTop() {
+  scrollToTarget(0, { duration: 2.4 });
+  const main = document.getElementById("main");
+  if (main) focusJumpTarget(main);
 }
 
 function FooterColumn({

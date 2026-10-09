@@ -1,6 +1,6 @@
 // Equipment: an editorial spread. A giant machine on a stone panel bleeds off
 // the left edge; the spec ledger on the right swaps the machine on hover/focus
-// (and cycles slowly on touch screens while in view).
+// (touch screens get one slow pass through the five while in view, then it rests).
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -89,27 +89,57 @@ export function HomeEquipment() {
 
   usePaperTheme(sectionRef);
   useInView(ledgerRef);
-  useDrift(driftRef, 5, sectionRef);
+  // A gentle 3% drift keeps the machine clear of the caption while it is read.
+  useDrift(driftRef, 3, sectionRef);
 
-  // Touch screens have no hover: cycle the machines while the spread is on screen.
+  // Touch screens have no hover: walk through the machines once while the
+  // spread is on screen, then rest on the last one. Leaving the viewport pauses
+  // the walk; the first touch or focus inside the section ends it for good, so
+  // the shopper is never fighting an automatic change (WCAG 2.2.2).
   useEffect(() => {
     const el = sectionRef.current;
-    if (!el || prefersReducedMotion() || !window.matchMedia("(hover: none)").matches) return;
+    if (
+      !el ||
+      ROWS.length < 2 ||
+      prefersReducedMotion() ||
+      !window.matchMedia("(hover: none)").matches
+    ) {
+      return;
+    }
+    const last = ROWS.length - 1;
+    let taken = 0;
     let timer = 0;
-    const io = new IntersectionObserver(
+    let done = false;
+    let io: IntersectionObserver | null = null;
+
+    const stop = () => {
+      if (done) return;
+      done = true;
+      window.clearInterval(timer);
+      io?.disconnect();
+      el.removeEventListener("pointerdown", stop);
+      el.removeEventListener("touchstart", stop);
+      el.removeEventListener("focusin", stop);
+    };
+
+    io = new IntersectionObserver(
       ([entry]) => {
         window.clearInterval(timer);
-        if (entry?.isIntersecting) {
-          timer = window.setInterval(() => setActive((i) => (i + 1) % ROWS.length), CYCLE_MS);
-        }
+        if (done || !entry?.isIntersecting) return;
+        timer = window.setInterval(() => {
+          taken += 1;
+          setActive((i) => Math.min(i + 1, last));
+          if (taken >= last) stop();
+        }, CYCLE_MS);
       },
       { threshold: 0.35 },
     );
+
+    el.addEventListener("pointerdown", stop, { passive: true });
+    el.addEventListener("touchstart", stop, { passive: true });
+    el.addEventListener("focusin", stop);
     io.observe(el);
-    return () => {
-      io.disconnect();
-      window.clearInterval(timer);
-    };
+    return stop;
   }, []);
 
   if (ROWS.length === 0) return null;
@@ -186,7 +216,7 @@ export function HomeEquipment() {
                   </span>
                   <span aria-hidden="true" className="hequip-row__name">
                     <span className="hequip-row__meta t-label">
-                      {machine.brand} · {machine.type}
+                      {machine.brand} · <span className="hequip-row__type">{machine.type}</span>
                     </span>
                     <span className="hequip-row__title">{machine.name}</span>
                   </span>
@@ -195,7 +225,7 @@ export function HomeEquipment() {
                   </span>
                   <span aria-hidden="true" className="hequip-row__price t-num">
                     {price.from ? <span className="hequip-row__from">from</span> : null}
-                    {price.amount}
+                    <span className="hequip-row__amount">{price.amount}</span>
                   </span>
                 </Link>
               </li>

@@ -233,7 +233,7 @@
 }
 .ftr-col__title {
   margin: 0 0 16px;
-  color: var(--fg-faint);
+  color: var(--fg-muted);
 }
 .ftr-list {
   display: grid;
@@ -399,6 +399,14 @@
   }
 }
 
+/* Tablet: the mark runs edge to edge, past the gutters. */
+@media (min-width: 640px) and (max-width: 1100px) {
+  .ftr-mark {
+    margin-right: calc(-1 * var(--gutter));
+    margin-left: calc(-1 * var(--gutter));
+  }
+}
+
 @media (max-width: 819.98px) {
   .ftr {
     --header-h: 64px;
@@ -427,7 +435,7 @@
   .ftr-link {
     display: inline-flex;
     align-items: center;
-    min-height: 40px;
+    min-height: 44px;
   }
   .ftr-list__note {
     padding: 4px 0;
@@ -438,6 +446,34 @@
   }
   .ftr-up {
     margin: 0 0 0 -6px;
+  }
+
+  /* Phones: the mark becomes a vertical poster in its own band. The real lockup,
+     whole, turned -90deg (reading bottom to top) and sized by the band's height:
+     as tall as the screen allows while the entire word stays in view at the end
+     of the page, below the bar. Each letter still rises from its own mask (the
+     SVG viewport turns with it). */
+  .ftr-mark {
+    --ftr-mark-len: max(64svh, calc(100svh - 96px - env(safe-area-inset-bottom)));
+    /* Lockup proportions: 356.85 / 1492.68. */
+    --ftr-mark-w: calc(var(--ftr-mark-len) * 0.23907);
+    position: relative;
+    height: var(--ftr-mark-len);
+    min-height: 0;
+    margin-top: clamp(28px, 5svh, 48px);
+    padding-top: 0;
+    overflow: hidden;
+    overflow: clip;
+  }
+  .ftr-mark__svg {
+    position: absolute;
+    top: 0;
+    left: calc(50% - var(--ftr-mark-w) / 2);
+    width: var(--ftr-mark-len);
+    max-width: none;
+    height: var(--ftr-mark-w);
+    transform-origin: 0 0;
+    transform: translateY(var(--ftr-mark-len)) rotate(-90deg);
   }
 }
 

@@ -78,13 +78,13 @@ export const MENU_FEATURE: {
   image: string;
   price: string;
 }[] = [
-  { name: "Aristotle", build: "3 ristretto shots, 180ml micro foam", note: "Short, dense, sweet. The one regulars order by name.", filter: "Signature", image: "/assets/drinks/aristotle.webp", price: "R48" },
-  { name: "Platō", build: "3 ristretto shots, 280ml micro foam", note: "The house signature, in the cup that started it.", filter: "Signature", image: "/assets/drinks/plato.webp", price: "R54" },
+  { name: "Aristotle", build: "3 ristretto shots, 180ml micro foam", note: "Short, dense, sweet. Three shots in a small cup.", filter: "Signature", image: "/assets/drinks/aristotle.webp", price: "R48" },
+  { name: "Platō", build: "3 ristretto shots, 280ml micro foam", note: "The house signature: three shots, a medium cup.", filter: "Signature", image: "/assets/drinks/plato.webp", price: "R54" },
   { name: "Socrates", build: "4 ristretto shots, 410ml micro foam", note: "For the long morning and the longer conversation.", filter: "Signature", image: "/assets/drinks/socrates.webp", price: "R62" },
   { name: "Hector", build: "4 ristretto shots, 160ml micro foam", note: "Four shots, very little milk. Strong opinions welcome.", filter: "Signature", image: "/assets/drinks/hector.webp", price: "R56" },
   { name: "Ophelia", build: "Rooibos, white hot chocolate, micro foam", note: "A South African cup with no coffee at all.", filter: "Signature", image: "/assets/drinks/ophelia.webp", price: "from R48" },
   { name: "Thalia", build: "Micro foam, vanilla, ristretto on top", note: "Layered, sweet, and poured last.", filter: "Signature", image: "/assets/drinks/thalia.webp", price: "from R46" },
   { name: "Dirty Chai", build: "Spiced chai, espresso, micro foam", note: "Chai with a shot of courage.", filter: "Alternatives", image: "/assets/drinks/dirtychai.webp", price: "from R48" },
   { name: "Iced Matcha", build: "PerfectTed ceremonial matcha, cold milk, ice", note: "Official South African partner of PerfectTed.", filter: "Matcha", image: "/assets/drinks/matcha.webp", price: "from R56" },
-  { name: "Signature Freezo", build: "Platō, Mocha, Caramel, Caribbean or Ophelia", note: "The Freezo reviewers drive across town for.", filter: "Freezo", image: "/assets/drinks/freezo.webp", price: "from R60" },
+  { name: "Signature Freezo", build: "Platō, Mocha, Caramel, Caribbean or Ophelia", note: "The Freezo one reviewer calls the best in town.", filter: "Freezo", image: "/assets/drinks/freezo.webp", price: "from R60" },
 ];

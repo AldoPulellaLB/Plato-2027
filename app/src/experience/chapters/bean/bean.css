@@ -58,7 +58,31 @@
 .ch-f01__aside {
   justify-self: end;
   margin: 0 0 0.35rem;
-  color: var(--fg-faint);
+  color: var(--fg-muted);
+}
+/* A soft roast floor under the foot row, so the labels read over the drifting beans. */
+.ch-f01__inner::before {
+  position: absolute;
+  z-index: 0;
+  right: calc(-1 * max(var(--gutter), env(safe-area-inset-right)));
+  bottom: 0;
+  left: calc(-1 * max(var(--gutter), env(safe-area-inset-left)));
+  height: calc(clamp(4.75rem, 11svh, 7rem) + env(safe-area-inset-bottom) + 18svh);
+  content: "";
+  /* Densest on the label row (about 30% to 50% up), lighter below it, so the
+   * beans still glint along the very bottom edge. */
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--plato-roast) 55%, transparent) 0%,
+    color-mix(in srgb, var(--plato-roast) 88%, transparent) 28%,
+    color-mix(in srgb, var(--plato-roast) 90%, transparent) 50%,
+    color-mix(in srgb, var(--plato-roast) 60%, transparent) 72%,
+    color-mix(in srgb, var(--plato-roast) 0%, transparent) 100%
+  );
+  pointer-events: none;
+}
+.ch-f01__foot {
+  z-index: 1;
 }
 
 /* Sound hint: points at the toggle (bottom left); never a second toggle. */
@@ -139,10 +163,6 @@
   width: min(34vw, 30rem);
   padding-top: calc(var(--header-h) * 0.5);
 }
-.ch-f02__kicker {
-  margin: 0 0 clamp(1.5rem, 3svh, 2.25rem);
-  color: var(--fg-muted);
-}
 .ch-origins {
   margin: 0;
   padding: 0;
@@ -158,7 +178,7 @@
   padding-top: 0.9em;
   font-size: 0.75rem;
   letter-spacing: 0.14em;
-  color: var(--fg-faint);
+  color: var(--fg-muted);
 }
 .ch-origin__name {
   font-family: var(--font-serif);
@@ -185,10 +205,6 @@
   top: var(--ch-top);
   left: 0;
   max-width: 14rem;
-}
-.ch-f03__kicker {
-  margin: 0 0 0.9rem;
-  color: var(--fg-muted);
 }
 .ch-f03__h {
   margin: 0;
@@ -276,8 +292,12 @@
   grid-template-columns: 2.4rem 1fr;
   padding: 0.95rem 0 1rem;
   border-bottom: 1px solid var(--line);
-  color: var(--fg-faint);
+  color: var(--fg-muted);
   transition: color 600ms var(--ease-out-quart);
+}
+/* Pending stages stay readable; only their index numeral steps back. */
+.ch-stage-row[data-state="next"] .ch-stage-row__n {
+  color: var(--fg-faint);
 }
 .ch-stage-row[data-state="done"] {
   color: var(--fg-muted);
@@ -305,7 +325,6 @@
 .ch-stage-row__note {
   font-size: 0.9rem;
   line-height: 1.45;
-  opacity: 0.85;
 }
 .ch-stage-row__bar {
   position: absolute;

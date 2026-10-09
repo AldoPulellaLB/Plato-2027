@@ -269,7 +269,7 @@ function ShopEmpty({ label }: { label?: string }) {
     <div className="shop-empty">
       <PlatoSymbol className="shop-empty__mark" title="" />
       <h3 className="shop-empty__title">Nothing on this shelf{label ? ` in ${label}` : ""} yet.</h3>
-      <p className="t-body shop-empty__body">New stock lands at the counter often. In the meantime, the rest of the shop is a step away.</p>
+      <p className="t-body shop-empty__body">The rest of the shop is a step away.</p>
       <Link className="shop-empty__link" resetScroll={false} search={{}} to="/shop">
         <RollText>See everything</RollText>
         <ArrowRight aria-hidden="true" size={18} strokeWidth={1.5} />
@@ -280,7 +280,7 @@ function ShopEmpty({ label }: { label?: string }) {
 
 const PROMISES = [
   { n: "01", title: "From our own roastery", body: "Medium roast, 100% Arabica House Blend, roasted for every Platō counter and for yours." },
-  { n: "02", title: "Delivered across South Africa", body: "Choose your address at checkout. Delivery is calculated there, before you pay." },
+  { n: "02", title: "Delivered across South Africa", body: "Choose your delivery address at checkout." },
   { n: "03", title: "Secure checkout", body: "Payments are handled by Stripe, so your card details never touch our site." },
 ];
 

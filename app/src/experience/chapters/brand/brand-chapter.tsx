@@ -4,17 +4,24 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
-import { GhostHeadline, SplitReveal } from "@/components/site/text/reveal";
-import { PlatoSymbol } from "@/components/site/wordmark";
+import { GhostHeadline } from "@/components/site/text/reveal";
+import { PlatoSymbol, Wordmark } from "@/components/site/wordmark";
 import { Frame } from "@/experience/frame";
 import { CUP_ROW_SLIDE_VW, cupRowSlide } from "@/experience/gl/modules/brand/choreo";
 import { story } from "@/experience/story";
 import { cart } from "@/lib/cart";
 import { productByHandle } from "@/lib/catalog";
-import { BRANCHES, LOCAL_STORES } from "@/lib/site";
+import { BRANCHES, LOCAL_STORES, STORE_COUNT } from "@/lib/site";
 
 import { ArrowGlyph, BeanGlyph, ChapterLabel, ChLink } from "../shared/parts";
-import { easeInOutCubic, range, revealOn, tickWhileNear, useScrollScene } from "../shared/motion";
+import {
+  easeInOutCubic,
+  playOn,
+  range,
+  revealOn,
+  tickWhileNear,
+  useScrollScene,
+} from "../shared/motion";
 import "./brand.css";
 
 export function BrandChapter() {
@@ -44,8 +51,9 @@ function CupFamily() {
     const frame = el.closest("section")!;
     const list = el.querySelector(".ch-cups");
     const label = el.querySelector(".ch-label");
-    // Labels land after their cups (the cups drop with an 80ms stagger).
-    const stop = revealOn(ScrollTrigger, [label, list], frame, "top 30%");
+    const mark = el.querySelector(".ch-f10__mark");
+    // The wordmark letters rise with the cups' 80ms stagger; the labels land after their cups.
+    const stop = revealOn(ScrollTrigger, [label, list, mark], frame, "top 30%");
 
     // Exit: the headline lifts away.
     const tl = gsap.timeline({
@@ -87,6 +95,7 @@ function CupFamily() {
           <GhostHeadline className="t-statement ch-f10__h">
             A different colour for every size.
           </GhostHeadline>
+          <Wordmark className="ch-f10__mark" letterClassName="ch-f10__letter" title="" />
         </div>
         <ul className="ch-cups" aria-label="Cup sizes">
           {CUPS.map((cup, i) => (
@@ -124,9 +133,12 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 function Stores() {
   const ref = useRef<HTMLDivElement>(null);
+  const [titleIn, setTitleIn] = useState(false);
 
   useScrollScene(ref, ({ el, gsap, ScrollTrigger, reduced, isMobile }) => {
     const frame = el.closest("section")!;
+    // The statement resolves from its ghost as the frame arrives (every layout).
+    const stopTitle = reduced ? () => {} : playOn(ScrollTrigger, frame, "top 60%", setTitleIn);
     const track = el.querySelector<HTMLElement>(".ch-track")!;
     const scroller = el.querySelector<HTMLElement>(".ch-track-wrap")!;
     const panels = Array.from(el.querySelectorAll<HTMLElement>(".ch-panel"));
@@ -148,8 +160,10 @@ function Stores() {
       panels.forEach((p, k) => (k === idx ? (p.dataset.active = "") : delete p.dataset.active));
     };
 
-    // Mobile and reduced motion: a native sideways row with snap points.
+    // Mobile and reduced motion: a native sideways row with snap points; the row
+    // is a real scroller here, so it takes keyboard focus.
     if (isMobile || reduced) {
+      scroller.tabIndex = 0;
       let raf = 0;
       const read = () => {
         raf = 0;
@@ -179,9 +193,11 @@ function Stores() {
       window.addEventListener("resize", onScroll);
       read();
       return () => {
+        stopTitle();
         cancelAnimationFrame(raf);
         scroller.removeEventListener("scroll", onScroll);
         window.removeEventListener("resize", onScroll);
+        scroller.removeAttribute("tabindex");
         pin.style.removeProperty("transform");
       };
     }
@@ -242,6 +258,7 @@ function Stores() {
     return () => {
       stopTick();
       stopReveal();
+      stopTitle();
       ScrollTrigger.removeEventListener("refreshInit", measure);
       track.style.removeProperty("transform");
       pin.style.removeProperty("transform");
@@ -259,16 +276,15 @@ function Stores() {
         style={{ "--ch-i": 0, "--ch-n": N } as CSSProperties}
       >
         <header className="ch-f11__head">
-          <div>
-            <p className="t-label ch-f11__kicker">Same store, local twist</p>
-            <h2 className="ch-f11__h">The same Platō. A little bit local.</h2>
-          </div>
+          <GhostHeadline className="ch-f11__h" play={titleIn} trigger="manual">
+            The same Platō. A little bit local.
+          </GhostHeadline>
           <p className="ch-f11__note">
-            About 150 stores share the same white interior. Each one keeps a little of where it is.
+            About {STORE_COUNT} stores share the same white interior. Each one keeps a little of where it is.
           </p>
         </header>
 
-        <div className="ch-track-wrap" tabIndex={0} aria-label="Platō stores, scroll sideways">
+        <div aria-label="Platō stores" className="ch-track-wrap" role="region">
           <ol className="ch-track">
             {STORES.map((s, i) => (
               <li className="ch-panel" key={s.name} style={{ "--i": i } as CSSProperties}>
@@ -410,11 +426,18 @@ const BAGS = [
 function TakeHome() {
   const ref = useRef<HTMLDivElement>(null);
   const [announce, setAnnounce] = useState("");
+  const [titleIn, setTitleIn] = useState(false);
 
   useScrollScene(ref, ({ el, ScrollTrigger, reduced }) => {
     if (reduced) return;
     const frame = el.closest("section")!;
-    return revealOn(ScrollTrigger, [el], frame, "top 45%");
+    // The copy rises in order; the statement resolves from its ghost on the same beat.
+    const stopReveal = revealOn(ScrollTrigger, [el], frame, "top 45%");
+    const stopTitle = playOn(ScrollTrigger, frame, "top 45%", setTitleIn);
+    return () => {
+      stopReveal();
+      stopTitle();
+    };
   });
 
   const chips = BAGS.flatMap((bag) => {
@@ -430,16 +453,16 @@ function TakeHome() {
           <span className="ch-f12__dot" aria-hidden="true" />
           Take Platō home
         </p>
-        <SplitReveal as="h2" className="ch-f12__h">
+        <GhostHeadline className="ch-f12__h" delay={120} play={titleIn} trigger="manual">
           Our House Blend, from our roastery to your kitchen.
-        </SplitReveal>
+        </GhostHeadline>
         <p className="ch-f12__body">
           Medium roast, 100% Arabica from Tanzania, Guatemala and Brazil, roasted at Blank. Whole
           beans here; espresso and filter grinds in the shop.
         </p>
         {chips.length ? (
           <div
-            aria-label="Add House Blend whole beans to your cart"
+            aria-label="Add House Blend whole beans to your bag"
             className="ch-f12__chips"
             role="group"
           >
@@ -447,7 +470,7 @@ function TakeHome() {
               <PriceChip
                 key={c.variant.id}
                 label={`${c.product.title}, whole bean`}
-                onAdded={() => setAnnounce(`${c.product.title}, whole bean, added to your cart.`)}
+                onAdded={() => setAnnounce(`${c.product.title}, whole bean, added to your bag.`)}
                 price={c.variant.price}
                 size={c.size}
                 variantId={c.variant.id}
@@ -490,7 +513,7 @@ function PriceChip({
 
   return (
     <button
-      aria-label={`Add ${label}, ${value}, to your cart`}
+      aria-label={`Add ${label}, ${value}, to your bag`}
       className="ch-chip"
       data-added={showAdded ? "" : undefined}
       onClick={() => {

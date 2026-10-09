@@ -15,7 +15,7 @@ import "./academy.css";
 /** Course photography (real Academy and product images). */
 const COURSE_IMAGE: Record<string, { src: string; w: number; h: number; alt: string }> = {
   "barista-basics": { src: "/assets/products/barista-basics-1.jpg", w: 1200, h: 960, alt: "Espresso being pulled on a commercial machine at the Academy" },
-  "home-brewing-filter-copy": { src: "/assets/academy/hands-on.webp", w: 600, h: 400, alt: "Two students working at an espresso machine" },
+  "home-brewing-filter-copy": { src: "/assets/academy/group-head.webp", w: 2000, h: 1600, alt: "An espresso shot pouring into a measuring glass on a scale" },
   "home-brewing-filter": { src: "/assets/academy/pour-over.webp", w: 768, h: 1024, alt: "A barista pouring a filter brew" },
   "sensory-evaluation-and-tasting": { src: "/assets/academy/cupping.webp", w: 768, h: 1024, alt: "Cups of coffee lined up for a cupping" },
   "becoming-a-cafe-barista": { src: "/assets/products/becoming-a-cafe-barista-1.jpg", w: 1200, h: 900, alt: "A barista training behind a white café bar" },

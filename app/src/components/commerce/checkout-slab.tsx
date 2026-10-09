@@ -6,12 +6,28 @@ import { useEffect, useId, useState } from "react";
 
 import { RollText } from "@/components/site/text/reveal";
 import { createCheckout } from "@/lib/api/checkout.functions";
+import { CHECKOUT_SESSION_KEY, linesSchema, needsDelivery } from "@/lib/api/checkout.rules";
 import { formatRand } from "@/lib/catalog";
 import { CONTACT } from "@/lib/site";
 
 import "./checkout-slab.css";
 
 type SlabState = { kind: "idle" } | { kind: "busy" } | { kind: "info" | "error"; message: string };
+
+const NEEDS_UPDATE = "Something in your bag needs updating. Please check the quantities and try again.";
+const NO_CONNECTION = "We couldn't reach checkout. Check your connection and try again.";
+
+/** A rejected request payload (the server function's validator), as opposed to a network failure. */
+function isValidationError(error: unknown) {
+  if (!(error instanceof Error)) return false;
+  if (error.name === "ZodError" || "issues" in error) return true;
+  try {
+    const parsed: unknown = JSON.parse(error.message);
+    return Array.isArray(parsed) && parsed.some((issue) => issue && typeof issue === "object" && "code" in issue && "path" in issue);
+  } catch {
+    return false;
+  }
+}
 
 interface CheckoutSlabProps {
   lines: { variantId: string; quantity: number }[];
@@ -38,16 +54,27 @@ export function CheckoutSlab({ lines, subtotal, blocked = null }: CheckoutSlabPr
 
   const start = async () => {
     if (busy || unavailable) return;
+    const payload = { lines: lines.map(({ variantId, quantity }) => ({ variantId, quantity })) };
+    // Same rules as the server: a bag the server would reject gets a useful message, not a network one.
+    if (!linesSchema.safeParse(payload).success) {
+      setState({ kind: "error", message: NEEDS_UPDATE });
+      return;
+    }
     setState({ kind: "busy" });
     try {
-      const result = await createCheckout({ data: { lines: lines.map(({ variantId, quantity }) => ({ variantId, quantity })) } });
+      const result = await createCheckout({ data: payload });
       if (result.ok) {
+        try {
+          window.sessionStorage.setItem(CHECKOUT_SESSION_KEY, result.sessionId);
+        } catch {
+          // Storage blocked: the success page then leaves the bag for the visitor to clear.
+        }
         window.location.assign(result.url);
         return;
       }
       setState({ kind: result.code === "not_configured" ? "info" : "error", message: result.message });
-    } catch {
-      setState({ kind: "error", message: "We couldn't reach checkout. Check your connection and try again." });
+    } catch (error) {
+      setState({ kind: "error", message: isValidationError(error) ? NEEDS_UPDATE : NO_CONNECTION });
     }
   };
 
@@ -97,7 +124,7 @@ export function CheckoutSlab({ lines, subtotal, blocked = null }: CheckoutSlabPr
 
       <p className="cos-secure">
         <Lock aria-hidden="true" size={14} strokeWidth={1.5} />
-        Secure checkout by Stripe. Delivery is calculated there.
+        {needsDelivery(lines) ? "Secure checkout by Stripe. Add your delivery address there." : "Secure checkout by Stripe."}
       </p>
     </div>
   );

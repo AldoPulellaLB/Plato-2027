@@ -45,9 +45,9 @@
   gap: 8px;
   margin: 0;
 }
+/* Small information-bearing labels stay at 12px (.t-label) on --fg-muted (5.2:1 on paper). */
 .hacad-contact__k {
-  color: var(--fg-faint);
-  font-size: 0.625rem;
+  color: var(--fg-muted);
 }
 .hacad-contact__mail {
   position: relative;
@@ -102,8 +102,7 @@
   grid-template-columns: var(--hacad-cols);
   column-gap: clamp(14px, 1.6vw, 28px);
   padding-bottom: 14px;
-  font-size: 0.625rem;
-  color: var(--fg-faint);
+  color: var(--fg-muted);
 }
 .hacad-cols__price {
   text-align: right;
@@ -169,7 +168,7 @@
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.14em;
-  color: var(--fg-faint);
+  color: var(--fg-muted);
 }
 .hacad-row__thumb {
   display: none;
@@ -322,7 +321,11 @@
   border-radius: 2px;
   background-color: var(--plato-stone);
   opacity: 0;
-  transform: translate(-50%, -50%) scale(0.72);
+  /* Right of the pointer, bottom edge on the anchor: HomeAcademy places the
+     anchor above the hovered title (below it near the top of the screen),
+     flips it left near the right edge and keeps it inside the viewport. Its
+     GAP constant mirrors the 32px here. */
+  transform: translate(32px, -100%) scale(0.72);
   clip-path: inset(22% 22% 22% 22% round 2px);
   transition:
     opacity 360ms var(--ease-out-quart),
@@ -332,7 +335,7 @@
 /* Only while a mouse is over the list: keyboard focus never summons it. */
 .hacad-cursor[data-visible="true"][data-inside="true"] .hacad-cursor__frame {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+  transform: translate(32px, -100%) scale(1);
   clip-path: inset(0 0 0 0 round 2px);
 }
 .hacad-cursor__img {

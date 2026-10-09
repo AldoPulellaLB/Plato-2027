@@ -1,7 +1,7 @@
 /* /cart */
 .cp {
   position: relative;
-  padding: calc(var(--header-h) + clamp(28px, 4vw, 64px)) var(--gutter) 0;
+  padding: calc(var(--header-h) + env(safe-area-inset-top, 0px) + clamp(28px, 4vw, 64px)) var(--gutter) 0;
   overflow-x: clip;
 }
 
@@ -108,7 +108,7 @@
 
 .cp-summary__inner {
   position: sticky;
-  top: calc(var(--header-h) + 24px);
+  top: calc(var(--header-h) + env(safe-area-inset-top) + 24px);
   display: grid;
   gap: 18px;
   margin-top: clamp(22px, 2.4vw, 32px);

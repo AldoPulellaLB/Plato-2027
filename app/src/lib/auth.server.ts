@@ -15,10 +15,13 @@ const PBKDF2_ITERATIONS = 100_000;
 const SALT_BYTES = 16;
 const KEY_BITS = 256;
 
-/** Throttling: failed attempts allowed per window before sign-in is refused. */
+/** Throttling: sign-in attempts allowed per window before sign-in is refused. */
 export const THROTTLE_WINDOW_MINUTES = 15;
 const MAX_FAILURES_PER_EMAIL = 10;
 const MAX_FAILURES_PER_IP = 40;
+/** Account creation: attempts allowed per IP per hour. */
+const CREATION_WINDOW_MINUTES = 60;
+const MAX_CREATIONS_PER_IP = 10;
 
 const encoder = new TextEncoder();
 
@@ -209,30 +212,93 @@ export function requestIp() {
   return raw ? raw.trim().slice(0, 64) : null;
 }
 
-/** True when this email or IP has failed too often within the window. */
-export async function isThrottled(db: D1Database, email: string, ip: string | null) {
-  const span = `-${THROTTLE_WINDOW_MINUTES} minutes`;
-  const byEmail = await db
-    .prepare(`SELECT COUNT(*) AS n FROM login_attempts WHERE email = ?1 AND created_at > datetime('now', ?2)`)
-    .bind(email, span)
-    .first<{ n: number }>();
-  if ((byEmail?.n ?? 0) >= MAX_FAILURES_PER_EMAIL) return true;
-  if (!ip) return false;
-  const byIp = await db
-    .prepare(`SELECT COUNT(*) AS n FROM login_attempts WHERE ip = ?1 AND created_at > datetime('now', ?2)`)
-    .bind(ip, span)
-    .first<{ n: number }>();
-  return (byIp?.n ?? 0) >= MAX_FAILURES_PER_IP;
+/*
+ * Every sign-in and account creation inserts its row in login_attempts BEFORE
+ * any password work, then counts the rows up to and including its own (by id).
+ * Parallel requests therefore cannot all read a count under the limit: the
+ * eleventh row for an email is the eleventh, whatever the timing. A successful
+ * sign-in deletes the email's rows; failures simply leave theirs in place.
+ */
+
+/** Inserts this attempt and returns its row id. */
+export async function recordAttempt(db: D1Database, email: string, ip: string | null): Promise<number> {
+  const row = await db
+    .prepare(`INSERT INTO login_attempts (email, ip) VALUES (?1, ?2) RETURNING id`)
+    .bind(email, ip)
+    .first<{ id: number }>();
+  if (!row) throw new Error("Attempt was not recorded");
+  return row.id;
 }
 
-export async function recordFailure(db: D1Database, email: string, ip: string | null) {
-  await db.prepare(`INSERT INTO login_attempts (email, ip) VALUES (?1, ?2)`).bind(email, ip).run();
-  // Keep the table small: anything older than a day no longer matters.
+/**
+ * True when this sign-in attempt (already recorded) must be refused.
+ * The per-IP cap is the main brake. The per-email cap only applies once this
+ * IP has itself tried that email before in the window, so a stranger hammering
+ * someone's email cannot lock the real customer out from their own network.
+ */
+export async function signInThrottled(db: D1Database, email: string, ip: string | null, attemptId: number) {
+  const counts = await db
+    .prepare(
+      `SELECT COALESCE(SUM(email = ?1), 0) AS by_email,
+              COALESCE(SUM(ip = ?2), 0) AS by_ip,
+              COALESCE(SUM(email = ?1 AND ip = ?2 AND id < ?3), 0) AS pair_before
+         FROM login_attempts
+        WHERE id <= ?3 AND created_at > datetime('now', ?4) AND (email = ?1 OR ip = ?2)`,
+    )
+    .bind(email, ip, attemptId, `-${THROTTLE_WINDOW_MINUTES} minutes`)
+    .first<{ by_email: number; by_ip: number; pair_before: number }>();
+  if (!counts) return false;
+  if (ip !== null && counts.by_ip > MAX_FAILURES_PER_IP) return true;
+  // Without an IP there is no pair to check: the email cap always applies.
+  const emailCapApplies = ip === null || counts.pair_before > 0;
+  return emailCapApplies && counts.by_email > MAX_FAILURES_PER_EMAIL;
+}
+
+/**
+ * True when this account creation (already recorded) must be refused: more than
+ * MAX_CREATIONS_PER_IP attempts from this IP within the hour. The table has no
+ * action column, so every attempt row from the IP counts (sign-in failures too).
+ */
+export async function creationThrottled(db: D1Database, ip: string | null, attemptId: number) {
+  if (ip === null) return false;
+  const counts = await db
+    .prepare(`SELECT COUNT(*) AS n FROM login_attempts WHERE ip = ?1 AND id <= ?2 AND created_at > datetime('now', ?3)`)
+    .bind(ip, attemptId, `-${CREATION_WINDOW_MINUTES} minutes`)
+    .first<{ n: number }>();
+  return (counts?.n ?? 0) > MAX_CREATIONS_PER_IP;
+}
+
+export type SignInOutcome = { ok: true; id: number; name: string } | { ok: false; reason: "throttled" | "credentials" };
+
+/**
+ * The password check behind sign-in (everything but the session cookie):
+ * record the attempt, apply the throttle, verify, then tidy the attempt rows.
+ */
+export async function checkSignIn(db: D1Database, email: string, password: string, ip: string | null): Promise<SignInOutcome> {
+  const attemptId = await recordAttempt(db, email, ip);
+  if (await signInThrottled(db, email, ip, attemptId)) return { ok: false, reason: "throttled" };
+  const row = await db
+    .prepare(`SELECT id, name, password_hash FROM customers WHERE email = ?1`)
+    .bind(email)
+    .first<{ id: number; name: string; password_hash: string }>();
+  const valid = row ? await verifyPassword(password, row.password_hash) : await burnPasswordCheck(password);
+  if (!row || !valid) {
+    // The attempt row stays as the failure record.
+    await pruneAttempts(db);
+    return { ok: false, reason: "credentials" };
+  }
+  await clearFailures(db, email, attemptId);
+  return { ok: true, id: row.id, name: row.name };
+}
+
+/** Housekeeping: anything older than a day no longer matters. */
+export async function pruneAttempts(db: D1Database) {
   await db.prepare(`DELETE FROM login_attempts WHERE created_at < datetime('now', '-1 day')`).run();
 }
 
-export async function clearFailures(db: D1Database, email: string) {
-  await db.prepare(`DELETE FROM login_attempts WHERE email = ?1`).bind(email).run();
+/** After a successful sign-in: drops this attempt and the email's earlier failures. */
+export async function clearFailures(db: D1Database, email: string, attemptId: number) {
+  await db.prepare(`DELETE FROM login_attempts WHERE id = ?2 OR email = ?1`).bind(email, attemptId).run();
 }
 
 export function normaliseEmail(email: string) {

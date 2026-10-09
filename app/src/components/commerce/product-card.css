@@ -75,7 +75,7 @@
   top: 14px;
   left: 16px;
   z-index: 2;
-  color: var(--fg-faint);
+  color: var(--fg-muted);
   transition:
     opacity var(--dur-ui) var(--ease-out-quart),
     transform var(--dur-ui) var(--ease-out-expo);

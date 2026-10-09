@@ -128,6 +128,31 @@ export function revealOn(
   };
 }
 
+/**
+ * Calls `set(true)` when `trigger` crosses `start` (and `set(false)` when scrolling
+ * back above it): drives React-controlled reveals such as a manual GhostHeadline.
+ * Cleanup leaves the content shown, so a torn-down scene never hides text.
+ */
+export function playOn(
+  ScrollTrigger: ST,
+  trigger: Element,
+  start: string,
+  set: (on: boolean) => void,
+) {
+  const st = ScrollTrigger.create({
+    trigger,
+    start,
+    onEnter: () => set(true),
+    onEnterBack: () => set(true),
+    onLeaveBack: () => set(false),
+  });
+  set(st.progress > 0 || st.isActive);
+  return () => {
+    st.kill();
+    set(true);
+  };
+}
+
 /** Writes text only when it changed (no layout thrash from identical writes). */
 export function setText(el: Element | null | undefined, text: string) {
   if (el && el.textContent !== text) el.textContent = text;

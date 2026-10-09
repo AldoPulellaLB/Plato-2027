@@ -40,13 +40,18 @@
   background: var(--plato-forest);
   transition: clip-path 900ms var(--ease-in-out-expo) 120ms;
 }
+/* Bar, body, foot. The body never shrinks below its links (so the link grid
+   always starts below the list); if the whole is taller than the screen, the
+   curtain scrolls instead of overlapping. */
 .menu-scroll {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto 1fr auto;
   height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .menu[data-open="true"] .menu-shutter {
   clip-path: inset(0 0 0 0);
@@ -67,10 +72,22 @@
   opacity: 0.06;
 }
 .menu-bar,
+.menu-top,
 .menu-body,
 .menu-foot {
   position: relative;
   z-index: 1;
+}
+.menu-bar {
+  grid-row: 1;
+}
+.menu-foot {
+  grid-row: 4;
+}
+/* The chapter row under the bar (row 2) is the small-screen layout only. */
+.menu-top {
+  grid-row: 2;
+  display: none;
 }
 
 /* Shared choreography */
@@ -149,18 +166,19 @@
   outline-offset: -2px;
 }
 
-/* Body: page links + preview */
+/* Body: page links + preview (third grid row, 1fr: fills the spare height and
+   centres the list, never smaller than its content). */
 .menu-body {
+  grid-row: 3;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: clamp(24px, 4vw, 96px);
-  min-height: 0;
   padding: clamp(4px, 1.5svh, 20px) var(--gutter) clamp(16px, 3svh, 36px);
 }
 
 .menu-pages {
-  --menu-fs: clamp(2.6rem, min(5.3vw, 7.1svh), 6.6rem);
+  --menu-fs: clamp(2.2rem, min(5.3vw, 5.4svh), 6.6rem);
 }
 .menu-pages ol {
   margin: 0;
@@ -342,7 +360,7 @@
 }
 .menu-col__title {
   margin: 0 0 12px;
-  color: var(--fg-faint);
+  color: var(--fg-muted);
 }
 .menu-list {
   display: grid;
@@ -435,15 +453,13 @@
   transform: translateX(6px) rotate(-45deg);
 }
 
-/* Short desktop viewports: let the body scroll rather than crop. */
-@media (min-width: 820px) and (max-height: 700px) {
-  .menu-scroll {
-    display: block;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+/* The photo preview needs room: wide and tall screens only. */
+@media (max-width: 1100px), (max-height: 820px) {
+  .menu-body {
+    grid-template-columns: minmax(0, 1fr);
   }
-  .menu-preview__frame {
-    height: min(60svh, 30vw);
+  .menu-preview {
+    display: none;
   }
 }
 
@@ -479,18 +495,31 @@
   .menu-logo__mark {
     height: 17px;
   }
+  /* The four chapters first, as a compact 2 x 2 row right under the bar. */
+  .menu-top {
+    display: block;
+    margin: 0 var(--gutter);
+    padding: 4px 0 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .menu-top .menu-col__title {
+    margin-bottom: 2px;
+  }
+  .menu-col--chapters {
+    display: none;
+  }
   .menu-body {
     display: block;
-    padding: 18px var(--gutter) 36px;
+    padding: 16px var(--gutter) 36px;
   }
   .menu-preview {
     display: none;
   }
   .menu-pages {
-    --menu-fs: clamp(2.5rem, 11.4vw, 3.75rem);
+    --menu-fs: clamp(2.1rem, 9vw, 2.75rem);
   }
   .menu-pages li + li {
-    margin-top: 14px;
+    margin-top: 10px;
   }
   .menu-link {
     display: grid;
@@ -498,7 +527,7 @@
     grid-template-areas:
       "num label"
       ". caption";
-    column-gap: 10px;
+    gap: 0 10px;
   }
   .menu-link__num {
     grid-area: num;
@@ -517,7 +546,7 @@
     letter-spacing: 0.2em;
     line-height: 1.4;
     text-transform: uppercase;
-    color: var(--fg-faint);
+    color: var(--fg-muted);
     opacity: 0;
     transition: opacity 240ms var(--ease-out-quart);
   }
@@ -530,12 +559,9 @@
     gap: 30px 20px;
     padding-top: 28px;
   }
-  .menu-col--chapters {
-    grid-column: 1 / -1;
-  }
   .menu-jumps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 4px 16px;
+    gap: 0 16px;
   }
   .menu-jump,
   .menu-list__link {

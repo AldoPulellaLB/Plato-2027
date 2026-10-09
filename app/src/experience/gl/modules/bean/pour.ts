@@ -15,6 +15,12 @@ import { clamp, fract, hash, mix, range, smooth } from "./util";
 /** Hopper rim (the circle that becomes the drum window). */
 export const HOPPER_RIM_RADIUS = 1.47;
 export const HOPPER_RIM_TUBE = 0.09;
+/** The outlet flange under the slide gate: the lowest part of the hopper when the stem is off. */
+export const HOPPER_OUTLET_Y = -3.57;
+export const HOPPER_OUTLET_R = 0.58;
+/** Where the funnel hands over to the long stem (hidden inside the outlet flange). */
+const STEM_TOP = -3.5;
+const STEM_BOTTOM = -14;
 
 const POUR_START = 0.55;
 const POUR_STOP = 2.02;
@@ -34,7 +40,12 @@ export function heapLevel(b: number) {
 
 export interface PourSet {
   group: THREE.Group;
-  layout(anchor: Shot, aspect: number, dpr: number): void;
+  /**
+   * `stem`: draw the long stem below the outlet flange (it runs out of frame on
+   * wide layouts; stacked portrait layouts end the hopper at the flange so the
+   * copy underneath sits on clean black).
+   */
+  layout(anchor: Shot, aspect: number, dpr: number, stem?: boolean): void;
   update(s: FilmState): void;
   dispose(): void;
 }
@@ -102,10 +113,14 @@ export function createPourSet(kit: Kit): PourSet {
     new THREE.Vector2(0.47, -2.84),
     new THREE.Vector2(0.47, -3.0),
     new THREE.Vector2(0.42, -3.04),
-    new THREE.Vector2(0.42, -14),
+    new THREE.Vector2(0.42, STEM_TOP),
   ];
   const funnelGeo = new THREE.LatheGeometry(profile, m ? 40 : 72);
   const funnel = new THREE.Mesh(funnelGeo, steel);
+  // The stem continues below the flange; the seam sits inside the flange.
+  const stemGeo = new THREE.CylinderGeometry(0.42, 0.42, STEM_TOP - STEM_BOTTOM, m ? 40 : 72, 1, true);
+  const stem = new THREE.Mesh(stemGeo, steel);
+  stem.position.y = (STEM_TOP + STEM_BOTTOM) / 2;
   const rimGeo = new THREE.TorusGeometry(HOPPER_RIM_RADIUS, HOPPER_RIM_TUBE, 20, m ? 64 : 120);
   const rim = new THREE.Mesh(rimGeo, steel);
   rim.rotation.x = Math.PI / 2;
@@ -133,9 +148,9 @@ export function createPourSet(kit: Kit): PourSet {
     envMapIntensity: 0.35,
   });
   const flange = new THREE.Mesh(flangeGeo, enamel);
-  flange.position.y = -3.5;
+  flange.position.y = HOPPER_OUTLET_Y + 0.07;
   const hopper = new THREE.Group();
-  hopper.add(funnel, rim, seam, collar, gate, knob, flange);
+  hopper.add(funnel, stem, rim, seam, collar, gate, knob, flange);
   group.add(hopper);
 
   // Heap mass under the surface beans (a shallow cone of dark beans).
@@ -179,7 +194,8 @@ export function createPourSet(kit: Kit): PourSet {
   const anchorRight = new THREE.Vector3(1, 0, 0);
   const anchorUp = new THREE.Vector3(0, 1, 0);
 
-  function layout(anchor: Shot, aspect: number, dpr: number) {
+  function layout(anchor: Shot, aspect: number, dpr: number, withStem = true) {
+    stem.visible = withStem;
     shotQuaternion(anchor, _q);
     _fwd.set(0, 0, -1).applyQuaternion(_q);
     anchorRight.set(1, 0, 0).applyQuaternion(_q);
@@ -349,7 +365,7 @@ export function createPourSet(kit: Kit): PourSet {
       steel.dispose();
       enamel.dispose();
       massMat.dispose();
-      for (const g of [funnelGeo, rimGeo, seamGeo, collarGeo, gateGeo, knobGeo, flangeGeo, massGeo]) g.dispose();
+      for (const g of [funnelGeo, stemGeo, rimGeo, seamGeo, collarGeo, gateGeo, knobGeo, flangeGeo, massGeo]) g.dispose();
       fg.dispose();
       beams.dispose();
       dust.dispose();

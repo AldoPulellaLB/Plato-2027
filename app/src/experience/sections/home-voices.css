@@ -62,7 +62,7 @@
   animation: hvoice-tick 700ms var(--ease-out-expo) both;
 }
 .hvoice-count__of {
-  color: var(--fg-faint);
+  color: var(--fg-muted);
 }
 @keyframes hvoice-tick {
   from {
@@ -228,7 +228,7 @@
   border: 0;
   background: none;
   text-align: left;
-  color: var(--fg-faint);
+  color: var(--fg-muted);
 }
 .hvoice-dot__no {
   font-size: 0.75rem;

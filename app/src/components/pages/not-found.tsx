@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import type { CSSProperties } from "react";
 
 import { GhostHeadline, RollText } from "@/components/site/text/reveal";
+import { STORE_COUNT } from "@/lib/site";
 
 import { PageLink, useHeroReveal } from "./shared";
 import "./not-found.css";
@@ -13,7 +14,7 @@ import "./not-found.css";
 const LINKS = [
   { href: "/", label: "Back to the experience", note: "From the roast to the regular" },
   { href: "/shop", label: "Shop coffee", note: "House Blend, pods, matcha and more" },
-  { href: "/stores", label: "Find your Platō", note: "Over 140 locations" },
+  { href: "/stores", label: "Find your Platō", note: `About ${STORE_COUNT} locations` },
 ];
 
 export function NotFoundPage() {

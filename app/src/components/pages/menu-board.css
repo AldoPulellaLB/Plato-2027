@@ -27,7 +27,7 @@
 
 /* ------------------------------------------------------------------ hero */
 .mb-hero {
-  padding-top: calc(var(--header-h) + clamp(32px, 5vw, 80px));
+  padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + clamp(32px, 5vw, 80px));
   padding-bottom: clamp(72px, 9vw, 150px);
 }
 .mb-hero__grid {
@@ -151,7 +151,7 @@
 .mb-index {
   grid-column: 1 / span 3;
   position: sticky;
-  top: calc(var(--header-h) + 28px);
+  top: calc(var(--header-h) + env(safe-area-inset-top) + 28px);
   padding-top: 8px;
 }
 .mb-index__label {
@@ -324,7 +324,7 @@
 }
 .mb-row__build {
   color: var(--fg-muted);
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 300;
   line-height: 1.45;
   transition: transform 700ms var(--ease-out-expo);
@@ -574,7 +574,7 @@
     border-top: 0;
   }
   .mb-index {
-    top: var(--header-h);
+    top: calc(var(--header-h) + env(safe-area-inset-top));
     z-index: 5;
     margin-inline: calc(var(--gutter) * -1);
     padding-top: 0;
@@ -628,7 +628,7 @@
     letter-spacing: 0.18em;
   }
   .mb-row__build {
-    font-size: 0.875rem;
+    font-size: 1rem;
   }
   .mb-row__price {
     font-size: 0.9375rem;

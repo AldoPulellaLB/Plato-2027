@@ -101,7 +101,7 @@
 
 /* Sticky-safe in-page anchor offset under the fixed header. */
 .pg-anchor {
-  scroll-margin-top: calc(var(--header-h) + 24px);
+  scroll-margin-top: calc(var(--header-h) + env(safe-area-inset-top) + 24px);
 }
 
 @media (prefers-reduced-motion: reduce) {

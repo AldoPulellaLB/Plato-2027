@@ -23,7 +23,6 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
   {
     id: "f06",
     label: "The shot",
-    kicker: "The ristretto",
     title: "Three ristretto shots. Every time.",
     body: "Our signature drinks are built on ristretto: the short, dense first part of the shot. Aristotle and Platō both start with three.",
     tags: ["Ristretto", "100% Arabica"],
@@ -37,7 +36,7 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
   {
     id: "f07",
     label: "The pour",
-    title: "Then it's handed over.",
+    title: "Then it’s handed over.",
     // No words during the pour: the line appears in ink once the white covers the frame.
     body: "",
     clip: "/assets/world/pour-milk.mp4",
@@ -51,7 +50,6 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
   {
     id: "f08",
     label: "The counter",
-    kicker: "The counter",
     title: "They know your name. And your order.",
     body: "Regulars are the heart of every Platō. The people behind the counter remember how you take it, and love a chat while they make it.",
     clip: "/assets/world/counter.mp4",
@@ -60,7 +58,8 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     mobilePoster: "/assets/world/counter-mobile-poster.webp",
     scroll: 1.5,
     align: "right",
-    objectPosition: "35% 50%",
+    // --ch-f08-x (scroll-scrub.css) shifts the picture left on narrower screens so the cup clears the copy.
+    objectPosition: "var(--ch-f08-x, 35%) 50%",
     mobileObjectPosition: "40% 50%",
   },
 ];

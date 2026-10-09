@@ -7,7 +7,11 @@ import "./story-canvas.css";
 function webglAvailable() {
   try {
     const c = document.createElement("canvas");
-    return !!(c.getContext("webgl2") || c.getContext("webgl"));
+    const gl = c.getContext("webgl2") || c.getContext("webgl");
+    if (!gl) return false;
+    // Release the probe context right away; browsers cap live contexts per page.
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    return true;
   } catch {
     return false;
   }

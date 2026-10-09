@@ -1,11 +1,12 @@
 // /checkout/success: confirms the Stripe session (which records the order),
-// clears the bag, and says thank you.
+// clears the bag when this device opened that checkout, and says thank you.
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { PlatoSymbol } from "@/components/site/wordmark";
 import { confirmOrder } from "@/lib/api/checkout.functions";
+import { CHECKOUT_SESSION_KEY } from "@/lib/api/checkout.rules";
 import { cart } from "@/lib/cart";
 import { formatRand } from "@/lib/catalog";
 import { CONTACT } from "@/lib/site";
@@ -20,6 +21,17 @@ type SuccessState =
   | { kind: "not_configured" }
   | { kind: "missing" };
 
+/** Clears the bag only when this device started this checkout (a shared success link leaves other bags alone). */
+function clearBagFor(sessionId: string) {
+  try {
+    if (window.sessionStorage.getItem(CHECKOUT_SESSION_KEY) !== sessionId) return;
+    window.sessionStorage.removeItem(CHECKOUT_SESSION_KEY);
+  } catch {
+    return;
+  }
+  cart.clear();
+}
+
 export function CheckoutSuccess({ sessionId }: { sessionId?: string }) {
   const [state, setState] = useState<SuccessState>(sessionId ? { kind: "loading" } : { kind: "missing" });
 
@@ -31,10 +43,12 @@ export function CheckoutSuccess({ sessionId }: { sessionId?: string }) {
       .then((result) => {
         if (cancelled) return;
         if (result.paid) {
-          cart.clear();
+          clearBagFor(sessionId);
           setState({ kind: "paid", name: result.name, email: result.email, total: result.total, signedIn: result.signedIn });
         } else {
-          setState({ kind: result.reason === "not_configured" ? "not_configured" : "pending" });
+          setState({
+            kind: result.reason === "not_configured" ? "not_configured" : result.reason === "unknown" ? "missing" : "pending",
+          });
         }
       })
       .catch(() => {

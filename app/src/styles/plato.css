@@ -109,6 +109,14 @@
   --surface: var(--plato-stone);
 }
 
+/* Phones: the site header is 64px tall (header.css), so every offset below it
+   uses the same height and sticky bars meet the header without a gap. */
+@media (max-width: 819.98px) {
+  :root {
+    --header-h: 64px;
+  }
+}
+
 :root[data-story="roast"] {
   --bg: var(--plato-roast);
   --bg-2: var(--plato-roast-2);
@@ -165,9 +173,12 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition:
-      background-color 700ms var(--ease-out-quart),
-      color 700ms var(--ease-out-quart);
+    /* Only the canvas colour eases between story themes. background-color is
+       not inherited, so this repaints one layer. Never transition the root
+       `color`: it is inherited, and every tick of it restyles the whole
+       document (about 45ms a frame on the home page). Text snaps at the flip;
+       chrome elements carry their own small-subtree transitions. */
+    transition: background-color 700ms var(--ease-out-quart);
   }
 
   html[data-story="roast"],
@@ -178,15 +189,14 @@
   body {
     min-height: 100dvh;
     margin: 0;
-    background-color: var(--bg);
+    /* Transparent so the html canvas (and its single eased background-color)
+       paints the page colour. No transition here: see html above. */
+    background: transparent;
     color: var(--fg);
     font-family: var(--font-sans);
     font-size: 17px;
     font-weight: 400;
     line-height: 1.6;
-    transition:
-      background-color 700ms var(--ease-out-quart),
-      color 700ms var(--ease-out-quart);
   }
 
   * {

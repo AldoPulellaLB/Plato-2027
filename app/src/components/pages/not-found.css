@@ -4,7 +4,7 @@
   display: grid;
   align-items: center;
   min-height: 100svh;
-  padding-top: calc(var(--header-h) + clamp(24px, 4vw, 64px));
+  padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + clamp(24px, 4vw, 64px));
   padding-bottom: clamp(64px, 8vw, 128px);
 }
 .nf-grid {

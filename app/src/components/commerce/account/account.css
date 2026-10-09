@@ -1,7 +1,7 @@
 /* /account */
 .acct {
   position: relative;
-  padding: calc(var(--header-h) + clamp(24px, 3.4vw, 56px)) var(--gutter) clamp(96px, 10vw, 170px);
+  padding: calc(var(--header-h) + env(safe-area-inset-top, 0px) + clamp(24px, 3.4vw, 56px)) var(--gutter) clamp(96px, 10vw, 170px);
   overflow-x: clip;
 }
 

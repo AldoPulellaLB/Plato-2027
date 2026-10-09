@@ -13,6 +13,7 @@ import { CONTACT } from "@/lib/site";
 import { announce } from "../announcer";
 import { WordsRise } from "../words-rise";
 import { Field } from "./field";
+import { notifySessionChanged } from "./session-event";
 
 type Mode = "signin" | "create";
 
@@ -189,6 +190,7 @@ function SignInForm({ onSwitch }: { onSwitch: () => void }) {
       const result = await signIn({ data: { email: form.values.email ?? "", password: form.values.password ?? "" } });
       if (result.ok) {
         announce(`Signed in. Welcome back, ${result.name.split(" ")[0]}.`);
+        notifySessionChanged();
         await router.invalidate();
         return;
       }
@@ -213,9 +215,8 @@ function SignInForm({ onSwitch }: { onSwitch: () => void }) {
         </button>
       </p>
       <p className="acct-small">
-        Forgotten your password? Write to{" "}
-        <a href={`mailto:${CONTACT.email}?subject=${encodeURIComponent("Account password")}`}>{CONTACT.email}</a> from the email on your
-        account.
+        Forgotten your password? Contact us at{" "}
+        <a href={`mailto:${CONTACT.email}?subject=${encodeURIComponent("Account password")}`}>{CONTACT.email}</a>.
       </p>
     </form>
   );
@@ -238,6 +239,7 @@ function CreateAccountForm({ onSwitch }: { onSwitch: () => void }) {
       });
       if (result.ok) {
         announce(`Account created. Welcome, ${result.name.split(" ")[0]}.`);
+        notifySessionChanged();
         await router.invalidate();
         return;
       }

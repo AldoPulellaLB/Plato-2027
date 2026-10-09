@@ -16,6 +16,11 @@
   background: transparent;
 }
 
+/* A frame that receives focus from a jump link (tabindex -1) shows no outline. */
+.ch-story section[tabindex="-1"]:focus {
+  outline: none;
+}
+
 /* Pinned stages respect the header and the safe areas. */
 .ch-stage {
   --ch-top: calc(var(--header-h) + clamp(1rem, 3.2svh, 2.25rem));
@@ -40,7 +45,7 @@
   color: var(--fg);
 }
 .ch-label__n {
-  color: var(--fg-faint);
+  color: var(--fg-muted);
   letter-spacing: 0.12em;
 }
 .ch-label__rule {

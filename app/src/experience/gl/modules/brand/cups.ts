@@ -13,7 +13,7 @@ import * as THREE from "three";
 import type { FrameView, GLContext } from "../../engine";
 import { CUP_ROW_SLIDE_VW, cupRowLook, cupRowSlide } from "./choreo";
 import { createShadowDecal } from "./floor";
-import type { FloorPool } from "./floor";
+import type { FloorPool, FloorReach } from "./floor";
 import { paintCupLivery } from "./livery";
 import { bump, damp, lerp, range, smooth } from "./math";
 import type { BrandPalette } from "./palette";
@@ -53,6 +53,8 @@ const LARGE_TOTAL = CUPS[2].height - LID_OVERLAP + LID_TOP;
 const LID_DIAMETER = 2 * (CUPS[2].rTop + SKIRT);
 
 const PITCH = (9 * Math.PI) / 180;
+/** Floor pool centre (z), a little behind the cup row. */
+const FLOOR_Z = -0.25;
 /** f10 scroll position (viewport heights past the pin) that releases the cups. */
 const DROP_AT = -0.2;
 /** Seconds between cups (the brief's 80ms stagger) and for one fall + bounce. */
@@ -234,6 +236,7 @@ export function createCupRow(ctx: GLContext, palette: BrandPalette, blob: THREE.
   let rig: Rig = solveRig(BRAND_FOV, PITCH, 6, -0.4, 1.6);
   let floorFront = 1.6;
   let floorHalfWidth = 2.6;
+  const floorCore: FloorReach = { x: 1.2, front: 0.6, back: 0.6 };
   let clock = 0;
   let lastSeen = -1;
   let look = 0;
@@ -257,6 +260,15 @@ export function createCupRow(ctx: GLContext, palette: BrandPalette, blob: THREE.
     const nearZ = floorZAt(rig, -1) ?? 2;
     floorFront = Math.max(0.8, (nearZ + 0.25) * 1.04);
     floorHalfWidth = Math.max(2.4, widthAt(rig, rig.distance) * 0.8);
+    // Flat stone under the row: across all three cups (lids included) and over
+    // a band 20% of the viewport tall centred on their bases, so the cups stand
+    // on stone, not on paper; the melt into the page runs from there to the rim.
+    const outer = Math.max(Math.abs(cups[0].x), Math.abs(cups[2].x)) + LID_DIAMETER / 2;
+    const backZ = floorZAt(rig, 1 - 2 * (baseY - 0.1)) ?? -1;
+    const frontZ = floorZAt(rig, 1 - 2 * Math.min(0.97, baseY + 0.1)) ?? 0.6;
+    floorCore.x = Math.min(outer, floorHalfWidth * 0.8);
+    floorCore.back = Math.max(0.2, FLOOR_Z - backZ);
+    floorCore.front = Math.max(0.2, frontZ - FLOOR_Z);
   };
 
   const update: CupRow["update"] = (c, view, stage, camera, floor) => {
@@ -296,7 +308,7 @@ export function createCupRow(ctx: GLContext, palette: BrandPalette, blob: THREE.
     camera.setViewOffset(c.width, c.height, 0, -stage.top * c.height, c.width, c.height);
     camera.updateMatrixWorld();
 
-    floor.set({ x: 0, z: -0.25 }, { x: floorHalfWidth, front: floorFront, back: 4.2 });
+    floor.set({ x: 0, z: FLOOR_Z }, { x: floorHalfWidth, front: floorFront, back: 4.2 }, 1, floorCore);
 
     cups.forEach((cup, i) => {
       const { spec } = cup;

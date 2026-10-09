@@ -1,22 +1,35 @@
-/* SoundToggle: an equaliser glyph that wakes up when sound is on. */
+/* SoundToggle: an equaliser glyph that wakes up when sound is on, on a backed
+   capsule so it reads over any frame (dark roast, white film, forest menu). */
 .snd {
   position: fixed;
-  left: calc(var(--gutter) - 12px);
-  bottom: calc(14px + env(safe-area-inset-bottom));
+  /* Mirrors the store pill: same gutter, same centre line. */
+  left: var(--gutter);
+  bottom: calc(20px + env(safe-area-inset-bottom));
   z-index: var(--z-float);
   display: inline-flex;
   align-items: center;
   gap: 12px;
   height: 44px;
-  padding: 0 12px;
-  border: 0;
+  padding: 0 16px 0 14px;
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: none;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   color: var(--fg);
   transition:
     color 700ms var(--ease-out-quart),
+    background-color 700ms var(--ease-out-quart),
+    border-color 700ms var(--ease-out-quart),
     opacity 600ms var(--ease-out-quart),
     transform 800ms var(--ease-out-expo);
+}
+/* Over the bright milk film, before the theme flips: ink on a paper capsule. */
+.snd[data-tone="ink"] {
+  --bg: var(--plato-paper);
+  --fg: var(--plato-ink);
+  --fg-muted: color-mix(in srgb, var(--plato-ink) 72%, transparent);
+  --line: color-mix(in srgb, var(--plato-ink) 14%, transparent);
 }
 .snd[data-hidden="true"] {
   opacity: 0;
@@ -24,7 +37,7 @@
   pointer-events: none;
 }
 .snd:focus-visible {
-  outline-offset: -2px;
+  outline-offset: 3px;
 }
 /* Stepped aside for the footer, but a keyboard visit brings it back. */
 .snd[data-hidden="true"]:focus-visible {
@@ -110,8 +123,18 @@
 }
 
 @media (max-width: 639.98px) {
+  .snd {
+    padding: 0 14px 0 13px;
+  }
   .snd-label {
     display: none;
+  }
+}
+
+/* No backdrop blur: lean on a denser capsule instead. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .snd {
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
   }
 }
 

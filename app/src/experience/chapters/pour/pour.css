@@ -63,25 +63,11 @@
   );
   pointer-events: none;
 }
+/* Two lines ("One taste." / "150 stores."), resolving from a ghost (GhostHeadline). */
 .ch-f05__title {
   margin: 0;
   color: var(--fg);
-}
-.ch-f05__line {
-  display: block;
-  overflow: hidden;
-  vertical-align: top;
-  padding-bottom: 0.08em;
-  margin-bottom: -0.08em;
-}
-.ch-f05__in {
-  display: inline-block;
-  transition: transform 1200ms var(--ease-out-expo) var(--d, 0ms);
-}
-.ch-f05__title[data-armed]:not([data-in]) .ch-f05__in {
-  transform: translateY(108%);
-  transition-duration: 300ms;
-  transition-delay: 0ms;
+  white-space: pre-line;
 }
 .ch-f05__count {
   display: flex;
@@ -100,8 +86,7 @@
   transform-origin: left bottom;
 }
 .ch-f05__zeros {
-  color: var(--fg-faint);
-  opacity: 0.55;
+  color: var(--fg-muted);
 }
 .ch-f05__count[data-full] .ch-f05__num {
   animation: ch-count-pulse 900ms var(--ease-out-expo);
@@ -141,6 +126,7 @@
   --ss-line-in: 0;
   --ss-line-out: 0;
   --ss-f08: 1;
+  --ss-f08-out: 0;
   --ss-cover: 4;
 }
 
@@ -172,7 +158,7 @@
 .ch-f09__field {
   position: relative;
   height: 100%;
-  min-height: 195svh;
+  min-height: 250svh;
 }
 .ch-f09__head {
   position: absolute;
@@ -186,23 +172,15 @@
   color: var(--fg);
 }
 .ch-f09__note {
-  display: flex;
-  align-items: baseline;
-  gap: 1.25rem;
+  max-width: 34ch;
   margin: clamp(1.5rem, 3.5svh, 2.5rem) 0 0 0.2rem;
-  color: var(--fg-muted);
-}
-.ch-f09__note .t-label {
-  flex: none;
-  color: var(--accent);
-}
-.ch-f09__note-body {
-  max-width: 30ch;
   font-size: 1rem;
   line-height: 1.5;
+  color: var(--fg-muted);
 }
 
-/* Four depths: windows slowest, the counter, the room, the people in front fastest. */
+/* Four depths: the empty café full-bleed at the back (0.5x), the arched windows
+ * (0.8x), the room of guests (1x), the baristas in front (1.4x). */
 .ch-shot {
   position: absolute;
   z-index: var(--z, 0);
@@ -221,26 +199,56 @@
   height: 100%;
   object-fit: cover;
 }
+/* The wide view: the white café, edge to edge, carrying the end of the frame. */
 .ch-shot--bg {
-  top: 6svh;
-  right: max(var(--gutter), env(safe-area-inset-right));
-  width: 34vw;
+  top: 150svh;
+  left: 0;
+  width: 100%;
+  height: 100svh;
 }
-.ch-shot--subject {
-  top: 54svh;
-  left: 41vw;
-  width: 28vw;
+.ch-shot--bg .ch-shot__move,
+.ch-shot--bg .ch-shot__frame {
+  height: 100%;
+}
+.ch-shot--bg .ch-shot__frame {
+  aspect-ratio: auto;
 }
 .ch-shot--mid {
-  top: 90svh;
-  left: max(var(--gutter), env(safe-area-inset-left));
-  width: 25vw;
+  top: 54svh;
+  right: 0;
+  width: 70vw;
+}
+.ch-shot--subject {
+  top: 150svh;
+  left: 0;
+  width: 55vw;
 }
 .ch-shot--fg {
-  top: 122svh;
+  top: 170svh;
   right: 5vw;
-  width: 30vw;
-  z-index: 6;
+  width: 40vw;
+}
+/* One wide room with prints laid over it: the empty café rises out of the paper
+ * (its top edge dissolves), and the nearer layers sit on it as bordered prints
+ * whose shadows deepen with their depth. */
+@media (min-width: 820px) and (prefers-reduced-motion: no-preference) {
+  .ch-shot--bg .ch-shot__frame {
+    --ch-feather: 1;
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      var(--plato-ink) calc(var(--ch-feather) * 30%)
+    );
+  }
+  .ch-shot--mid .ch-shot__frame {
+    box-shadow: 0 30px 60px -40px color-mix(in srgb, var(--plato-ink) 35%, transparent);
+  }
+  .ch-shot--subject .ch-shot__frame {
+    box-shadow: 0 40px 80px -42px color-mix(in srgb, var(--plato-ink) 42%, transparent);
+  }
+  .ch-shot--fg .ch-shot__frame {
+    box-shadow: 0 60px 100px -40px color-mix(in srgb, var(--plato-ink) 50%, transparent);
+  }
 }
 
 .ch-quotes {
@@ -250,24 +258,20 @@
 }
 .ch-quote {
   position: absolute;
-  z-index: 5;
-  width: clamp(17rem, 25vw, 24rem);
+  z-index: 8;
+  width: clamp(17rem, 24vw, 23rem);
 }
 .ch-quote--1 {
-  top: 58svh;
+  top: 62svh;
   left: 6vw;
 }
 .ch-quote--2 {
-  top: 92svh;
-  left: 56vw;
+  top: 112svh;
+  right: 9vw;
 }
 .ch-quote--3 {
-  top: 126svh;
-  left: 15vw;
-}
-.ch-quote--4 {
-  top: 153svh;
-  left: 42vw;
+  top: 182svh;
+  left: 12vw;
 }
 .ch-quote__card {
   position: relative;
@@ -276,6 +280,19 @@
   background: var(--bg);
   border: 1px solid var(--line);
   box-shadow: 0 30px 70px -36px color-mix(in srgb, var(--plato-ink) 38%, transparent);
+}
+/* A soft paper halo lifts each card off the photography. */
+.ch-quote__card::before {
+  position: absolute;
+  z-index: -1;
+  inset: -2.5rem;
+  content: "";
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--bg) 82%, transparent) 55%,
+    color-mix(in srgb, var(--bg) 0%, transparent) 100%
+  );
+  pointer-events: none;
 }
 .ch-quote__mark {
   position: absolute;
@@ -292,8 +309,8 @@
 .ch-quote__text p {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: clamp(1.2rem, 1.4vw, 1.45rem);
-  line-height: 1.28;
+  font-size: clamp(1.35rem, 1.65vw, 1.7rem);
+  line-height: 1.22;
   letter-spacing: -0.005em;
   color: var(--fg);
   text-wrap: pretty;
@@ -306,13 +323,14 @@
   color: var(--fg-muted);
 }
 .ch-quote__who::before {
+  flex: none;
   content: "";
   width: 1.5rem;
   height: 1px;
   background: currentColor;
 }
 
-/* ---- mobile: two layers, quotes as a settling stack ---- */
+/* ---- mobile: two layers (the baristas, then the empty café), quotes between ---- */
 @media (max-width: 819px) {
   .frame.ch-f09 {
     height: auto;
@@ -326,7 +344,7 @@
     flex-direction: column;
     gap: 2.25rem;
     min-height: 0;
-    padding: 14svh max(var(--gutter), env(safe-area-inset-right)) 18svh
+    padding: 14svh max(var(--gutter), env(safe-area-inset-right)) 0
       max(var(--gutter), env(safe-area-inset-left));
   }
   .ch-f09__head,
@@ -343,47 +361,38 @@
     width: auto;
     left: 0;
   }
-  .ch-f09__note {
-    flex-direction: column;
-    gap: 0.6rem;
-  }
   .ch-shot--mid,
   .ch-shot--subject {
     display: none;
-  }
-  .ch-shot--bg {
-    order: 1;
-    margin: 0 calc(-1 * var(--gutter));
   }
   .ch-quotes {
     display: contents;
   }
   .ch-quote--1 {
+    order: 1;
+  }
+  .ch-shot--fg {
     order: 2;
+    width: 86%;
+    margin-left: auto;
   }
   .ch-quote--2 {
     order: 3;
     margin-left: 12%;
   }
-  .ch-shot--fg {
-    order: 4;
-    width: 86%;
-    margin-left: auto;
-  }
   .ch-quote--3 {
-    order: 5;
+    order: 4;
   }
-  .ch-quote--4 {
-    order: 6;
-    margin-left: 12%;
+  /* The empty café closes the frame, edge to edge. */
+  .ch-shot--bg {
+    order: 5;
+    height: 72svh;
+    margin: 1rem calc(-1 * max(var(--gutter), env(safe-area-inset-left))) 0;
   }
 }
 
 /* ---- reduced motion: a still, with the quotes as a list ---- */
 @media (prefers-reduced-motion: reduce) {
-  .ch-f05__in {
-    transition: none;
-  }
   .ch-f05__inner {
     min-height: 100svh;
   }
@@ -414,6 +423,10 @@
   }
   .ch-shot--bg {
     grid-column: 1 / -1;
+    height: auto;
+  }
+  .ch-shot--bg .ch-shot__frame {
+    aspect-ratio: var(--ar);
   }
   .ch-quotes {
     display: contents;

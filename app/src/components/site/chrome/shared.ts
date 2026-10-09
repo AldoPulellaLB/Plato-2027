@@ -8,10 +8,15 @@ import type { FrameId } from "@/experience/story";
 
 export const MENU_ID = "site-menu";
 export const FOOTER_ID = "site-footer";
+/** The home page's story wrapper (chapters one to four). */
+export const STORY_ID = "story";
 
 /** Session keys (sessionStorage). */
 export const PRELOADED_KEY = "plato.preloaded";
-export const SOUND_KEY = "plato.sound";
+
+/** The menu's preview photography only shows on wide, tall, hover-capable screens
+ *  (menu.css hides it at max-width 1100px or max-height 820px). */
+const MENU_PRIME_QUERY = "(min-width: 820px) and (hover: hover) and (width > 1100px) and (height > 820px)";
 
 export function usePathname() {
   return useRouterState({ select: (s) => s.location.pathname });
@@ -26,22 +31,31 @@ export function frameIndex(frame: FrameId | null) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Tiny chrome store: header condensed state + menu image priming.      */
+/* Tiny chrome store: scroll state published by the header's rAF        */
+/* measure, plus menu image priming.                                    */
 
-interface ChromeState {
+export interface ChromeState {
   condensed: boolean;
   menuPrimed: boolean;
+  /** Home only: #story still reaches past the middle of the viewport (the story is on screen). */
+  storyOnScreen: boolean;
+  /** The bright milk film (f07) sits under the chrome before the theme flips: chrome turns ink. */
+  inkTone: boolean;
 }
 
-let chromeState: ChromeState = { condensed: false, menuPrimed: false };
-const SERVER_STATE: ChromeState = { condensed: false, menuPrimed: false };
+const SERVER_STATE: ChromeState = {
+  condensed: false,
+  menuPrimed: false,
+  storyOnScreen: false,
+  inkTone: false,
+};
+let chromeState: ChromeState = SERVER_STATE;
 const listeners = new Set<() => void>();
 
 function setChrome(patch: Partial<ChromeState>) {
-  const next = { ...chromeState, ...patch };
-  if (next.condensed === chromeState.condensed && next.menuPrimed === chromeState.menuPrimed)
-    return;
-  chromeState = next;
+  const keys = Object.keys(patch) as (keyof ChromeState)[];
+  if (keys.every((k) => patch[k] === undefined || patch[k] === chromeState[k])) return;
+  chromeState = { ...chromeState, ...patch };
   for (const l of listeners) l();
 }
 
@@ -51,17 +65,91 @@ export const chrome = {
     listeners.add(listener);
     return () => listeners.delete(listener);
   },
-  setCondensed(condensed: boolean) {
-    setChrome({ condensed });
+  /** Scroll-derived state, measured once per frame by the header. */
+  setScroll(patch: Pick<ChromeState, "condensed" | "storyOnScreen" | "inkTone">) {
+    setChrome(patch);
   },
-  /** Start loading the full-screen menu's preview photography (intent signal). */
+  /** Start loading the full-screen menu's preview photography (intent signal). Desktop only. */
   primeMenu() {
+    if (chromeState.menuPrimed || typeof window === "undefined") return;
+    if (!window.matchMedia(MENU_PRIME_QUERY).matches) return;
     setChrome({ menuPrimed: true });
   },
 };
 
 export function useChrome(): ChromeState {
   return useSyncExternalStore(chrome.subscribe, chrome.get, () => SERVER_STATE);
+}
+
+/**
+ * True while #story still holds the middle of the viewport. Re-queried on every
+ * call because the story mounts after hydration.
+ */
+export function measureStoryOnScreen() {
+  const el = document.getElementById(STORY_ID);
+  return !!el && el.getBoundingClientRect().bottom > 0.5 * window.innerHeight;
+}
+
+/**
+ * Calls `onChange(story)` as soon as #story exists and whenever it changes size
+ * (frames and the film measure themselves after mount). A MutationObserver waits
+ * for it to appear; a ResizeObserver follows it after that. Returns a teardown.
+ */
+export function observeStory(onChange: (story: HTMLElement) => void) {
+  let current: HTMLElement | null = null;
+  let mo: MutationObserver | null = null;
+  let ro: ResizeObserver | null = null;
+
+  const watchForMount = () => {
+    if (mo || typeof MutationObserver === "undefined") return;
+    mo = new MutationObserver(attach);
+    mo.observe(document.body, { childList: true, subtree: true });
+  };
+
+  function attach() {
+    const el = document.getElementById(STORY_ID);
+    if (!el || el === current) return;
+    current = el;
+    mo?.disconnect();
+    mo = null;
+    ro?.disconnect();
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(() => {
+        if (!current) return;
+        if (!current.isConnected) {
+          // Remounted (hot reload, route remount): find the new one.
+          current = null;
+          ro?.disconnect();
+          attach();
+          if (!current) watchForMount();
+          return;
+        }
+        onChange(current);
+      });
+      ro.observe(el);
+    }
+    onChange(el);
+  }
+
+  attach();
+  if (!current) watchForMount();
+  return () => {
+    mo?.disconnect();
+    ro?.disconnect();
+  };
+}
+
+/**
+ * Move keyboard focus to where a jump landed (a chapter, the top of the page)
+ * without a second scroll, so the next Tab continues from there.
+ */
+export function focusJumpTarget(el: HTMLElement) {
+  if (!el.hasAttribute("tabindex")) {
+    el.tabIndex = -1;
+    // Regions focused programmatically get no outline (see header.css).
+    el.dataset.jumpTarget = "";
+  }
+  el.focus({ preventScroll: true });
 }
 
 /**

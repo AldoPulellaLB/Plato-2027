@@ -71,7 +71,7 @@ Eyebrow budget: 2 outside the chapter labels (chapter labels are the brief's own
 
 ## Store
 
-Built-in store, ZAR, server-validated prices, cart persisted on the device, Stripe Checkout (needs `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`; without them checkout shows a clear "payments not connected yet" state). Customer accounts with email and password (PBKDF2, D1 sessions, HttpOnly cookie); orders are linked to the signed-in customer.
+Built-in store, ZAR, server-validated prices, cart persisted on the device, Stripe Checkout (needs `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`; without them checkout shows a clear "payments not connected yet" state). Optional platform secret `STRIPE_SHIPPING_RATE_ID` (a Stripe `shr_...` id) adds that shipping rate to orders with physical items; without it Stripe charges no shipping. Customer accounts with email and password (PBKDF2, D1 sessions, HttpOnly cookie); orders are linked to the signed-in customer.
 
 ## Asset plan
 

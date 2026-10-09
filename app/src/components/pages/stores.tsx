@@ -1,14 +1,14 @@
 // /stores: "Find your Platō". Search and region filters over the published
 // branches, local-twist photography, the wider footprint and the loyalty app.
 // Namespace: st-.
-import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin, Search, Smartphone, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin, Plus, Search, Smartphone, X } from "lucide-react";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
 import { GhostHeadline, RollText, SplitReveal } from "@/components/site/text/reveal";
 import { PlatoSymbol } from "@/components/site/wordmark";
 import { prefersReducedMotion } from "@/lib/motion/smooth";
-import { BRANCHES, CONTACT, LOCAL_STORES, mapsUrl } from "@/lib/site";
+import { BRANCHES, CONTACT, LOCAL_STORES, STORE_COUNT, mapsUrl } from "@/lib/site";
 import type { Branch } from "@/lib/site";
 
 import { NewTab, Rise, jumpTo, useHeroReveal, useParallax } from "./shared";
@@ -19,6 +19,36 @@ type RegionFilter = Branch["region"] | "All";
 type Sort = "number" | "name";
 
 const pad = (n: number) => String(n).padStart(2, "0");
+
+/** "Mon to Sat: 6am to 6pm · Sun: 7am to 6pm" → one entry per line. */
+const hourLines = (hours: string) => hours.split("·").map((h) => h.trim());
+
+/** The hours most of `list` keep, and whether every café in `list` keeps them. */
+function sharedHours(list: Branch[]) {
+  const tally = new Map<string, number>();
+  for (const b of list) tally.set(b.hours, (tally.get(b.hours) ?? 0) + 1);
+  let hours = "";
+  let most = 0;
+  for (const [h, n] of tally) {
+    if (n > most) {
+      hours = h;
+      most = n;
+    }
+  }
+  return { hours, all: list.length > 0 && most === list.length };
+}
+
+const STREETISH = /^(\d|cnr\b|corner\b|shop\b)|\b(street|st|road|avenue|ave|drive|boulevard|crossing)\b/i;
+
+/** Suburb and city without the street: "57, 13th Street, Menlo Park, Pretoria" → "Menlo Park, Pretoria". */
+function locality(address: string) {
+  const parts = address
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const places = parts.filter((p) => !STREETISH.test(p));
+  return (places.length ? places : parts).slice(-2).join(", ");
+}
 
 /** Lower case, accents stripped, one char per source char (so match indices map back). */
 function fold(s: string) {
@@ -71,6 +101,8 @@ export function StoresPage() {
     return list.slice().sort((a, b) => (sort === "number" ? a.cafe - b.cafe || a.opened.localeCompare(b.opened) : a.name.localeCompare(b.name)));
   }, [deferred, region, sort]);
 
+  const common = useMemo(() => sharedHours(results), [results]);
+
   const reset = () => {
     setQuery("");
     setRegion("All");
@@ -92,9 +124,9 @@ export function StoresPage() {
           <div className="st-results__bar">
             <h2 className="st-results__title" id="st-results-title">
               <span aria-live="polite" className="t-num">
-                {results.length === 0 ? "No stores" : `${results.length} ${results.length === 1 ? "store" : "stores"}`}
+                {results.length === 0 ? "No cafés" : `${results.length} ${results.length === 1 ? "café" : "cafés"}`}
               </span>
-              <span className="st-results__scope">{region === "All" ? "across South Africa" : `in ${region}`}</span>
+              <span className="st-results__scope">{region === "All" ? "listed here" : `listed in ${region}`}</span>
             </h2>
             <div aria-label="Sort stores" className="st-sort" role="group">
               <button aria-pressed={sort === "number"} className="st-sort__btn" onClick={() => setSort("number")} type="button">
@@ -107,17 +139,31 @@ export function StoresPage() {
           </div>
 
           {results.length ? (
-            <ul className="st-grid">
-              {results.map((b, i) => (
-                <StoreCard branch={b} index={i} key={`${b.name}-${b.cafe}`} query={deferred} />
-              ))}
-            </ul>
+            <>
+              {/* Compact (phone) list: the hours are said once here instead of on every row. */}
+              <div className="st-hours">
+                <span className="st-hours__label t-label">
+                  {common.all ? (results.length === 1 ? "Hours" : "Hours at every café listed") : "Hours at most cafés"}
+                </span>
+                <p className="st-hours__lines">
+                  {hourLines(common.hours).map((h) => (
+                    <span key={h}>{h}</span>
+                  ))}
+                </p>
+                {common.all ? null : <p className="st-hours__note">Cafés with different hours are marked below.</p>}
+              </div>
+              <ul className="st-grid">
+                {results.map((b, i) => (
+                  <StoreCard branch={b} commonHours={common.hours} index={i} key={`${b.name}-${b.cafe}`} query={deferred} />
+                ))}
+              </ul>
+            </>
           ) : (
             <EmptyState onReset={reset} query={deferred} region={region} />
           )}
 
           <p className="st-results__note">
-            This list shows the cafés with published details. For every one of our 140+ locations, including the newest, search{" "}
+            This list shows the {BRANCHES.length} cafés with published details, out of about {STORE_COUNT} locations. For any of the others, including the newest, search{" "}
             <a className="st-inline" href={CONTACT.maps} rel="noopener noreferrer" target="_blank">
               Platō on Google Maps
               <NewTab />
@@ -160,7 +206,7 @@ function StoresHero({
       <div className="pg-wrap st-hero__grid">
         <div className="st-hero__meta pg-in">
           <span className="t-label">Stores</span>
-          <span className="t-label st-hero__meta-end">Over 140 locations, and London</span>
+          <span className="t-label st-hero__meta-end">About {STORE_COUNT} locations, and London</span>
         </div>
 
         <div className="st-hero__main">
@@ -182,44 +228,46 @@ function StoresHero({
             role="search"
             style={{ "--d": "520ms" } as CSSProperties}
           >
-            <label className="sr-only" htmlFor="st-q">
-              Search stores by name, suburb or city
+            <label className="st-search__label t-label" htmlFor="st-q">
+              Search the cafés
             </label>
-            <Search aria-hidden="true" className="st-search__icon" size={22} strokeWidth={1.5} />
-            <input
-              autoComplete="off"
-              className="st-search__input"
-              enterKeyHint="search"
-              id="st-q"
-              onChange={(e) => onQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Escape" && query) {
-                  e.preventDefault();
-                  onQuery("");
-                }
-              }}
-              placeholder="Name, suburb or city"
-              ref={input}
-              spellCheck={false}
-              type="search"
-              value={query}
-            />
-            {query ? (
-              <button
-                aria-label="Clear search"
-                className="st-search__clear"
-                onClick={() => {
-                  onQuery("");
-                  input.current?.focus();
+            <div className="st-search__field">
+              <Search aria-hidden="true" className="st-search__icon" size={22} strokeWidth={1.5} />
+              <input
+                autoComplete="off"
+                className="st-search__input"
+                enterKeyHint="search"
+                id="st-q"
+                onChange={(e) => onQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape" && query) {
+                    e.preventDefault();
+                    onQuery("");
+                  }
                 }}
-                type="button"
-              >
-                <X aria-hidden="true" size={18} strokeWidth={1.5} />
-              </button>
-            ) : null}
-            <span aria-hidden="true" className="st-search__count t-num">
-              {pad(resultCount)}
-            </span>
+                placeholder="Name, suburb or city"
+                ref={input}
+                spellCheck={false}
+                type="search"
+                value={query}
+              />
+              {query ? (
+                <button
+                  aria-label="Clear search"
+                  className="st-search__clear"
+                  onClick={() => {
+                    onQuery("");
+                    input.current?.focus();
+                  }}
+                  type="button"
+                >
+                  <X aria-hidden="true" size={18} strokeWidth={1.5} />
+                </button>
+              ) : null}
+              <span aria-hidden="true" className="st-search__count t-num">
+                {pad(resultCount)}
+              </span>
+            </div>
           </form>
 
           <div aria-label="Filter by region" className="st-chips pg-in" role="group" style={{ "--d": "640ms" } as CSSProperties}>
@@ -247,9 +295,13 @@ function StoresHero({
 
 /* ------------------------------------------------------------------ card */
 
-function StoreCard({ branch, index, query }: { branch: Branch; index: number; query: string }) {
-  const hours = branch.hours.split("·").map((h) => h.trim());
+function StoreCard({ branch, commonHours, index, query }: { branch: Branch; commonHours: string; index: number; query: string }) {
+  const hours = hourLines(branch.hours);
   const id = `st-${branch.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${branch.cafe}`;
+  // Compact rows show the suburb; if the search only matches the street, show the full address so the match is visible.
+  const loc = locality(branch.address);
+  const q = fold(query.trim());
+  const place = q && !fold(`${branch.name} ${loc}`).includes(q) && fold(branch.address).includes(q) ? branch.address : loc;
   return (
     <Rise as="li" className="st-card" delay={(index % 3) * 80}>
       <article aria-labelledby={id} className="st-card__in">
@@ -265,6 +317,9 @@ function StoreCard({ branch, index, query }: { branch: Branch; index: number; qu
         </h3>
         <p className="st-card__addr">
           <Highlight query={query} text={branch.address} />
+        </p>
+        <p className="st-card__loc">
+          <Highlight query={query} text={place} />
         </p>
         <dl className="st-card__facts">
           <div>
@@ -282,13 +337,31 @@ function StoreCard({ branch, index, query }: { branch: Branch; index: number; qu
             </dd>
           </div>
         </dl>
-        <a className="st-dir" href={mapsUrl(branch)} rel="noopener noreferrer" target="_blank">
+        {branch.hours !== commonHours ? (
+          <details className="st-card__own">
+            <summary className="st-card__own-sum">
+              <span>Different hours</span>
+              <Plus aria-hidden="true" className="st-card__own-icon" size={16} strokeWidth={1.5} />
+            </summary>
+            <p className="st-card__own-lines">
+              {hours.map((h) => (
+                <span key={h}>{h}</span>
+              ))}
+            </p>
+          </details>
+        ) : null}
+        <a
+          aria-label={`Directions to Platō ${branch.name} (opens Google Maps in a new tab)`}
+          className="st-dir"
+          href={mapsUrl(branch)}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
           <span className="st-dir__pin" aria-hidden="true">
             <MapPin size={18} strokeWidth={1.5} />
           </span>
           <span className="st-dir__label">Directions</span>
           <ArrowUpRight aria-hidden="true" className="st-dir__arrow" size={18} strokeWidth={1.5} />
-          <span className="sr-only"> to Platō {branch.name} (opens Google Maps in a new tab)</span>
         </a>
       </article>
     </Rise>
@@ -489,9 +562,8 @@ function Footprint() {
       <div className="pg-wrap st-foot__grid">
         <Rise className="st-foot__sa">
           <p className="st-foot__big">
-            <Counter to={140}>
-              <span className="st-foot__plus">+</span>
-            </Counter>
+            <span className="st-foot__about">About</span>
+            <Counter to={STORE_COUNT} />
           </p>
           <p className="st-foot__label">locations across South Africa</p>
         </Rise>

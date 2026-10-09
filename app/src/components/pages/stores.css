@@ -7,7 +7,7 @@
 
 /* ------------------------------------------------------------------ hero */
 .st-hero {
-  padding-top: calc(var(--header-h) + clamp(16px, 2.4vw, 36px));
+  padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + clamp(16px, 2.4vw, 36px));
   padding-bottom: clamp(64px, 7vw, 112px);
 }
 .st-hero__grid {
@@ -54,15 +54,21 @@
 
 /* Search console */
 .st-search {
+  margin-top: clamp(36px, 4.4vw, 64px);
+}
+.st-search__label {
+  display: block;
+  color: var(--fg-muted);
+}
+.st-search__field {
   position: relative;
   display: flex;
   align-items: center;
   gap: 14px;
-  min-height: 80px;
-  margin-top: clamp(36px, 4.4vw, 64px);
+  min-height: 72px;
   border-bottom: 1px solid var(--fg);
 }
-.st-search::after {
+.st-search__field::after {
   content: "";
   position: absolute;
   left: 0;
@@ -74,7 +80,7 @@
   transform-origin: 0 50%;
   transition: transform 800ms var(--ease-out-expo);
 }
-.st-search:focus-within::after {
+.st-search__field:focus-within::after {
   transform: scaleX(1);
 }
 .st-search__icon {
@@ -96,7 +102,8 @@
   appearance: none;
 }
 .st-search__input::placeholder {
-  color: var(--fg-faint);
+  color: var(--fg-muted);
+  opacity: 1;
 }
 .st-search__input::-webkit-search-cancel-button {
   appearance: none;
@@ -335,6 +342,12 @@
 .st-card__hour {
   display: block;
 }
+/* Phone-only pieces of the card and list (see the compact list below). */
+.st-card__loc,
+.st-card__own,
+.st-hours {
+  display: none;
+}
 .st-mark {
   background: linear-gradient(transparent 56%, var(--plato-sage) 56%, var(--plato-sage) 94%, transparent 94%);
   color: inherit;
@@ -439,7 +452,7 @@
   margin: clamp(32px, 4vw, 56px) 0 0;
   max-width: 72ch;
   color: var(--fg-muted);
-  font-size: 0.9375rem;
+  font-size: 1rem;
   line-height: 1.6;
 }
 
@@ -570,7 +583,7 @@
 .st-local__desc {
   grid-column: 2;
   color: var(--fg-muted);
-  font-size: 0.9375rem;
+  font-size: 1rem;
 }
 .st-local__progress {
   display: block;
@@ -611,12 +624,15 @@
   display: inline-flex;
   align-items: flex-start;
 }
-.st-foot__plus {
-  margin-left: 0.04em;
+/* "About" sits above the counter so the figure reads "About 150 locations". */
+.st-foot__about {
+  display: block;
+  margin: 0 0 0.12em 0.06em;
   color: var(--plato-green);
   font-style: italic;
-  font-size: 0.5em;
-  line-height: 1.2;
+  font-size: 0.22em;
+  line-height: 1;
+  letter-spacing: -0.01em;
 }
 .st-foot__label {
   margin: clamp(16px, 2vw, 28px) 0 0;
@@ -760,8 +776,8 @@
     aspect-ratio: 4 / 3;
     margin-top: 40px;
   }
-  .st-search {
-    min-height: 68px;
+  .st-search__field {
+    min-height: 64px;
   }
   .st-search__input {
     height: 56px;
@@ -798,23 +814,160 @@
   }
 }
 
-@media (max-width: 640px) {
-  .st-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
+/* Phones: the directory becomes a compact list. One row per café (number, name,
+ * suburb, a round Directions button); hours are said once above the list and
+ * only cafés that keep different hours carry their own (in a <details>). */
+@media (max-width: 639.98px) {
   .st-empty {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .st-hours {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    margin-top: 24px;
+    padding: 16px 0 18px;
+    border-top: 1px solid var(--line);
+  }
+  .st-hours__label {
+    color: var(--fg-muted);
+  }
+  .st-hours__lines {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 18px;
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 1.375rem;
+    line-height: 1.25;
+  }
+  .st-hours__note {
+    margin: 4px 0 0;
+    color: var(--fg-muted);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  .st-grid {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0;
+    margin-top: 0;
+  }
+  .st-card__in {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) 44px;
+    grid-template-areas:
+      "no name dir"
+      "no loc dir"
+      ". own own";
+    column-gap: 14px;
+    row-gap: 2px;
+    align-items: center;
+    height: auto;
+    margin-inline: -10px;
+    padding: 14px 10px 15px;
+    border-top: 0;
+  }
+  /* Rules sit on the row (aligned to the gutter); the hover sweep bleeds 10px past them. */
+  .st-card {
+    border-top: 1px solid var(--line);
+  }
+  .st-card:first-child {
+    border-top-color: var(--fg);
+  }
+  .st-card__top {
+    display: contents;
+  }
+  .st-card__no {
+    grid-area: no;
+    align-self: start;
+    padding-top: 3px;
+  }
+  .st-card__no > .t-label,
+  .st-card__region,
+  .st-card__addr,
+  .st-card__facts {
+    display: none;
+  }
+  .st-card__num {
+    font-size: 1.5rem;
+  }
+  .st-card__name {
+    grid-area: name;
+    margin: 0;
+    font-size: 1.625rem;
+    line-height: 1.05;
+  }
+  .st-card__loc {
+    display: block;
+    grid-area: loc;
+    margin: 0;
+    color: var(--fg-muted);
+    font-size: 0.9375rem;
+    line-height: 1.45;
+  }
+
+  .st-card__own {
+    display: block;
+    grid-area: own;
+    margin-top: 2px;
+  }
+  .st-card__own-sum {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin-block: -6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    list-style: none;
+    cursor: pointer;
+  }
+  .st-card__own-sum::-webkit-details-marker {
+    display: none;
+  }
+  .st-card__own-icon {
+    transition: transform 500ms var(--ease-out-expo);
+  }
+  .st-card__own[open] .st-card__own-icon {
+    transform: rotate(45deg);
+  }
+  .st-card__own-lines {
+    display: grid;
+    gap: 2px;
+    margin: 6px 0 4px;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  /* Directions collapses to a 44px round pin button (its aria-label names the café). */
+  .st-dir {
+    grid-area: dir;
+    justify-content: center;
+    align-self: center;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    padding: 0;
+  }
+  .st-dir__label,
+  .st-dir__arrow {
+    display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .st-search::after,
+  .st-search__field::after,
   .st-search__clear,
   .st-chip,
   .st-chip::before,
   .st-sort__btn::after,
   .st-card__in::before,
   .st-dir__arrow,
+  .st-card__own-icon,
   .st-empty__reset,
   .st-round,
   .st-round::before,

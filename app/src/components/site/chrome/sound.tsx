@@ -1,7 +1,10 @@
-// SoundToggle: bottom-left, off by default. Roaster hum through the bean chapter
-// and the shot, café murmur from the pour onward and on every other page, one
-// procedural crackle at first crack. Never starts without the visitor's opt-in.
-import { useEffect, useRef } from "react";
+// SoundToggle: bottom-left, off on every load. The beds belong to the story:
+// roaster hum through the bean chapter and the shot, café murmur from the pour
+// on, one procedural crackle at first crack. The toggle only exists while the
+// story is on screen; anywhere else it steps away and the audio sleeps (the
+// visitor's choice is kept for when they return). Audio only ever starts from a
+// click on the toggle itself.
+import { useEffect } from "react";
 import type { CSSProperties } from "react";
 
 import { onStoryEvent, useStory } from "@/experience/story";
@@ -9,14 +12,7 @@ import { ui, useUi } from "@/lib/ui";
 
 import { ambient } from "./audio";
 import type { Bed } from "./audio";
-import {
-  SOUND_KEY,
-  frameIndex,
-  readSession,
-  useFooterInView,
-  usePathname,
-  writeSession,
-} from "./shared";
+import { frameIndex, useChrome, useFooterInView, usePathname } from "./shared";
 import "./sound.css";
 
 const BARS = [
@@ -31,42 +27,26 @@ const POUR_INDEX = frameIndex("f07");
 export function SoundToggle() {
   const { soundOn, ready, menuOpen } = useUi();
   const { frame } = useStory();
+  const { storyOnScreen, inkTone } = useChrome();
   const pathname = usePathname();
   const footerInView = useFooterInView();
-  const firstRun = useRef(true);
 
   const isHome = pathname === "/";
+  const inStory = isHome && storyOnScreen;
   const bed: Bed = isHome && frameIndex(frame) < POUR_INDEX ? "roaster" : "cafe";
-
-  // Restore this session's choice (it resumes on the next tap or key press).
-  useEffect(() => {
-    if (readSession(SOUND_KEY) === "1") ui.setSound(true);
-  }, []);
 
   useEffect(() => {
     ambient().setEnabled(soundOn);
-    if (firstRun.current) {
-      firstRun.current = false;
-      return;
-    }
-    writeSession(SOUND_KEY, soundOn ? "1" : "0");
   }, [soundOn]);
 
   useEffect(() => {
     ambient().setBed(bed);
   }, [bed]);
 
-  // Browsers only start audio after a gesture; wake the engine on the next one.
+  // Outside the story: fade out and sleep, without touching the saved choice.
   useEffect(() => {
-    if (!soundOn) return;
-    const wake = () => ambient().unlock();
-    window.addEventListener("pointerdown", wake, { once: true });
-    window.addEventListener("keydown", wake, { once: true });
-    return () => {
-      window.removeEventListener("pointerdown", wake);
-      window.removeEventListener("keydown", wake);
-    };
-  }, [soundOn]);
+    ambient().setSuspended(!inStory);
+  }, [inStory]);
 
   // Silence when the tab is hidden.
   useEffect(() => {
@@ -86,14 +66,17 @@ export function SoundToggle() {
   const toggle = () => {
     const next = !soundOn;
     if (next) {
-      // Create and resume the context inside the click itself.
+      // Create and resume the context inside the click itself (the opt-in gesture).
       ambient().setEnabled(true);
       ambient().unlock();
     }
     ui.setSound(next);
   };
 
-  const hidden = !ready || footerInView || menuOpen;
+  // Off the story (other pages, the home sections after it) it is gone for
+  // pointer, keyboard and assistive tech alike.
+  const away = !ready || !inStory;
+  const hidden = away || footerInView || menuOpen;
 
   return (
     <button
@@ -102,8 +85,10 @@ export function SoundToggle() {
       className="snd"
       data-hidden={hidden ? "true" : "false"}
       data-on={soundOn ? "true" : "false"}
+      data-tone={inkTone ? "ink" : "theme"}
+      inert={away}
       onClick={toggle}
-      tabIndex={ready ? undefined : -1}
+      tabIndex={away ? -1 : undefined}
       type="button"
     >
       <span aria-hidden="true" className="snd-eq">

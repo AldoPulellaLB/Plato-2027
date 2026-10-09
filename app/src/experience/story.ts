@@ -37,7 +37,7 @@ export const FRAMES: FrameSpec[] = [
   { id: "f06", chapter: "pour", vh: 200, pinned: true, theme: "roast", title: "The ristretto shot" },
   { id: "f07", chapter: "pour", vh: 200, pinned: true, theme: "roast", title: "The pour opens into light" },
   { id: "f08", chapter: "pour", vh: 150, pinned: true, theme: "paper", title: "The barista knows your name" },
-  { id: "f09", chapter: "pour", vh: 150, pinned: false, theme: "paper", title: "Community included" },
+  { id: "f09", chapter: "pour", vh: 250, pinned: false, theme: "paper", title: "Community included" },
   { id: "f10", chapter: "brand", vh: 150, pinned: true, theme: "paper", title: "The cup family" },
   { id: "f11", chapter: "brand", vh: 300, pinned: true, theme: "paper", title: "Same store, local twist" },
   { id: "f12", chapter: "brand", vh: 120, pinned: false, theme: "paper", title: "Take Platō home" },

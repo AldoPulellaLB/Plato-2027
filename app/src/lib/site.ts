@@ -89,11 +89,18 @@ export const TESTIMONIALS: { quote: string; where: string }[] = [
   },
 ];
 
+/**
+ * Store count used across the site, per the client storyboard (f05 "One taste.
+ * 150 stores.", f11 "About 150 stores"). plato.coffee says "over 140": this
+ * figure is awaiting client confirmation. If it changes, change every instance
+ * in one pass (STORY.presence, f05's counter and the cups grid, page copy).
+ */
+export const STORE_COUNT = 150;
+
 export const STORY = {
   intro:
     "What began as a dream became a side hustle, and eventually a full-time mission to bring people together over great coffee.",
-  presence:
-    "Platō is now in over 140 locations across South Africa, and in London. Our focus has always been on purpose: accessible, community-driven spaces where quality and connection matter.",
+  presence: `Platō is now in about ${STORE_COUNT} locations across South Africa, and in London. Our focus has always been on purpose: accessible, community-driven spaces where quality and connection matter.`,
   mission: "To serve exceptional coffee in places that feel like home.",
   vision: "To build one of Africa's most loved lifestyle brands through consistency, connection and craft.",
   craft:

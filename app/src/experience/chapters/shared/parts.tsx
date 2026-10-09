@@ -45,6 +45,12 @@ export function ScrollCue({ target, className }: { target: string; className?: s
       onClick={(e) => {
         e.preventDefault();
         scrollToTarget(`#${target}`, { duration: 2.2 });
+        // Move keyboard focus with the view, so the next Tab continues from there.
+        const to = document.getElementById(target);
+        if (to) {
+          if (!to.hasAttribute("tabindex")) to.setAttribute("tabindex", "-1");
+          to.focus({ preventScroll: true });
+        }
       }}
     >
       <span className="ch-cue__track" aria-hidden="true">

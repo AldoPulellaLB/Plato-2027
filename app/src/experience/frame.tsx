@@ -54,6 +54,9 @@ export function Frame({ id, children, className, stageClassName, vh, applyTheme 
       start: "top 55%",
       end: "bottom 55%",
       onToggle: (self) => {
+        // A route change can reset the scroll while this frame is leaving the
+        // document; a detached frame must never repaint the next page.
+        if (!el.isConnected) return;
         if (self.isActive) {
           setActiveFrame(id);
           if (applyTheme) setStoryTheme(spec.theme);

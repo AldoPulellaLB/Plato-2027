@@ -2,19 +2,26 @@
 // signature drinks on deep green, then the close: the opening line returns,
 // with the way in (find a store, get the app) and the loyalty card on a phone.
 import { Clock, Coffee, House, MapPin, UserRound } from "lucide-react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
 import { GhostHeadline } from "@/components/site/text/reveal";
 import { PlatoSymbol, Wordmark } from "@/components/site/wordmark";
 import { Frame } from "@/experience/frame";
 import { story } from "@/experience/story";
-import { prefersReducedMotion } from "@/lib/motion/smooth";
+import { getLenis, prefersReducedMotion } from "@/lib/motion/smooth";
 import { MENU_FEATURE, MENU_SECTIONS } from "@/lib/menu";
 import { CONTACT } from "@/lib/site";
 
 import { ArrowGlyph, ChapterLabel, ChLink } from "../shared/parts";
-import { easeInOutCubic, range, revealOn, tickWhileNear, useScrollScene } from "../shared/motion";
+import {
+  easeInOutCubic,
+  playOn,
+  range,
+  revealOn,
+  tickWhileNear,
+  useScrollScene,
+} from "../shared/motion";
 import "./menu.css";
 
 export function MenuChapter() {
@@ -37,6 +44,8 @@ function SignatureMenu() {
   const ref = useRef<HTMLDivElement>(null);
   const chipsRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLOListElement>(null);
+  const uid = useId();
+  const [titleIn, setTitleIn] = useState(false);
   const [filter, setFilter] = useState<Filter>("All");
   const [shown, setShown] = useState<Filter>("All");
   const items = MENU_FEATURE.filter((d) => shown === "All" || d.filter === shown);
@@ -59,6 +68,30 @@ function SignatureMenu() {
     window.addEventListener("resize", place);
     return () => window.removeEventListener("resize", place);
   }, [filter]);
+
+  // Mobile: the chip row scrolls; drop its edge fade once the last chip is in view.
+  useEffect(() => {
+    const wrap = chipsRef.current?.parentElement;
+    if (!wrap) return;
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const atEnd = wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 2;
+      if (atEnd) wrap.dataset.end = "";
+      else delete wrap.dataset.end;
+    };
+    const onChange = () => {
+      if (!raf) raf = requestAnimationFrame(read);
+    };
+    read();
+    wrap.addEventListener("scroll", onChange, { passive: true });
+    window.addEventListener("resize", onChange);
+    return () => {
+      cancelAnimationFrame(raf);
+      wrap.removeEventListener("scroll", onChange);
+      window.removeEventListener("resize", onChange);
+    };
+  }, []);
 
   // Filtering: the row clears, the set swaps, the cards rise back in order.
   useEffect(() => {
@@ -95,10 +128,12 @@ function SignatureMenu() {
       const track = trackRef.current!;
       const cards = Array.from(track.querySelectorAll<HTMLElement>(".ch-drink"));
       const imgs = cards.map((c) => c.querySelector<HTMLElement>(".ch-drink__img"));
-      const head = el.querySelector(".ch-f13__head");
+      const head = el.querySelector<HTMLElement>(".ch-f13__head");
       const stopReveal = reduced
         ? () => {}
         : revealOn(ScrollTrigger, [head, el.querySelector(".ch-label")], frame, "top 55%");
+      // The statement resolves from its ghost on the same beat as the head.
+      const stopTitle = reduced ? () => {} : playOn(ScrollTrigger, frame, "top 55%", setTitleIn);
 
       const styleCards = (focusX: number, offset: number, step: number) => {
         cards.forEach((card, i) => {
@@ -134,6 +169,7 @@ function SignatureMenu() {
         }
         return () => {
           stopReveal();
+          stopTitle();
           cancelAnimationFrame(raf);
           scroller.removeEventListener("scroll", onScroll);
           cards.forEach((c) => {
@@ -145,11 +181,18 @@ function SignatureMenu() {
       }
 
       // Desktop: vertical scroll moves the row sideways; the reading point sits left of centre.
+      const stage = frame.querySelector<HTMLElement>(".frame__stage");
       let maxX = 0;
       let step = 1;
       const measure = () => {
         const vw = window.innerWidth;
         const focus = vw * 0.34;
+        // The rail always starts below the head (it wraps to two rows on narrower screens);
+        // the cards shrink to fit what is left of the screen.
+        if (head) {
+          const headBottom = head.offsetTop + head.offsetHeight;
+          el.style.setProperty("--ch-rail-min", `${Math.ceil(headBottom + 32)}px`);
+        }
         const lastDrink = cards[cards.length - 1];
         const end = track.querySelector<HTMLElement>(".ch-drink-end");
         step = (cards[0]?.offsetWidth ?? 400) + 20;
@@ -166,27 +209,69 @@ function SignatureMenu() {
       ScrollTrigger.addEventListener("refreshInit", measure);
       window.addEventListener("resize", measure);
 
+      /** Sideways travel (px) for the row at pin progress t (0..1). */
+      const travel = (t: number) => maxX * (t * 0.88 + easeInOutCubic(t) * 0.12);
+      const T_FROM = 0.05;
+      const T_TO = 0.86;
+
+      // The populated row stays at full strength through the end of the pin and
+      // scrolls away into the close: no blank forest screen.
       const update = () => {
         const p = story.progress.f13;
-        const t = range(p, 0.05, 0.86);
-        const x = -maxX * (t * 0.88 + easeInOutCubic(t) * 0.12);
+        const x = -travel(range(p, T_FROM, T_TO));
         track.style.transform = `translate3d(${x.toFixed(2)}px, 0, 0)`;
         styleCards(window.innerWidth * 0.34, x, step);
-        // The row clears before the close fades to white.
-        const out = range(p, 0.9, 0.995);
-        track.style.opacity = (1 - out).toFixed(3);
-        el.style.setProperty("--ch-out", out.toFixed(3));
       };
       const stopTick = tickWhileNear(ScrollTrigger, gsap, frame, update, "20%");
+
+      // Keyboard: focusing a card scrolls the page to the point where that card
+      // sits at the reading point (never a sideways scroll of the pinned stage).
+      let focusRaf = 0;
+      const resetStage = () => {
+        if (stage) stage.scrollLeft = 0;
+        el.scrollLeft = 0;
+      };
+      const onFocusIn = (e: FocusEvent) => {
+        const item = (e.target as HTMLElement | null)?.closest<HTMLElement>(".ch-drink, .ch-drink-end");
+        if (!item || !track.contains(item)) return;
+        resetStage();
+        const want = item.offsetLeft + item.offsetWidth / 2 - window.innerWidth * 0.34;
+        let lo = 0;
+        let hi = 1;
+        if (want <= 0) hi = 0;
+        else if (want >= maxX) lo = 1;
+        else {
+          for (let i = 0; i < 24; i++) {
+            const mid = (lo + hi) / 2;
+            if (travel(mid) < want) lo = mid;
+            else hi = mid;
+          }
+        }
+        const t = (lo + hi) / 2;
+        const p = T_FROM + t * (T_TO - T_FROM);
+        const top = frame.getBoundingClientRect().top + window.scrollY;
+        const y = top + p * Math.max(0, frame.offsetHeight - window.innerHeight);
+        const lenis = getLenis();
+        if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
+        else window.scrollTo({ top: y, behavior: "auto" });
+        // Place the row now, before the browser's own scroll-into-view runs.
+        ScrollTrigger.update();
+        update();
+        cancelAnimationFrame(focusRaf);
+        focusRaf = requestAnimationFrame(resetStage);
+      };
+      track.addEventListener("focusin", onFocusIn);
 
       return () => {
         stopTick();
         stopReveal();
+        stopTitle();
+        cancelAnimationFrame(focusRaf);
+        track.removeEventListener("focusin", onFocusIn);
         ScrollTrigger.removeEventListener("refreshInit", measure);
         window.removeEventListener("resize", measure);
+        el.style.removeProperty("--ch-rail-min");
         track.style.removeProperty("transform");
-        track.style.removeProperty("opacity");
-        el.style.removeProperty("--ch-out");
         cards.forEach((c) => {
           c.style.removeProperty("transform");
           c.style.removeProperty("--near");
@@ -203,7 +288,9 @@ function SignatureMenu() {
         <header className="ch-f13__head">
           <div className="ch-f13__titles">
             <ChapterLabel chapter="menu" className="ch-f13__label" />
-            <h2 className="ch-f13__h">The signature menu.</h2>
+            <GhostHeadline className="ch-f13__h" play={titleIn} trigger="manual">
+              The signature menu.
+            </GhostHeadline>
           </div>
           <div className="ch-f13__tools">
             <div className="ch-chips-wrap">
@@ -249,7 +336,11 @@ function SignatureMenu() {
           >
             {items.map((d, i) => (
               <li className="ch-drink" key={d.name} style={{ "--i": i } as CSSProperties}>
-                <article className="ch-drink__card">
+                <article
+                  aria-labelledby={`${uid}-d${i}`}
+                  className="ch-drink__card"
+                  tabIndex={0}
+                >
                   <div className="ch-drink__media">
                     <img
                       alt={`${d.name}, served at Platō`}
@@ -267,7 +358,9 @@ function SignatureMenu() {
                   </div>
                   <div className="ch-drink__meta">
                     <p className="ch-drink__filter t-label">{d.filter}</p>
-                    <h3 className="ch-drink__name">{d.name}</h3>
+                    <h3 className="ch-drink__name" id={`${uid}-d${i}`}>
+                      {d.name}
+                    </h3>
                     <p className="ch-drink__build">{d.build}</p>
                     <p className="ch-drink__note">{d.note}</p>
                   </div>
@@ -295,8 +388,24 @@ function SignatureMenu() {
 /* ------------------------------------------------------------------ */
 /* Frame 14: find your Platō                                           */
 
-const STAMPS = 10;
-const FILLED = 7;
+/**
+ * The member code on the card: a QR-style block of plain squares (a fixed,
+ * deterministic pattern so server and client render the same markup).
+ */
+const CODE_SIZE = 11;
+const CODE_CELLS = Array.from({ length: CODE_SIZE * CODE_SIZE }, (_, i) => {
+  const x = i % CODE_SIZE;
+  const y = Math.floor(i / CODE_SIZE);
+  const far = CODE_SIZE - 3;
+  // Three solid corner blocks, like a scan code, each with a quiet ring around it.
+  const inBlock = (bx: number, by: number) => x >= bx && x < bx + 3 && y >= by && y < by + 3;
+  if (inBlock(0, 0) || inBlock(far, 0) || inBlock(0, far)) return true;
+  const inRing = (x < 4 && y < 4) || (x >= far - 1 && y < 4) || (x < 4 && y >= far - 1);
+  if (inRing) return false;
+  // A fixed integer hash: scattered like a scan code, identical on server and client.
+  const h = Math.imul(x + 1, 0x9e3779b1) ^ Math.imul(y + 1, 0x85ebca77);
+  return ((h ^ (h >>> 15)) >>> 0) % 9 < 4;
+});
 
 function FindYourPlato() {
   const ref = useRef<HTMLDivElement>(null);
@@ -407,7 +516,7 @@ function FindYourPlato() {
         </div>
 
         <figure
-          aria-label="The Platō loyalty app: a stamp card made of ō symbols"
+          aria-label="The Platō loyalty app on a phone"
           className="ch-phone"
           role="img"
         >
@@ -433,28 +542,17 @@ function FindYourPlato() {
               <div className="ch-phone__card">
                 <PlatoSymbol className="ch-phone__card-ghost" title="" />
                 <div className="ch-phone__card-top">
-                  <span>Loyalty card</span>
-                  <PlatoSymbol className="ch-phone__card-mark" title="" />
+                  <Wordmark className="ch-phone__card-logo" title="" />
+                  <span>Your Platō card</span>
                 </div>
-                <div className="ch-phone__stamps">
-                  {Array.from({ length: STAMPS }, (_, i) => (
-                    <span
-                      className="ch-phone__stamp"
-                      data-filled={i < FILLED ? "" : undefined}
+                <div className="ch-phone__code">
+                  {CODE_CELLS.map((on, i) => (
+                    <i
+                      data-on={on ? "" : undefined}
                       key={i}
-                      style={{ "--i": i } as CSSProperties}
-                    >
-                      <PlatoSymbol title="" />
-                    </span>
+                      style={{ "--i": (i % CODE_SIZE) + Math.floor(i / CODE_SIZE) } as CSSProperties}
+                    />
                   ))}
-                </div>
-                <div className="ch-phone__card-foot">
-                  <span>Your stamps</span>
-                  <span className="ch-phone__card-dots">
-                    <i />
-                    <i />
-                    <i />
-                  </span>
                 </div>
               </div>
               <div className="ch-phone__row">
@@ -463,7 +561,6 @@ function FindYourPlato() {
                   <span className="ch-phone__row-label">Nearest store</span>
                   <span>Irene, Café #1</span>
                 </span>
-                <span className="ch-phone__open">Open</span>
               </div>
               <div className="ch-phone__row">
                 <Clock size={16} strokeWidth={1.5} />

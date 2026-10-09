@@ -58,6 +58,13 @@ export interface Engine {
   destroy(): void;
 }
 
+/** Most device pixels the canvas may hold (about 1440x900 at 1.57x). */
+const PIXEL_BUDGET = 3.2e6;
+/** Frame-time governor: EMA of the frame interval (ms) and how long it must stay slow. */
+const SLOW_FRAME_MS = 20;
+const SLOW_FRAMES = 30;
+const DPR_STEP = 0.25;
+
 const ALL_FRAMES: FrameId[] = ["f01", "f02", "f03", "f04", "f05", "f06", "f07", "f08", "f09", "f10", "f11", "f12", "f13", "f14"];
 
 export function createEngine(container: HTMLElement, modules: SceneModule[]): Engine {
@@ -65,8 +72,10 @@ export function createEngine(container: HTMLElement, modules: SceneModule[]): En
   const coarse = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
   const isMobileNow = () => coarse || window.innerWidth < 820;
 
+  // MSAA is fixed when the context is created: dense screens get their
+  // smoothing from the pixel ratio instead of a 4x multisampled buffer.
   const renderer = new THREE.WebGLRenderer({
-    antialias: true,
+    antialias: (window.devicePixelRatio || 1) < 1.5,
     alpha: true,
     powerPreference: "high-performance",
     premultipliedAlpha: true,
@@ -137,11 +146,22 @@ export function createEngine(container: HTMLElement, modules: SceneModule[]): En
     }
   };
 
+  // Pixel ratio: capped per device class, then held to a pixel budget so large
+  // high-DPI screens do not grow the cost without bound. `adaptiveCap` only ever
+  // falls (see the frame-time governor in tick); it is never raised again.
+  let adaptiveCap = Infinity;
+  const pixelRatio = () => {
+    const budget = Math.sqrt(PIXEL_BUDGET / Math.max(1, ctx.width * ctx.height));
+    // Never below 1 unless the viewport alone is larger than the budget (then never below 0.75).
+    const floor = Math.max(0.75, Math.min(1, budget));
+    return Math.max(floor, Math.min(window.devicePixelRatio || 1, ctx.isMobile ? 1.5 : 1.75, budget, adaptiveCap));
+  };
+
   const resize = () => {
     ctx.width = window.innerWidth;
     ctx.height = window.innerHeight;
     ctx.isMobile = isMobileNow();
-    ctx.dpr = Math.min(window.devicePixelRatio || 1, ctx.isMobile ? 1.5 : 1.75);
+    ctx.dpr = pixelRatio();
     renderer.setPixelRatio(ctx.dpr);
     renderer.setSize(ctx.width, ctx.height, false);
     canvas.style.width = "100%";
@@ -174,10 +194,27 @@ export function createEngine(container: HTMLElement, modules: SceneModule[]): En
   let running = true;
   let currentOpacity = 0;
 
+  // Governor state: only intervals between two rendered frames count, and
+  // throttled or stalled frames (background tab, a one-off hitch) are ignored.
+  let renderedLast = false;
+  let frameEma = 1000 / 60;
+  let slowFrames = 0;
+  const govern = (intervalMs: number) => {
+    if (intervalMs < 4 || intervalMs > 70) return;
+    frameEma += (intervalMs - frameEma) * 0.1;
+    slowFrames = frameEma > SLOW_FRAME_MS ? slowFrames + 1 : 0;
+    if (slowFrames < SLOW_FRAMES || ctx.dpr <= 1) return;
+    adaptiveCap = Math.max(1, ctx.dpr - DPR_STEP);
+    slowFrames = 0;
+    frameEma = 1000 / 60;
+    resize();
+  };
+
   const tick = (now: number) => {
     raf = requestAnimationFrame(tick);
     if (!running) return;
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const intervalMs = now - last;
+    const dt = Math.min(0.05, intervalMs / 1000);
     last = now;
     ctx.delta = reduced ? 0 : dt;
     ctx.time = reduced ? 0 : ctx.time + dt;
@@ -210,14 +247,20 @@ export function createEngine(container: HTMLElement, modules: SceneModule[]): En
     container.style.opacity = currentOpacity.toFixed(3);
     container.style.visibility = currentOpacity < 0.002 ? "hidden" : "visible";
 
-    if (!active || currentOpacity < 0.002) return;
+    if (!active || currentOpacity < 0.002) {
+      renderedLast = false;
+      return;
+    }
+    if (renderedLast) govern(intervalMs);
     active.update(ctx, views);
     renderer.render(active.scene, active.camera);
+    renderedLast = true;
   };
 
   const onVisibility = () => {
     running = document.visibilityState === "visible";
     last = performance.now();
+    renderedLast = false;
   };
   const onResize = () => {
     if (coarse && window.innerWidth === ctx.width) return;
@@ -250,6 +293,9 @@ export function createEngine(container: HTMLElement, modules: SceneModule[]): En
       }
       envMap.dispose();
       renderer.dispose();
+      // Hand the context back now instead of waiting for GC (route round trips
+      // otherwise pile up live contexts until the browser starts dropping them).
+      renderer.forceContextLoss();
       canvas.remove();
     },
   };

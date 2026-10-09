@@ -12,6 +12,7 @@ import * as THREE from "three";
 import { FRAMES } from "../../story";
 import type { FrameId } from "../../story";
 import type { FrameView, GLContext, SceneModule } from "../engine";
+import { prewarmScene } from "../lib/prewarm";
 import { createHomeBag } from "./brand/bag";
 import type { HomeBag } from "./brand/bag";
 import { BRAND_FOV, createCupRow } from "./brand/cups";
@@ -170,6 +171,16 @@ export function createBrandModule(): SceneModule {
       };
 
       relayout(ctx);
+
+      // Compile both sets (cups and bag) before either is first seen, with the
+      // scene's own tone mapping, from a representative f10 view.
+      camera.clearViewOffset();
+      camera.position.set(0, 1.1, 6.5);
+      camera.lookAt(0, 0.35, 0);
+      camera.updateMatrixWorld();
+      const sets: THREE.Object3D[] = [cups.group];
+      if (bag) sets.push(bag.group);
+      await prewarmScene(ctx.renderer, scene, camera, { show: sets, toneMapping: THREE.NeutralToneMapping });
     },
 
     update(ctx, frames) {

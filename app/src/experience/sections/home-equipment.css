@@ -86,10 +86,13 @@
   pointer-events: none;
 }
 .hequip-caption__no {
+  /* Top right: the machines bleed off the left edge, so the top-left corner
+     sits on steel for the Appartamento; the right is clear for all five. */
+  align-self: flex-end;
   font-size: 0.75rem;
 }
 .hequip-caption__of {
-  color: var(--fg-faint);
+  color: var(--fg-muted);
 }
 .hequip-caption__name {
   display: grid;
@@ -97,8 +100,14 @@
   overflow: hidden;
 }
 .hequip-caption__brand {
+  /* A stone tab behind the label: invisible on the bare panel, it keeps the
+     12px label at 4.8:1 when a machine's base drifts in behind it. */
+  justify-self: start;
+  margin: -4px 0 -4px -10px;
+  padding: 4px 10px;
+  border-radius: 2px;
+  background-color: var(--plato-stone);
   color: var(--fg-muted);
-  font-size: 0.6875rem;
   animation: hequip-rise 900ms var(--ease-out-expo) both;
 }
 .hequip-caption__title {
@@ -206,7 +215,7 @@
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.14em;
-  color: var(--fg-faint);
+  color: var(--fg-muted);
   transition: transform 640ms var(--ease-out-expo);
 }
 .hequip-row__no::before {
@@ -228,15 +237,21 @@
   min-width: 0;
 }
 .hequip-row__meta {
-  font-size: 0.625rem;
   color: var(--fg-muted);
+}
+/* On a narrow ledger the type drops to its own line as a unit ("Rocket ·" over
+   "Espresso machine") instead of splitting mid-phrase. */
+.hequip-row__type {
+  display: inline-block;
 }
 .hequip-row__title {
   font-family: var(--font-serif);
   font-size: clamp(1.55rem, 2.05vw, 2.2rem);
   line-height: 1.04;
   letter-spacing: -0.01em;
-  transition: transform 720ms var(--ease-out-expo);
+  transition:
+    transform 720ms var(--ease-out-expo),
+    opacity 520ms var(--ease-out-quart);
 }
 .hequip-row__finish {
   font-size: 0.875rem;
@@ -251,7 +266,7 @@
 }
 .hequip-row__from {
   margin-right: 0.45em;
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--fg-muted);
@@ -265,15 +280,21 @@
 .hequip-row[data-active="true"] .hequip-row__title {
   transform: translateX(10px);
 }
-/* While the ledger is being explored, the other rows step back. */
+/* While the ledger is being explored, the other rows step back. Only the
+   full-ink title and price dim (ink at 70% is 6.3:1 on paper); the small
+   labels already sit on --fg-muted, so dimming the whole row would push them
+   under 4.5:1. */
+.hequip-row__amount {
+  transition: opacity 520ms var(--ease-out-quart);
+}
 @media (hover: hover) {
-  .hequip-ledger:is(:hover, :focus-within) .hequip-row[data-active="false"] {
-    opacity: 0.42;
+  .hequip-ledger:is(:hover, :focus-within) .hequip-row[data-active="false"] :is(.hequip-row__title, .hequip-row__amount) {
+    opacity: 0.7;
   }
 }
 @media (hover: none) {
-  .hequip-row[data-active="false"] {
-    opacity: 0.55;
+  .hequip-row[data-active="false"] :is(.hequip-row__title, .hequip-row__amount) {
+    opacity: 0.7;
   }
 }
 
@@ -362,7 +383,8 @@
     left: -6%;
     width: 112%;
     top: 12%;
-    height: 80%;
+    /* Short enough that the base clears the caption title through the drift. */
+    height: 72%;
   }
   .hequip-caption {
     inset: 20px var(--gutter) 24px;
@@ -412,6 +434,7 @@
   .hequip-row__no,
   .hequip-row__no::before,
   .hequip-row__title,
+  .hequip-row__amount,
   .hequip-cta__face--wipe,
   .hequip-cta__face--wipe svg {
     transition: none !important;

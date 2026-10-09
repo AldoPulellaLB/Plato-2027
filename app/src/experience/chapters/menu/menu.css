@@ -8,8 +8,10 @@
   transition: background-color 700ms var(--ease-out-quart);
 }
 .ch-f13__inner {
+  /* The rail sits below the head; the scene raises --ch-rail-min when the head wraps. */
+  --ch-rail: max(calc(var(--header-h) + clamp(9rem, 19svh, 12.5rem)), var(--ch-rail-min, 0px));
+  --ch-h: min(58svh, calc(100svh - var(--ch-rail) - 56px));
   --cw: calc(var(--ch-h) * 0.75);
-  --ch-h: 58svh;
   position: relative;
   height: 100%;
 }
@@ -24,9 +26,9 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 1.25rem 2rem;
-  opacity: calc(1 - var(--ch-out, 0));
 }
-.ch-f13__h {
+/* The statement resolves from its ghost (GhostHeadline); it is not part of the armed fade. */
+.ch-f13__titles .ch-f13__h {
   margin: 1.1rem 0 0;
   font-family: var(--font-serif);
   font-weight: 400;
@@ -34,9 +36,6 @@
   line-height: 1;
   letter-spacing: -0.015em;
   color: var(--fg);
-  transition:
-    opacity 900ms var(--ease-out-quart) 160ms,
-    transform 1200ms var(--ease-out-expo) 160ms;
 }
 .ch-f13__tools {
   display: flex;
@@ -46,7 +45,7 @@
     opacity 900ms var(--ease-out-quart) 300ms,
     transform 1200ms var(--ease-out-expo) 300ms;
 }
-.ch-f13__head[data-armed]:not([data-in]) :is(.ch-f13__h, .ch-f13__tools) {
+.ch-f13__head[data-armed]:not([data-in]) .ch-f13__tools {
   opacity: 0;
   transform: translateY(22px);
   transition-duration: 250ms;
@@ -69,7 +68,7 @@
 .ch-chips__ghost {
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 1.05rem;
   border: 0;
   border-radius: 999px;
@@ -145,14 +144,14 @@
   margin: 0;
   padding: 0 0 0 max(var(--gutter), env(safe-area-inset-left));
   list-style: none;
-  will-change: transform, opacity;
+  will-change: transform;
 }
 .ch-drink,
 .ch-drink-end {
   --near: 0;
   flex: none;
   height: var(--ch-h);
-  margin-top: calc(var(--header-h) + clamp(9rem, 19svh, 12.5rem));
+  margin-top: var(--ch-rail);
   transform-origin: 50% 60%;
 }
 .ch-drink {
@@ -170,6 +169,10 @@
   border-radius: 6px;
   background: var(--surface);
   box-shadow: 0 40px 80px -50px color-mix(in srgb, var(--plato-ink) 80%, transparent);
+}
+.ch-drink__card:focus-visible {
+  outline: 2px solid var(--plato-sage);
+  outline-offset: 4px;
 }
 .ch-drink__media {
   position: absolute;
@@ -626,15 +629,20 @@
   color: var(--plato-paper);
   box-shadow: 0 18px 30px -20px color-mix(in srgb, var(--plato-green) 90%, transparent);
 }
-.ch-phone__card-top,
-.ch-phone__card-foot {
+.ch-phone__card-top {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   font-size: 0.625rem;
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
+}
+.ch-phone__card-logo {
+  width: 3.6rem;
+  color: var(--plato-paper);
 }
 .ch-phone__card-ghost {
   position: absolute;
@@ -645,58 +653,31 @@
   opacity: 0.07;
   pointer-events: none;
 }
-.ch-phone__card-top,
-.ch-phone__card-foot,
-.ch-phone__stamps {
+/* The member code: a QR-style block of plain squares on a paper tile. */
+.ch-phone__code {
   position: relative;
-}
-.ch-phone__card-mark {
-  width: 0.85rem;
-  color: var(--plato-sage);
-}
-.ch-phone__stamps {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.45rem;
-  margin: 1rem 0;
-}
-.ch-phone__stamp {
-  display: grid;
-  place-items: center;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 2px;
+  width: 64%;
   aspect-ratio: 1;
-  border: 1px solid color-mix(in srgb, var(--plato-paper) 22%, transparent);
-  border-radius: 50%;
+  margin: 1rem auto 0.15rem;
+  padding: 0.55rem;
+  border-radius: 0.6rem;
+  background: var(--plato-paper);
 }
-.ch-phone__stamp svg {
-  width: 52%;
-  color: color-mix(in srgb, var(--plato-paper) 24%, transparent);
+.ch-phone__code i {
+  display: block;
+  border-radius: 1px;
 }
-.ch-phone__stamp[data-filled] {
-  border-color: transparent;
-  background: var(--plato-sage);
-  transition:
-    transform 700ms var(--ease-out-expo) calc(900ms + var(--i) * 90ms),
-    opacity 400ms var(--ease-out-quart) calc(900ms + var(--i) * 90ms);
+.ch-phone__code i[data-on] {
+  background: var(--plato-forest);
+  transition: opacity 500ms var(--ease-out-quart) calc(900ms + var(--i) * 24ms);
 }
-.ch-phone__stamp[data-filled] svg {
-  color: var(--plato-forest);
-}
-.ch-phone[data-armed]:not([data-in]) .ch-phone__stamp[data-filled] {
+.ch-phone[data-armed]:not([data-in]) .ch-phone__code i[data-on] {
   opacity: 0;
-  transform: scale(0.4);
   transition-duration: 200ms;
   transition-delay: 0ms;
-}
-.ch-phone__card-dots {
-  display: inline-flex;
-  gap: 3px;
-}
-.ch-phone__card-dots i {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.6;
 }
 .ch-phone__row {
   display: flex;
@@ -726,17 +707,6 @@
 }
 .ch-phone__row-sub {
   color: color-mix(in srgb, var(--plato-ink) 55%, transparent);
-}
-.ch-phone__open {
-  margin-left: auto;
-  padding: 0.2rem 0.5rem;
-  border-radius: 999px;
-  background: var(--plato-sage);
-  color: var(--plato-forest);
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 .ch-phone__tabs {
   display: flex;
@@ -781,24 +751,45 @@
     height: auto;
     padding: calc(var(--header-h) + 2.5rem) 0 4.5rem;
   }
+  /* A column that never wraps, so the flex line cannot grow to the chips' width. */
   .ch-f13__head {
     position: static;
     flex-direction: column;
+    flex-wrap: nowrap;
     align-items: stretch;
     gap: 1.5rem;
+  }
+  .ch-f13__titles .ch-f13__h {
+    max-width: 100%;
   }
   .ch-f13__tools {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.75rem;
+    width: 100%;
+    min-width: 0;
   }
+  /* The chips scroll sideways; the right edge fades to show there are more. */
   .ch-chips-wrap {
     width: calc(100% + 2 * var(--gutter));
     margin: 0 calc(-1 * var(--gutter));
     padding: 0 var(--gutter);
     overflow-x: auto;
     overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
     scrollbar-width: none;
+    mask-image: linear-gradient(
+      to right,
+      var(--plato-ink) calc(100% - var(--gutter) - 1.25rem),
+      transparent
+    );
+  }
+  .ch-chips-wrap[data-end] {
+    mask-image: none;
+  }
+  .ch-chips__chip {
+    scroll-snap-align: start;
   }
   .ch-chips-wrap::-webkit-scrollbar {
     display: none;
@@ -855,13 +846,12 @@
 /* ================= reduced motion ================= */
 @media (prefers-reduced-motion: reduce) {
   .ch-chips__capsule,
-  .ch-f13__h,
   .ch-f13__tools,
   .ch-drink__card,
   .ch-drink-end__link,
   .ch-f14__seal,
   .ch-f14__ctas > *,
-  .ch-phone__stamp[data-filled],
+  .ch-phone__code i[data-on],
   .ch-find,
   .ch-find__arrow,
   .ch-find__arrow svg,

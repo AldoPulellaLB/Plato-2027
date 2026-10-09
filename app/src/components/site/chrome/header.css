@@ -21,23 +21,85 @@
   --accent-ink: var(--plato-forest);
 }
 
-/* Soft scrim once the page moves, so the bar reads over photography and film. */
+/* Over the bright milk film (f07), before the theme flips at the white cover:
+   ink type on a paper scrim, handing over to the paper theme at the flip. */
+.hdr[data-tone="ink"] {
+  --bg: var(--plato-paper);
+  --fg: var(--plato-ink);
+  --fg-muted: color-mix(in srgb, var(--plato-ink) 82%, transparent);
+  --fg-faint: color-mix(in srgb, var(--plato-ink) 50%, transparent);
+  --line: color-mix(in srgb, var(--plato-ink) 14%, transparent);
+  --accent: var(--plato-green);
+  --accent-ink: var(--plato-paper);
+}
+.hdr[data-tone="ink"] .hdr-progress__fill {
+  background: var(--plato-ink);
+}
+
+/* Scrim once the page moves. Soft over the dark roast frames and the film, so the
+   bar floats over the footage; a solid band everywhere else, so paper content
+   never reads through the nav. The shape is a mask and the colour a plain
+   background-color, so tone and theme changes crossfade instead of cutting. */
 .hdr-scrim {
   position: absolute;
   inset: 0 0 -36px 0;
-  background: linear-gradient(
+  background-color: var(--bg);
+  -webkit-mask-image: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--bg) 94%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 72%, transparent) 52%,
-    color-mix(in srgb, var(--bg) 0%, transparent) 100%
+    color-mix(in srgb, var(--plato-ink) 94%, transparent) 0%,
+    color-mix(in srgb, var(--plato-ink) 72%, transparent) 52%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--plato-ink) 94%, transparent) 0%,
+    color-mix(in srgb, var(--plato-ink) 72%, transparent) 52%,
+    transparent 100%
   );
   opacity: 0;
   transition:
     opacity 700ms var(--ease-out-quart),
     background-color 700ms var(--ease-out-quart);
 }
+.hdr[data-scrim="solid"] .hdr-scrim {
+  /* The band covers the bar (header height plus the safe area); 24px of fade below. */
+  inset: 0 0 -24px 0;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    var(--plato-ink) 0,
+    var(--plato-ink) calc(100% - 24px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    var(--plato-ink) 0,
+    var(--plato-ink) calc(100% - 24px),
+    transparent 100%
+  );
+}
 .hdr[data-condensed="true"] .hdr-scrim {
   opacity: 1;
+}
+/* A hairline at the solid band's lower edge while condensed. */
+.hdr::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: var(--line);
+  opacity: 0;
+  transition:
+    opacity 700ms var(--ease-out-quart),
+    background-color 700ms var(--ease-out-quart);
+}
+.hdr[data-scrim="solid"][data-condensed="true"]::after {
+  opacity: 1;
+}
+
+/* Chapter jumps and Back to top move keyboard focus onto the landing region
+   (tabindex -1, set by the chrome). The region itself shows no ring. */
+[data-jump-target]:focus {
+  outline: none;
 }
 
 /* Progress hairline along the very top edge. */
@@ -520,6 +582,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hdr,
+  .hdr::after,
   .hdr *:not(.hdr-progress__fill),
   .hdr *::before,
   .hdr *::after {

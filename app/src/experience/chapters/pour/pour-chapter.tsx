@@ -2,7 +2,7 @@
 // scrubbed film (ristretto, milk, the white-out, the counter) and the
 // community parallax. The only theme flip of the story happens here, at the
 // exact moment the white of the milk covers the screen.
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
 import { ScrollScrub } from "@/components/scroll-scrub/scroll-scrub";
@@ -11,12 +11,12 @@ import { Frame } from "@/experience/frame";
 import { CUP_COUNT_WINDOW, POUR_WHITE_WINDOW, emitStoryEvent, setActiveFrame, setStoryTheme, story } from "@/experience/story";
 import type { FrameId } from "@/experience/story";
 import { ensureGsap, prefersReducedMotion } from "@/lib/motion/smooth";
-import { TESTIMONIALS } from "@/lib/site";
 import { scrollScrubScenes, scrollScrubTheme } from "@/scroll-scrub-scenes";
 
 import { ChapterLabel } from "../shared/parts";
 import {
   easeInOutCubic,
+  playOn,
   range,
   revealOn,
   setText,
@@ -44,6 +44,7 @@ const COUNT_TO = CUP_COUNT_WINDOW.to;
 
 function OneTaste() {
   const ref = useRef<HTMLDivElement>(null);
+  const [titleIn, setTitleIn] = useState(false);
 
   useScrollScene(ref, ({ el, gsap, ScrollTrigger, reduced }) => {
     const num = el.querySelector<HTMLElement>("[data-count]");
@@ -52,14 +53,15 @@ function OneTaste() {
     const frame = el.closest("section")!;
     const scrim = frame.querySelector<HTMLElement>(".ch-f05__scrim");
     const label = el.querySelector<HTMLElement>(".ch-label");
-    const title = el.querySelector<HTMLElement>(".ch-f05__title");
     if (reduced) {
       setText(zeros, "");
       setText(num, "150");
       return;
     }
 
-    const stopReveal = revealOn(ScrollTrigger, [label, title], frame, "top 62%");
+    const stopReveal = revealOn(ScrollTrigger, [label], frame, "top 62%");
+    // The statement resolves from its ghost on the label's beat.
+    const stopTitle = playOn(ScrollTrigger, frame, "top 62%", setTitleIn);
     let full = false;
     const update = () => {
       const p = story.progress.f05;
@@ -83,6 +85,7 @@ function OneTaste() {
     return () => {
       stopTick();
       stopReveal();
+      stopTitle();
       el.style.removeProperty("opacity");
       el.style.removeProperty("transform");
       scrim?.style.removeProperty("opacity");
@@ -98,16 +101,9 @@ function OneTaste() {
       <div className="ch-f05__inner" ref={ref}>
         <ChapterLabel chapter="pour" className="ch-f05__label" />
         <div className="ch-f05__copy">
-          <h2 className="t-statement ch-f05__title">
-            <span className="ch-f05__line">
-              <span className="ch-f05__in">One taste.</span>
-            </span>{" "}
-            <span className="ch-f05__line">
-              <span className="ch-f05__in" style={{ "--d": "90ms" } as CSSProperties}>
-                150 stores.
-              </span>
-            </span>
-          </h2>
+          <GhostHeadline className="t-statement ch-f05__title" play={titleIn} trigger="manual">
+            {"One taste.\n150 stores."}
+          </GhostHeadline>
           <div aria-hidden="true" className="ch-f05__count">
             <span className="ch-f05__num t-num">
               <span className="ch-f05__zeros" data-zeros>
@@ -177,6 +173,8 @@ function PourFilm() {
       const lineIn = range(p7, WHITE_COVER + 0.005, WHITE_COVER + 0.07);
       const lineOut = range(p8, 0.05, 0.15);
       const copy8 = range(p8, 0.12, 0.28);
+      // The f08 line leaves before the stage scrolls it under the header.
+      const copy8Out = range(p8, 0.3, 0.42);
       const s = root.style;
       s.setProperty("--ss-white", (grow * grow * (3 - 2 * grow)).toFixed(4));
       s.setProperty("--ss-wash", wash.toFixed(4));
@@ -185,6 +183,7 @@ function PourFilm() {
       s.setProperty("--ss-line-in", lineIn.toFixed(4));
       s.setProperty("--ss-line-out", lineOut.toFixed(4));
       s.setProperty("--ss-f08", copy8.toFixed(4));
+      s.setProperty("--ss-f08-out", copy8Out.toFixed(4));
       // The flip happens when the screen is white, never before.
       if (p8 > 0 || p7 >= 1) setWhite(true);
       else setWhite(p7 >= flipAt);
@@ -290,6 +289,11 @@ interface Layer {
   mobile: boolean;
 }
 
+/**
+ * Four depths (the brief's maximum): the empty white café full-bleed at the back
+ * (0.5x), the arched windows (0.8x), the room full of guests (1x) and the baristas
+ * in front (1.4x). The people fade at the end, leaving the empty café.
+ */
 const LAYERS: Layer[] = [
   {
     src: "/assets/interiors/white-hall.webp",
@@ -297,7 +301,7 @@ const LAYERS: Layer[] = [
     w: 2000,
     h: 1248,
     depth: "bg",
-    speed: 0.55,
+    speed: 0.5,
     people: false,
     mobile: true,
   },
@@ -333,8 +337,19 @@ const LAYERS: Layer[] = [
   },
 ];
 
+/**
+ * Short pull phrases, verbatim from the people-focused reviews (the full quotes
+ * live in the testimonials section further down the page).
+ */
+const PULL_QUOTES = [
+  "The best staff who love to chat and share a bit about their day.",
+  "Some of the best customer service in the city.",
+  "Their staff are so kind and friendly.",
+];
+const QUOTE_SOURCE = "From a review on plato.coffee";
+
 /** How far below its resting place each quote starts (fraction of the viewport): deeper drifts less. */
-const QUOTE_DEPTH = [0.32, 0.5, 0.24, 0.44];
+const QUOTE_DEPTH = [0.32, 0.5, 0.26];
 
 function Community() {
   const ref = useRef<HTMLDivElement>(null);
@@ -343,13 +358,15 @@ function Community() {
     if (reduced) return;
     const frame = el.closest("section")!;
     const title = el.querySelector<HTMLElement>(".ch-f09__title-wrap");
+    // Phones travel less: the column is narrow and the layers sit closer together.
+    const reach = isMobile ? 0.6 : 1;
 
     // Photography: classic layered parallax; each layer rests at its layout place mid-screen.
     // (The figure is the trigger; its inner layer moves, so measuring is never skewed.)
     el.querySelectorAll<HTMLElement>(".ch-shot").forEach((shot) => {
       if (isMobile && shot.dataset.mobile !== "true") return;
       const speed = Number(shot.dataset.speed || 1);
-      const travel = () => (speed - 1) * 0.5 * (shot.offsetHeight + window.innerHeight);
+      const travel = () => (speed - 1) * 0.5 * reach * (shot.offsetHeight + window.innerHeight);
       gsap.fromTo(
         shot.querySelector(".ch-shot__move"),
         { y: () => travel() },
@@ -365,29 +382,62 @@ function Community() {
           },
         },
       );
-      // Transition out: the people fade back, leaving the empty, clean café.
-      if (shot.dataset.people === "true") {
+      // Transition out: the people (and on desktop the arches print over the room)
+      // fade back, leaving the empty, clean café full screen as the frame ends.
+      const fades = shot.dataset.people === "true" || (!isMobile && shot.dataset.depth === "mid");
+      if (fades) {
         gsap.fromTo(
           shot.querySelector(".ch-shot__frame"),
           { opacity: 1 },
           {
             opacity: 0,
             ease: "none",
-            scrollTrigger: { trigger: frame, start: "bottom 72%", end: "bottom 22%", scrub: true },
+            scrollTrigger: {
+              trigger: frame,
+              start: isMobile ? "bottom 150%" : "bottom 135%",
+              end: isMobile ? "bottom 105%" : "bottom 100%",
+              scrub: true,
+            },
           },
         );
       }
     });
 
-    // Quotes drift up at their depth, fade in, and settle as they reach the centre.
+    // Desktop: the wide view of the café grows out of the paper as the arches print
+    // moves on, so the first screen stays clean (headline, one print, one quote);
+    // its soft top edge sharpens as the people leave, so the frame ends on the room.
+    const wide = el.querySelector<HTMLElement>(".ch-shot--bg .ch-shot__frame");
+    if (wide && !isMobile) {
+      gsap.fromTo(
+        wide,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          ease: "none",
+          scrollTrigger: { trigger: frame, start: "top -45%", end: "top -95%", scrub: true },
+        },
+      );
+      gsap.fromTo(
+        wide,
+        { "--ch-feather": 1 },
+        {
+          "--ch-feather": 0,
+          ease: "none",
+          scrollTrigger: { trigger: frame, start: "bottom 135%", end: "bottom 100%", scrub: true },
+        },
+      );
+    }
+
+    // Quotes drift up at their depth and settle as they reach the centre; each one
+    // is fully opaque early in the drift, so it never reads as a ghost over a photo.
     el.querySelectorAll<HTMLElement>(".ch-quote").forEach((card, i) => {
       const depth = QUOTE_DEPTH[i % QUOTE_DEPTH.length] * (isMobile ? 0.45 : 1);
+      const inner = card.querySelector(".ch-quote__card");
       gsap.fromTo(
-        card.querySelector(".ch-quote__card"),
-        { y: () => depth * window.innerHeight, opacity: 0, filter: "blur(6px)" },
+        inner,
+        { y: () => depth * window.innerHeight, filter: "blur(6px)" },
         {
           y: 0,
-          opacity: 1,
           filter: "blur(0px)",
           ease: "power1.out",
           scrollTrigger: {
@@ -397,6 +447,15 @@ function Community() {
             scrub: true,
             invalidateOnRefresh: true,
           },
+        },
+      );
+      gsap.fromTo(
+        inner,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          ease: "none",
+          scrollTrigger: { trigger: card, start: "top bottom", end: "top 78%", scrub: true },
         },
       );
     });
@@ -418,23 +477,21 @@ function Community() {
   });
 
   return (
-    <Frame className="ch-f09" id="f09" stageClassName="ch-f09__stage" vh={195}>
+    <Frame className="ch-f09" id="f09" stageClassName="ch-f09__stage" vh={250}>
       <div className="ch-f09__field" ref={ref}>
         <header className="ch-f09__head">
           <div className="ch-f09__title-wrap">
             <GhostHeadline className="t-display ch-f09__title">Community included.</GhostHeadline>
           </div>
           <p className="ch-f09__note">
-            <span className="t-label">From real reviews</span>
-            <span className="ch-f09__note-body">
-              What regulars say about the people behind the counter.
-            </span>
+            From real reviews: what regulars say about the people behind the counter.
           </p>
         </header>
 
         {LAYERS.map((layer, i) => (
           <figure
             className={`ch-shot ch-shot--${layer.depth}`}
+            data-depth={layer.depth}
             data-mobile={layer.mobile ? "true" : "false"}
             data-people={layer.people ? "true" : "false"}
             data-speed={layer.speed}
@@ -456,17 +513,17 @@ function Community() {
           </figure>
         ))}
 
-        <ul className="ch-quotes" aria-label="Customer reviews">
-          {TESTIMONIALS.map((t, i) => (
-            <li className={`ch-quote ch-quote--${i + 1}`} key={t.quote}>
+        <ul className="ch-quotes" aria-label="What regulars say">
+          {PULL_QUOTES.map((quote, i) => (
+            <li className={`ch-quote ch-quote--${i + 1}`} key={quote}>
               <figure className="ch-quote__card">
                 <span aria-hidden="true" className="ch-quote__mark">
                   “
                 </span>
                 <blockquote className="ch-quote__text">
-                  <p>{t.quote}</p>
+                  <p>{quote}</p>
                 </blockquote>
-                <figcaption className="ch-quote__who t-label">{t.where}</figcaption>
+                <figcaption className="ch-quote__who t-label">{QUOTE_SOURCE}</figcaption>
               </figure>
             </li>
           ))}

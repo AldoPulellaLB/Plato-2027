@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
+import { announce } from "@/components/commerce/announcer";
 import { RollText, SplitReveal } from "@/components/site/text/reveal";
 import { cart } from "@/lib/cart";
 import { CATEGORIES, PRODUCTS, liveVariants, productByHandle } from "@/lib/catalog";
@@ -97,6 +98,7 @@ function ProductCard({ card, index }: { card: Card; index: number }) {
   const onAdd = () => {
     if (!card.quickVariant) return;
     cart.add(card.quickVariant, 1, { open: true });
+    announce(`${product.title} added to your bag.`);
     setAdded(true);
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setAdded(false), 2000);
@@ -148,7 +150,7 @@ function ProductCard({ card, index }: { card: Card; index: number }) {
             {card.quickVariant ? (
               <button
                 aria-label={
-                  added ? `${product.title} added to cart` : `Add ${product.title} to cart`
+                  added ? `${product.title} added to your bag` : `Add ${product.title} to your bag`
                 }
                 className="hshop-qa"
                 data-state={added ? "added" : "idle"}

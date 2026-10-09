@@ -13,6 +13,7 @@ import { announce } from "../announcer";
 import { formatMonthYear, formatOrderDate, prettyVariant } from "../format";
 import { useRevealOnce } from "../motion";
 import { WordsRise } from "../words-rise";
+import { notifySessionChanged } from "./session-event";
 
 interface DashboardProps {
   customer: { name: string; email: string; since: string };
@@ -31,6 +32,7 @@ export function AccountDashboard({ customer, orders }: DashboardProps) {
     setError(null);
     try {
       await signOut();
+      notifySessionChanged();
       announce("Signed out.");
       await router.invalidate();
     } catch {

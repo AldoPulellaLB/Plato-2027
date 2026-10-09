@@ -8,7 +8,7 @@
 /* ------------------------------------------------------------------ hero */
 .ac-hero {
   --ac-h1: clamp(4.5rem, 14vw, 16rem);
-  padding-top: calc(var(--header-h) + clamp(16px, 2.4vw, 36px));
+  padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + clamp(16px, 2.4vw, 36px));
   padding-bottom: clamp(96px, 10vw, 168px);
 }
 .ac-hero__grid {
@@ -138,6 +138,7 @@
   font-size: clamp(2.6rem, 5.2vw, 5.75rem);
   line-height: 0.96;
   letter-spacing: -0.025em;
+  text-wrap: balance;
 }
 .ac-intro__body {
   grid-column: 8 / -1;

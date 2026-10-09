@@ -35,7 +35,7 @@ export function CartDrawer() {
   }
   const announcement = useAnnouncement();
   const blocked = items.some((i) => !isLiveVariant(i.variant))
-    ? "One of the Academy dates in your bag has already taken place. Remove it to continue."
+    ? "One of the Academy dates in your bag has already started. Remove it to continue."
     : null;
 
   // Open/close housekeeping: scroll lock, initial focus, Escape, focus trap, restore.

@@ -167,7 +167,6 @@ function BeansFall() {
     if (reduced) return;
     const frame = el.closest("section")!;
     const items = el.querySelectorAll<HTMLElement>(".ch-origin");
-    const kicker = el.querySelector(".ch-f02__kicker");
     const caption = el.querySelector(".ch-f02__caption");
 
     // The three origins arrive one at a time across the approach and the pin.
@@ -175,7 +174,6 @@ function BeansFall() {
       defaults: { ease: "none" },
       scrollTrigger: { trigger: frame, start: "top 55%", end: "bottom bottom", scrub: true },
     });
-    tl.fromTo(kicker, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.08 }, 0);
     items.forEach((item, i) => {
       const at = 0.06 + i * 0.24;
       tl.fromTo(
@@ -210,7 +208,6 @@ function BeansFall() {
   return (
     <Frame className="ch-frame ch-f02" id="f02" stageClassName="ch-stage ch-f02__stage">
       <div className="ch-f02__col" ref={ref}>
-        <p className="ch-f02__kicker t-label">Three origins</p>
         <ol className="ch-origins" aria-label="Tanzania. Guatemala. Brazil.">
           {ORIGINS.map((name, i) => (
             <li className="ch-origin" key={name}>
@@ -329,7 +326,6 @@ function Roast() {
     <Frame className="ch-frame ch-f03" id="f03" stageClassName="ch-stage ch-f03__stage">
       <div className="ch-f03__inner" ref={ref}>
         <div className="ch-f03__title">
-          <p className="t-label ch-f03__kicker">In the drum</p>
           <h2 className="ch-f03__h">The roast changes colour.</h2>
         </div>
 

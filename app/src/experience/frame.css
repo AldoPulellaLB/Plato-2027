@@ -8,7 +8,12 @@
   position: sticky;
   top: 0;
   height: 100svh;
+  /* clip, not hidden: a hidden box is still programmatically scrollable, so
+     focusing a card inside a transformed track (f13's end link) scrolled the
+     stage sideways and nothing reset it. A clip box cannot be scrolled.
+     (hidden first for engines without clip.) */
   overflow: hidden;
+  overflow: clip;
 }
 
 .frame--flow > .frame__stage {

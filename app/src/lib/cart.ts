@@ -28,14 +28,36 @@ let hydrated = false;
 let syncing = false;
 const listeners = new Set<() => void>();
 
+/** Per-line ceiling (checkout validates the same) and a sane bag size. */
+const MAX_QUANTITY = 99;
+const MAX_LINES = 40;
+
+/**
+ * Stored lines are untrusted (older builds, other tabs, hand edits): keep
+ * known variants with whole positive quantities, merge duplicates (one line
+ * per variant, so React keys stay unique), clamp each quantity to what
+ * checkout accepts, and cap the number of lines.
+ */
+function normaliseLines(input: unknown): CartLine[] {
+  if (!Array.isArray(input)) return [];
+  const merged = new Map<string, number>();
+  for (const raw of input) {
+    if (!raw || typeof raw !== "object") continue;
+    const { variantId, quantity } = raw as Partial<CartLine>;
+    if (typeof variantId !== "string" || typeof quantity !== "number") continue;
+    if (!Number.isInteger(quantity) || quantity <= 0 || !findVariant(variantId)) continue;
+    if (!merged.has(variantId) && merged.size >= MAX_LINES) continue;
+    merged.set(variantId, (merged.get(variantId) ?? 0) + quantity);
+  }
+  return Array.from(merged, ([variantId, quantity]) => ({ variantId, quantity: Math.min(MAX_QUANTITY, quantity) }));
+}
+
 function readStoredLines(): CartLine[] | null {
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw) as { lines?: CartLine[] };
-    return (parsed.lines ?? []).filter(
-      (l) => typeof l.variantId === "string" && Number.isInteger(l.quantity) && l.quantity > 0 && findVariant(l.variantId),
-    );
+    const parsed = JSON.parse(raw) as { lines?: unknown } | null;
+    return normaliseLines(parsed?.lines);
   } catch {
     // Unreadable or blocked storage: keep whatever is in memory.
     return null;
@@ -95,9 +117,10 @@ export const cart = {
     hydrate();
     if (!findVariant(variantId)) return;
     const existing = state.lines.find((l) => l.variantId === variantId);
+    if (!existing && state.lines.length >= MAX_LINES) return;
     const lines = existing
-      ? state.lines.map((l) => (l.variantId === variantId ? { ...l, quantity: Math.min(99, l.quantity + quantity) } : l))
-      : [...state.lines, { variantId, quantity: Math.min(99, quantity) }];
+      ? state.lines.map((l) => (l.variantId === variantId ? { ...l, quantity: Math.min(MAX_QUANTITY, l.quantity + quantity) } : l))
+      : [...state.lines, { variantId, quantity: Math.min(MAX_QUANTITY, quantity) }];
     set({ ...state, lines, bump: state.bump + 1, lastAdded: variantId, open: options.open ?? state.open });
   },
   setQuantity(variantId: string, quantity: number) {
@@ -105,7 +128,7 @@ export const cart = {
     const lines =
       quantity <= 0
         ? state.lines.filter((l) => l.variantId !== variantId)
-        : state.lines.map((l) => (l.variantId === variantId ? { ...l, quantity: Math.min(99, quantity) } : l));
+        : state.lines.map((l) => (l.variantId === variantId ? { ...l, quantity: Math.min(MAX_QUANTITY, quantity) } : l));
     set({ ...state, lines });
   },
   remove(variantId: string) {

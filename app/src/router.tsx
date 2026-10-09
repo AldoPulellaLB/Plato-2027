@@ -8,7 +8,9 @@ export const getRouter = () => {
   const router = createRouter({
     routeTree,
     context: { queryClient },
-    scrollRestoration: true,
+    // The story ("/") always opens on f01; restoring a mid-story position under
+    // the preloader leaves the visitor with no context. Other pages restore.
+    scrollRestoration: ({ location }) => location.pathname !== "/",
     defaultPreloadStaleTime: 0,
   });
 

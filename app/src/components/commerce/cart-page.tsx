@@ -34,7 +34,7 @@ export function CartPage() {
     .filter((p): p is Product => Boolean(p))
     .slice(0, 4);
   const blocked = items.some((i) => !isLiveVariant(i.variant))
-    ? "One of the Academy dates in your bag has already taken place. Remove it to continue."
+    ? "One of the Academy dates in your bag has already started. Remove it to continue."
     : null;
 
   return (
@@ -94,10 +94,6 @@ export function CartPage() {
                 <div className="cp-row">
                   <dt>Items</dt>
                   <dd className="t-num">{count}</dd>
-                </div>
-                <div className="cp-row">
-                  <dt>Delivery</dt>
-                  <dd>Calculated at checkout</dd>
                 </div>
                 <div className="cp-row cp-row--total">
                   <dt>Subtotal</dt>

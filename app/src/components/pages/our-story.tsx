@@ -1,4 +1,4 @@
-// /our-story: from a dream in Irene to 140+ locations and London. Story,
+// /our-story: from a dream in Irene to about 150 locations and London. Story,
 // mission and vision, the craft, a timeline of known facts, the founders and
 // the closing line. Namespace: os-.
 import { ArrowRight } from "lucide-react";
@@ -8,7 +8,7 @@ import type { CSSProperties } from "react";
 import { GhostHeadline, RevealMedia, RollText, SplitReveal } from "@/components/site/text/reveal";
 import { PlatoSymbol } from "@/components/site/wordmark";
 import { ensureGsap, prefersReducedMotion } from "@/lib/motion/smooth";
-import { BRANCHES, CONTACT, STORY } from "@/lib/site";
+import { BRANCHES, CONTACT, STORE_COUNT, STORY } from "@/lib/site";
 
 import { DrawRule, PageLink, Rise, useHeroReveal, useParallax } from "./shared";
 import "./our-story.css";
@@ -234,8 +234,8 @@ function Timeline() {
     },
     {
       when: "Today",
-      year: "140+",
-      title: "Over 140 locations across South Africa.",
+      year: String(STORE_COUNT),
+      title: `About ${STORE_COUNT} locations across South Africa.`,
       text: "Accessible, community-driven spaces where quality and connection matter.",
       image: null,
     },

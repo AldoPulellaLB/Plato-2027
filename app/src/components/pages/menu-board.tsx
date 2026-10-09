@@ -166,7 +166,11 @@ function Board({ grouped }: { grouped: Group[] }) {
   const go = useCallback((id: string) => {
     const mobile = window.matchMedia("(max-width: 860px)").matches;
     const header = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 76;
-    jumpTo(id, -(header + (mobile ? 72 : 28)));
+    // The sticky index's resolved `top` includes the notch (safe-area) inset; fall back to the bare header height.
+    const nav = chipBar.current?.parentElement;
+    const stickyTop = nav ? Number.parseFloat(getComputedStyle(nav).top) : Number.NaN;
+    const base = Number.isFinite(stickyTop) ? stickyTop - (mobile ? 0 : 28) : header;
+    jumpTo(id, -(base + (mobile ? 72 : 28)));
     setActive(id);
   }, []);
 

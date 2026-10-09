@@ -532,7 +532,7 @@
 }
 .hshop-count__sep,
 .hshop-count__total {
-  color: var(--fg-faint);
+  color: var(--fg-muted);
 }
 .hshop-progress {
   position: relative;

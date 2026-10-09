@@ -19,6 +19,7 @@ import {
   optionLabel,
   pad2,
   splitDated,
+  splitDescription,
   splitTitle,
   storyCopy,
   variantLabel,
@@ -355,7 +356,7 @@ function BuyBox({ product, live, title }: { product: Product; live: Variant[]; t
       </div>
 
       <p className="pdp-note pdp-in" style={{ "--d": 7 } as CSSProperties}>
-        {isDated ? "Places are confirmed at checkout. " : "Delivery is calculated at checkout. "}
+        {isDated ? "Places are confirmed at checkout. " : "Add your delivery address at checkout. "}
         <button className="pdp-note__link" onClick={() => cart.open()} type="button">
           View your bag
         </button>
@@ -407,7 +408,7 @@ function ComingSoon({ product, title }: { product: Product; title: string }) {
         <Calendar aria-hidden="true" className="pdp-soon__icon" size={22} strokeWidth={1.5} />
         <h2 className="pdp-soon__title">New dates coming soon</h2>
         <p className="pdp-soon__body">
-          Every date for this course has taken place. Email the Academy to ask about the next one.
+          Bookings have closed for every date of this course. Email the Academy to ask about the next one.
         </p>
         <a className="pdp-soon__cta" href={`mailto:${CONTACT.academyEmail}?subject=${subject}`}>
           <span>Email the Academy</span>
@@ -426,7 +427,8 @@ function ComingSoon({ product, title }: { product: Product; title: string }) {
 /* ------------------------------------------------------------------ */
 
 function ProductStory({ product }: { product: Product }) {
-  const { lede, paragraphs } = storyCopy(product.description);
+  const { copy, steps, specs } = splitDescription(product.description);
+  const { lede, paragraphs } = storyCopy(copy);
   const venue = extractVenue(product.description);
   const live = buyable(product);
   const category = CATEGORIES.find((c) => c.id === product.category);
@@ -448,8 +450,23 @@ function ProductStory({ product }: { product: Product }) {
       ),
     });
   }
+  for (const spec of specs) {
+    rows.push({
+      term: spec.term,
+      detail:
+        spec.lines.length > 1 ? (
+          <span className="pdp-ledger__list">
+            {spec.lines.map((line) => (
+              <span key={line}>{line}</span>
+            ))}
+          </span>
+        ) : (
+          spec.lines[0]
+        ),
+    });
+  }
   if (venue) rows.push({ term: "Venue", detail: venue });
-  if (!isAcademy) rows.push({ term: "Delivery", detail: "Calculated at checkout" });
+  if (!isAcademy) rows.push({ term: "Delivery", detail: "Across South Africa" });
   rows.push({ term: "Payment", detail: "Secure checkout by Stripe" });
   const email = isAcademy ? CONTACT.academyEmail : CONTACT.email;
   rows.push({
@@ -474,6 +491,21 @@ function ProductStory({ product }: { product: Product }) {
           {paragraphs.map((p) => (
             <p key={p.slice(0, 24)}>{p}</p>
           ))}
+          {steps.length ? (
+            <div className="pdp-steps">
+              <h3 className="t-label pdp-steps__title">How to prepare</h3>
+              <ol className="pdp-steps__list">
+                {steps.map((step, i) => (
+                  <li className="pdp-steps__item" key={step}>
+                    <span aria-hidden="true" className="pdp-steps__n t-num">
+                      {pad2(i + 1)}
+                    </span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
         </div>
         <dl className="pdp-ledger">
           {rows.map((row) => (

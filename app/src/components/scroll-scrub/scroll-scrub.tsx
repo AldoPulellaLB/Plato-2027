@@ -55,6 +55,8 @@ export interface ScrollScrubProps {
   /** Heading level of the first scene title. Defaults to h1 for a standalone
    *  film; pass "h2" when the film sits inside a page that owns its h1. */
   firstHeading?: "h1" | "h2";
+  /** Load the first poster eagerly at high priority (only when the film opens the page). */
+  eagerFirstPoster?: boolean;
 }
 
 interface Segment {
@@ -176,6 +178,7 @@ export function ScrollScrub({
   className,
   onActiveSectionChange,
   firstHeading = "h1",
+  eagerFirstPoster = false,
 }: ScrollScrubProps) {
   const rootRef = useRef<HTMLElement>(null);
   const controllerRef = useRef<Controller | null>(null);
@@ -248,7 +251,14 @@ export function ScrollScrub({
 
     const unloadClip = (segment: RuntimeSegment) => {
       segment.abort?.abort();
-      segment.video?.remove();
+      const video = segment.video;
+      if (video) {
+        // Release the decoder buffers before dropping the element.
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
+        video.remove();
+      }
       if (segment.objectUrl) {
         URL.revokeObjectURL(segment.objectUrl);
       }
@@ -413,7 +423,10 @@ export function ScrollScrub({
 
     const readScroll = () => {
       const pageY = window.scrollY || window.pageYOffset;
-      const y = clamp(pageY - rootTop, 0, total);
+      // Unclamped position for the load proximity check: above the film it is
+      // negative, so clips load only as the film approaches (not at scrollY 0).
+      const rawY = pageY - rootTop;
+      const y = clamp(rawY, 0, total);
       const crossfade = 0.1 * viewportHeight;
       let currentIndex = 0;
 
@@ -445,8 +458,8 @@ export function ScrollScrub({
         segment.layer.style.zIndex = index === currentIndex ? "2" : "1";
 
         if (
-          y > segment.start - 1.5 * viewportHeight &&
-          y < segment.end + 1.5 * viewportHeight
+          rawY > segment.start - 1.5 * viewportHeight &&
+          rawY < segment.end + 1.5 * viewportHeight
         ) {
           void loadClip(segment);
         }
@@ -623,8 +636,8 @@ export function ScrollScrub({
                     alt=""
                     className="scroll-scrub__poster"
                     decoding="async"
-                    fetchPriority={index === 0 ? "high" : "auto"}
-                    loading={index === 0 ? "eager" : "lazy"}
+                    fetchPriority={eagerFirstPoster && index === 0 ? "high" : "auto"}
+                    loading={eagerFirstPoster && index === 0 ? "eager" : "lazy"}
                     src={segment.poster}
                   />
                 </picture>

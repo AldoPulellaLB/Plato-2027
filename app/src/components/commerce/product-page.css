@@ -2,7 +2,7 @@
 .pdp {
   --pdp-tile: color-mix(in srgb, var(--plato-stone) 46%, var(--plato-paper));
   position: relative;
-  padding: calc(var(--header-h) + clamp(18px, 2.4vw, 36px)) var(--gutter) 0;
+  padding: calc(var(--header-h) + env(safe-area-inset-top, 0px) + clamp(18px, 2.4vw, 36px)) var(--gutter) 0;
   overflow-x: clip;
 }
 
@@ -48,7 +48,7 @@
 .pdp-crumbs li + li::before {
   content: "/";
   margin: 0 12px;
-  color: var(--fg-faint);
+  color: var(--fg-muted);
 }
 .pdp-crumbs a {
   display: inline-flex;
@@ -268,7 +268,7 @@
 }
 .pdp-buy__inner {
   position: sticky;
-  top: calc(var(--header-h) + 28px);
+  top: calc(var(--header-h) + env(safe-area-inset-top) + 28px);
   display: grid;
 }
 .pdp-kicker {
@@ -393,7 +393,7 @@
   flex: none;
   width: 12px;
   height: 12px;
-  border: 1px solid var(--fg-faint);
+  border: 1px solid var(--fg-muted);
   border-radius: 50%;
 }
 .pdp-option__dot::after {
@@ -707,6 +707,37 @@
   font-size: 1.0625rem;
   line-height: 1.72;
   text-wrap: pretty;
+}
+.pdp-steps {
+  max-width: 62ch;
+  margin-top: clamp(28px, 3vw, 44px);
+}
+.pdp-steps__title {
+  margin: 0 0 14px;
+  color: var(--fg-muted);
+  font-weight: 500;
+}
+.pdp-steps__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+.pdp-steps__item {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+.pdp-steps__n {
+  padding-top: 0.2em;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
 }
 .pdp-ledger {
   margin: 0;

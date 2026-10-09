@@ -12,16 +12,53 @@
 }
 .ch-f10__head {
   position: absolute;
-  top: calc(var(--ch-top) + clamp(2.5rem, 6svh, 4rem));
+  top: calc(var(--ch-top) + clamp(1.5rem, 5svh, 4rem));
   left: 0;
   right: 0;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 }
+/* One line on wide screens, so the wordmark below it stays clear of the cups
+ * (above 40% of the screen height). */
 .ch-f10__h {
-  max-width: 13ch;
+  max-width: 22ch;
   color: var(--fg);
+}
+/* The green wordmark settles above the cups: letters rise on the cups' 80ms stagger. */
+.ch-f10__mark {
+  display: block;
+  width: min(18vw, 30svh);
+  height: auto;
+  margin-top: clamp(0.75rem, 2svh, 1.5rem);
+  overflow: visible;
+  color: var(--plato-green);
+}
+.ch-f10__letter {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transition:
+    opacity 700ms var(--ease-out-quart),
+    transform 1000ms var(--ease-out-expo);
+}
+.ch-f10__letter:nth-child(2) {
+  transition-delay: 80ms;
+}
+.ch-f10__letter:nth-child(3) {
+  transition-delay: 160ms;
+}
+.ch-f10__letter:nth-child(4) {
+  transition-delay: 240ms;
+}
+.ch-f10__letter:nth-child(5) {
+  transition-delay: 320ms;
+}
+.ch-f10__mark[data-armed]:not([data-in]) .ch-f10__letter {
+  opacity: 0;
+  transform: translateY(60%);
+  transition-duration: 250ms;
+  transition-delay: 0ms;
 }
 .ch-cups {
   position: absolute;
@@ -104,7 +141,8 @@
   gap: 2rem;
   pointer-events: none;
 }
-.ch-f11__head > * {
+/* The statement resolves from its ghost (GhostHeadline); the note rises after it. */
+.ch-f11__head > :not(.ghost) {
   transition:
     opacity 900ms var(--ease-out-quart),
     transform 1200ms var(--ease-out-expo);
@@ -112,15 +150,11 @@
 .ch-f11__head > :last-child {
   transition-delay: 140ms;
 }
-.ch-f11__head[data-armed]:not([data-in]) > * {
+.ch-f11__head[data-armed]:not([data-in]) > :not(.ghost) {
   opacity: 0;
   transform: translateY(22px);
   transition-duration: 250ms;
   transition-delay: 0ms;
-}
-.ch-f11__kicker {
-  margin: 0 0 0.85rem;
-  color: var(--fg-muted);
 }
 .ch-f11__h {
   margin: 0;
@@ -224,6 +258,14 @@
   position: absolute;
   inset: 0;
   transform-origin: 50% 52%;
+}
+/* Pinned desktop: the shelf scene dissolves into the paper of frame 12 instead of
+ * ending on a hard stone edge. The mask sits on the panel (not the zoomed wall), so
+ * the fade holds at the bottom of the screen at any zoom. */
+@media (min-width: 820px) and (prefers-reduced-motion: no-preference) {
+  .ch-shelf {
+    mask-image: linear-gradient(to bottom, var(--plato-ink) calc(100% - 120px), transparent);
+  }
 }
 .ch-shelf__wall {
   position: absolute;
@@ -394,11 +436,11 @@
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--plato-ink) 38%, transparent);
+  color: var(--fg-muted);
   transition: color 500ms var(--ease-out-quart);
 }
 .ch-route__tick:first-child .ch-route__tick-label {
@@ -465,7 +507,7 @@
   border-radius: 50%;
   background: var(--plato-green);
 }
-.ch-f12__h {
+.ch-f12__copy .ch-f12__h {
   margin: 1.1rem 0 1.5rem;
   font-family: var(--font-serif);
   font-weight: 400;
@@ -800,6 +842,9 @@
   .ch-f10__h {
     max-width: 11ch;
   }
+  .ch-f10__mark {
+    width: 40vw;
+  }
 
   /* Stores: native sideways swipe with snap points. */
   .frame.ch-f11 {
@@ -883,6 +928,11 @@
     padding-bottom: 0.25rem;
   }
 
+  /* The frame grows with its copy, so frame 13 never covers the Academy card. */
+  .frame.ch-f12 {
+    height: auto;
+    min-height: calc(var(--frame-vh) * 1svh);
+  }
   .ch-f12__stage {
     align-items: flex-end;
   }
@@ -890,7 +940,7 @@
   .ch-f12__copy {
     position: relative;
     width: 100%;
-    margin: 54svh 0 0;
+    margin: 44svh 0 0;
     padding: 2.5rem 0 10svh;
   }
   .ch-f12__copy::before {
@@ -933,6 +983,7 @@
 /* ================= reduced motion ================= */
 @media (prefers-reduced-motion: reduce) {
   .ch-cup__in,
+  .ch-f10__letter,
   .ch-f11__head > *,
   .ch-band__rows,
   .ch-f12__copy > *,

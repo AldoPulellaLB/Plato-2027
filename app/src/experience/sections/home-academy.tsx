@@ -5,6 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
+import { formatHours } from "@/components/pages/shared";
 import { GhostHeadline, SplitReveal } from "@/components/site/text/reveal";
 import { liveVariants, productByHandle } from "@/lib/catalog";
 import type { Product, Variant } from "@/lib/catalog";
@@ -39,10 +40,8 @@ function parseSession(variant: Variant) {
     window = `${times[1]}:${times[2]} to ${times[3]}:${times[4]}`;
     minutes = Number(times[3]) * 60 + Number(times[4]) - (Number(times[1]) * 60 + Number(times[2]));
   }
-  const hours = minutes / 60;
-  const hoursLabel =
-    minutes > 0 ? `${Number.isInteger(hours) ? hours : hours.toFixed(1)} hours` : "";
-  const duration = days > 1 ? `${days} days` : hoursLabel;
+  // Same wording as /academy: "2½ hours", "Two days, 6 hours each".
+  const duration = formatHours(minutes / 60, days);
 
   let date = datePart;
   if (variant.date) {
@@ -59,9 +58,15 @@ interface Course {
   title: string;
   flavour: string | null;
   next: { date: string; window: string } | null;
-  duration: string;
+  /** "Two days, 6 hours each" splits into a main line and a muted second line. */
+  duration: { main: string; sub: string };
   price: string;
   image: string;
+}
+
+function splitDuration(text: string) {
+  const at = text.indexOf(", ");
+  return at < 0 ? { main: text, sub: "" } : { main: text.slice(0, at), sub: text.slice(at + 2) };
 }
 
 function buildCourses(): Course[] {
@@ -81,7 +86,7 @@ function buildCourses(): Course[] {
         title: flavourMatch ? flavourMatch[1] : product.title,
         flavour: flavourMatch ? flavourMatch[2] : null,
         next: nextVariant && session ? { date: session.date, window: session.window } : null,
-        duration: session?.duration ?? "",
+        duration: splitDuration(session?.duration ?? ""),
         price: rand(Math.min(...(live.length ? live : product.variants).map((v) => v.price))),
         image: product.images[0],
       },
@@ -94,6 +99,7 @@ export function HomeAcademy() {
   const listRef = useRef<HTMLOListElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
   // Dates depend on "today", so compute them per render, not at module load.
   const courses = buildCourses();
   const [hovered, setHovered] = useState<number | null>(null);
@@ -103,12 +109,25 @@ export function HomeAcademy() {
   useInView(listRef);
 
   // Cursor-following image (fine pointers only, never under reduced motion).
+  // The frame hangs GAP px right of the pointer with its bottom edge at the
+  // anchor (CSS: translate(32px, -100%)), and its bottom never drops below the
+  // top of the title being hovered, so the course name always stays readable.
+  // With no room above (top of the screen) it hangs just below that title
+  // instead; near the right edge it swings over to the pointer's left; and it
+  // is always held inside the viewport, clear of the fixed header.
   useEffect(() => {
     const wrap = wrapRef.current;
     const cursor = cursorRef.current;
-    if (!wrap || !cursor || !hasFinePointer() || prefersReducedMotion()) return;
+    const box = frameRef.current;
+    if (!wrap || !cursor || !box || !hasFinePointer() || prefersReducedMotion()) return;
     setCursorOn(true);
 
+    const GAP = 32; // mirrors the 32px in .hacad-cursor__frame's transform
+    const LIFT = 14;
+    const EDGE = 16;
+    const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h"));
+    const topEdge = (Number.isFinite(header) ? header : 76) + EDGE;
+    const rows = Array.from(wrap.querySelectorAll<HTMLElement>(".hacad-row"));
     let raf = 0;
     let inside = false;
     let clientX = 0;
@@ -117,22 +136,59 @@ export function HomeAcademy() {
     let y = 0;
     let rot = 0;
     let primed = false;
+    let flipped = false;
+
+    /** The title box of the row under the pointer, if any. */
+    const titleAt = (py: number) => {
+      for (const row of rows) {
+        const r = row.getBoundingClientRect();
+        if (py >= r.top && py < r.bottom) {
+          return row.querySelector(".hacad-row__title")?.getBoundingClientRect() ?? null;
+        }
+      }
+      return null;
+    };
 
     const frame = () => {
       const rect = wrap.getBoundingClientRect();
-      const tx = clientX - rect.left;
-      const ty = clientY - rect.top;
+      const vw = document.documentElement.clientWidth;
+      const vh = window.innerHeight;
+      const fw = box.offsetWidth;
+      const fh = box.offsetHeight;
+
+      // Horizontal: right of the pointer; swing left near the edge (with
+      // hysteresis so it never flutters at the threshold).
+      const roomRight = vw - EDGE - (clientX + GAP + fw);
+      if (!flipped && roomRight < 0) flipped = true;
+      else if (flipped && roomRight > 48) flipped = false;
+      let left = flipped ? clientX - GAP - fw : clientX + GAP;
+      left = Math.max(EDGE, Math.min(left, vw - EDGE - fw));
+
+      // Vertical: the frame's bottom edge sits above the pointer and above the
+      // hovered title; below that title when the screen has no room above.
+      let bottom = clientY - LIFT;
+      const title = titleAt(clientY);
+      if (title) {
+        bottom = Math.min(bottom, title.top - LIFT);
+        if (bottom - fh < topEdge) bottom = title.bottom + LIFT + fh;
+      }
+      bottom = Math.max(topEdge + fh, Math.min(bottom, vh - EDGE));
+
+      // Back to the anchor point the CSS offsets from.
+      const tx = left - GAP - rect.left;
+      const ty = bottom - rect.top;
       if (!primed) {
         x = tx;
         y = ty;
         primed = true;
       }
       const dx = tx - x;
+      const dy = ty - y;
       x += dx * 0.14;
-      y += (ty - y) * 0.14;
+      y += dy * 0.14;
       rot += (Math.max(-9, Math.min(9, dx * 0.06)) - rot) * 0.12;
       cursor.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) rotate(${rot.toFixed(2)}deg)`;
-      if (inside || Math.abs(dx) > 0.5) raf = requestAnimationFrame(frame);
+      if (inside || Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) raf = requestAnimationFrame(frame);
       else raf = 0;
     };
     const kick = () => {
@@ -259,7 +315,13 @@ export function HomeAcademy() {
                 </span>
                 <span className="hacad-row__dur">
                   <span className="hacad-row__k t-label">Duration </span>
-                  <span className="hacad-row__v">{course.duration}</span>
+                  <span className="hacad-row__v">{course.duration.main}</span>
+                  {course.duration.sub ? (
+                    <span className="hacad-row__sub">
+                      <span className="sr-only">, </span>
+                      {course.duration.sub}
+                    </span>
+                  ) : null}
                 </span>
                 <span className="hacad-row__price t-num">
                   <span className="hacad-row__k t-label">Price </span>
@@ -294,7 +356,7 @@ export function HomeAcademy() {
           data-visible={cursorOn && hovered !== null ? "true" : "false"}
           ref={cursorRef}
         >
-          <div className="hacad-cursor__frame">
+          <div className="hacad-cursor__frame" ref={frameRef}>
             {courses.map((course, i) => (
               <img
                 alt=""

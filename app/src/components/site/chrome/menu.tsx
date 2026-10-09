@@ -15,7 +15,7 @@ import { ui, useUi } from "@/lib/ui";
 import { BurgerLines } from "./burger";
 import { ArrowDownRightIcon } from "./icons";
 import { ChromeLink } from "./link";
-import { MENU_ID, chrome, useChrome, usePathname } from "./shared";
+import { MENU_ID, chrome, focusJumpTarget, useChrome, usePathname } from "./shared";
 import "./menu.css";
 
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -36,6 +36,8 @@ export function FullscreenMenu() {
 
   const rootRef = useRef<HTMLDivElement>(null);
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
+  /** Set by a chapter jump: on close, focus lands on the chapter instead of the burger. */
+  const jumpedRef = useRef<HTMLElement | null>(null);
   const [active, setActive] = useState(currentIndex);
   const [prev, setPrev] = useState<number | null>(null);
 
@@ -47,7 +49,8 @@ export function FullscreenMenu() {
     setPrev(null);
   }, [open, currentIndex]);
 
-  // Warm the preview photography once the visitor has settled in.
+  // Warm the preview photography once the visitor has settled in (wide, hover
+  // screens only: primeMenu ignores the rest, where the preview is not shown).
   useEffect(() => {
     if (!ready || menuPrimed) return;
     const id = window.setTimeout(() => chrome.primeMenu(), 6000);
@@ -94,7 +97,10 @@ export function FullscreenMenu() {
       window.clearTimeout(focusTimer);
       document.removeEventListener("keydown", onKey);
       lockScroll(false);
-      if (previous && document.contains(previous)) previous.focus({ preventScroll: true });
+      const jumped = jumpedRef.current;
+      jumpedRef.current = null;
+      if (jumped && document.contains(jumped)) focusJumpTarget(jumped);
+      else if (previous && document.contains(previous)) previous.focus({ preventScroll: true });
     };
   }, [open]);
 
@@ -116,12 +122,14 @@ export function FullscreenMenu() {
     }
   };
 
-  /** Chapter jumps: on the home page, cut to the chapter while the curtain still covers the screen. */
+  /** Chapter jumps: on the home page, cut to the chapter while the curtain still
+   *  covers the screen; keyboard focus follows to the chapter when the menu closes. */
   const onChapterClick = (id: ChapterId) => (event: MouseEvent<HTMLAnchorElement>) => {
     if (!isHome) return;
     const target = document.getElementById(id);
     if (!target) return;
     event.preventDefault();
+    jumpedRef.current = target;
     lockScroll(false);
     scrollToTarget(target, { immediate: true });
     ui.setMenu(false);
@@ -172,6 +180,19 @@ export function FullscreenMenu() {
             </button>
           </div>
 
+          {/* Small screens: the four chapters sit right under the bar (the foot's
+              journey column takes over from 820px). */}
+          <section
+            aria-labelledby="menu-top-chapters"
+            className="menu-top menu-fade"
+            style={{ "--i": 1 } as CSSProperties}
+          >
+            <h2 className="menu-col__title t-label" id="menu-top-chapters">
+              The journey
+            </h2>
+            <ChapterJumps onJump={onChapterClick} />
+          </section>
+
           <div className="menu-body">
             <nav aria-label="Pages" className="menu-pages">
               <ol>
@@ -219,6 +240,9 @@ export function FullscreenMenu() {
                     decoding="async"
                     height={1250}
                     key={page.href}
+                    // Lazy where the preview is hidden (small screens never fetch it);
+                    // eager once primed, so the photos are warm before the first open.
+                    loading={menuPrimed ? "eager" : "lazy"}
                     src={menuPrimed || open ? page.image : undefined}
                     width={1000}
                   />
@@ -246,23 +270,7 @@ export function FullscreenMenu() {
               <h2 className="menu-col__title t-label" id="menu-foot-chapters">
                 The journey
               </h2>
-              <ul className="menu-jumps">
-                {CHAPTERS.map((c) => (
-                  <li key={c.id}>
-                    <ChromeLink
-                      className="menu-jump"
-                      href={`/#${c.id}`}
-                      onClick={onChapterClick(c.id)}
-                    >
-                      <span aria-hidden="true" className="menu-jump__num t-num">
-                        {c.number}
-                      </span>
-                      <span className="menu-jump__label">{c.title}</span>
-                      <ArrowDownRightIcon className="menu-jump__arrow" />
-                    </ChromeLink>
-                  </li>
-                ))}
-              </ul>
+              <ChapterJumps onJump={onChapterClick} />
             </section>
 
             <LinkColumn i={2} id="menu-foot-work" items={WORK_WITH_US} title="Work with us" />
@@ -300,6 +308,29 @@ export function FullscreenMenu() {
         </div>
       </div>
     </div>
+  );
+}
+
+/** The four chapters as jump links (rendered once per layout; the other copy is display: none). */
+function ChapterJumps({
+  onJump,
+}: {
+  onJump: (id: ChapterId) => (event: MouseEvent<HTMLAnchorElement>) => void;
+}) {
+  return (
+    <ul className="menu-jumps">
+      {CHAPTERS.map((c) => (
+        <li key={c.id}>
+          <ChromeLink className="menu-jump" href={`/#${c.id}`} onClick={onJump(c.id)}>
+            <span aria-hidden="true" className="menu-jump__num t-num">
+              {c.number}
+            </span>
+            <span className="menu-jump__label">{c.title}</span>
+            <ArrowDownRightIcon className="menu-jump__arrow" />
+          </ChromeLink>
+        </li>
+      ))}
+    </ul>
   );
 }
 

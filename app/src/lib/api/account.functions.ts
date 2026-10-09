@@ -1,5 +1,9 @@
 // Customer accounts: create, sign in, sign out, and the signed-in account view.
-// Errors are deliberately generic (no hint whether an email is registered).
+// Sign-in errors are deliberately generic (the same message whether or not an
+// email is registered, and unknown emails cost the same password work). Account
+// creation does say when an email cannot be used ("exists"), since a new
+// customer has to be told; to keep that from becoming a quick lookup, every
+// creation attempt is recorded and each IP is limited to 10 an hour.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -8,18 +12,17 @@ import { createAccountSchema as createSchema, signInSchema } from "./account.rul
 import type { AuthField } from "./account.rules";
 import {
   THROTTLE_WINDOW_MINUTES,
-  burnPasswordCheck,
-  clearFailures,
+  checkSignIn,
+  creationThrottled,
   currentCustomer,
   endSession,
   getDb,
   hashPassword,
-  isThrottled,
   normaliseEmail,
-  recordFailure,
+  pruneAttempts,
+  recordAttempt,
   requestIp,
   startSession,
-  verifyPassword,
 } from "../auth.server";
 
 // Transport-level shape only; the shared rules (account.rules.ts) produce field messages.
@@ -72,25 +75,19 @@ export const signIn = createServerFn({ method: "POST" })
     const email = normaliseEmail(parsed.data.email);
     const ip = requestIp();
     try {
-      if (await isThrottled(db, email, ip)) {
-        return {
-          ok: false,
-          code: "throttled",
-          message: `Too many attempts. For your security, please wait ${THROTTLE_WINDOW_MINUTES} minutes before trying again.`,
-        };
+      // The attempt is recorded before the password check, so parallel requests are counted too.
+      const outcome = await checkSignIn(db, email, parsed.data.password, ip);
+      if (!outcome.ok) {
+        return outcome.reason === "throttled"
+          ? {
+              ok: false,
+              code: "throttled",
+              message: `Too many attempts. For your security, please wait ${THROTTLE_WINDOW_MINUTES} minutes before trying again.`,
+            }
+          : { ok: false, code: "credentials", message: "That email and password don't match. Please try again." };
       }
-      const row = await db
-        .prepare(`SELECT id, name, password_hash FROM customers WHERE email = ?1`)
-        .bind(email)
-        .first<{ id: number; name: string; password_hash: string }>();
-      const valid = row ? await verifyPassword(parsed.data.password, row.password_hash) : await burnPasswordCheck(parsed.data.password);
-      if (!row || !valid) {
-        await recordFailure(db, email, ip);
-        return { ok: false, code: "credentials", message: "That email and password don't match. Please try again." };
-      }
-      await clearFailures(db, email);
-      await startSession(db, row.id);
-      return { ok: true, name: row.name };
+      await startSession(db, outcome.id);
+      return { ok: true, name: outcome.name };
     } catch (error) {
       console.error("Sign in failed", error);
       return SERVER_ERROR;
@@ -115,14 +112,17 @@ export const createAccount = createServerFn({ method: "POST" })
     const name = parsed.data.name.replace(/\s+/g, " ").trim();
     const ip = requestIp();
     try {
-      // Account creation shares the sign-in throttle so it cannot be used to probe emails quickly.
-      if (await isThrottled(db, email, ip)) {
+      // Every creation is recorded (success or not) before the password work, and
+      // each IP gets 10 an hour, so "exists" cannot be used to probe emails quickly.
+      const attemptId = await recordAttempt(db, email, ip);
+      if (await creationThrottled(db, ip, attemptId)) {
         return {
           ok: false,
           code: "throttled",
-          message: `Too many attempts. For your security, please wait ${THROTTLE_WINDOW_MINUTES} minutes before trying again.`,
+          message: "Too many attempts. For your security, please wait an hour before trying again.",
         };
       }
+      await pruneAttempts(db);
       const passwordHash = await hashPassword(parsed.data.password);
       const inserted = await db
         .prepare(
@@ -133,7 +133,6 @@ export const createAccount = createServerFn({ method: "POST" })
         .bind(email, name, passwordHash)
         .first<{ id: number }>();
       if (!inserted) {
-        await recordFailure(db, email, ip);
         return {
           ok: false,
           code: "exists",

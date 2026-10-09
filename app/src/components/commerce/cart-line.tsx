@@ -84,7 +84,7 @@ export function CartLine({ item, size = "sm", highlight = false, index = 0 }: Ca
         {sub ? <p className="cl-sub">{sub}</p> : null}
         {name ? <p className="cl-variant">{name}</p> : null}
         {quantity > 1 ? <p className="cl-unit t-num">{formatRand(variant.price)} each</p> : null}
-        {!live ? <p className="cl-warn">This date has already taken place. Please remove it to check out.</p> : null}
+        {!live ? <p className="cl-warn">This course has already started. Please remove it to check out.</p> : null}
       </div>
 
       <p className="cl-total t-num">

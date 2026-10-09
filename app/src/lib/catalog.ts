@@ -5,7 +5,7 @@ export interface Variant {
   id: string;
   title: string;
   price: number;
-  /** ISO date for dated items (Academy courses). Past dates are not sold. */
+  /** ISO date for dated items (Academy courses). Sales close when the course starts (see isLiveVariant). */
   date?: string;
 }
 
@@ -170,7 +170,7 @@ export const PRODUCTS: Product[] = [
     "handle": "plato-coffee-pods-pack-of-10",
     "title": "Platō Coffee Pods (Pack of 10 Nespresso Compatible Pods)",
     "category": "pods",
-    "description": "Indulge in the exclusive luxury of Platō Coffee Pods. With a partnership with @4wks_coffee, you can enjoy the smooth taste of our eco-friendly, compostable pods. 100% Nespresso Machine compatible for a convenient and premium coffee experience. Start your morning ritual with Platō. Important Information Slow Extraction . In comparison to Aluminium Nespresso(r) capsules, our Platō pods are different. Here are some reasons why: Each capsule is filled with 6.0g of freshly roasted coffee, in comparison to the 5.4g you would find in a Nespresso(r) capsule.",
+    "description": "Indulge in the exclusive luxury of Platō Coffee Pods. With a partnership with 4WKS Coffee, you can enjoy the smooth taste of our eco-friendly, compostable pods. 100% Nespresso Machine compatible for a convenient and premium coffee experience. Start your morning ritual with Platō. Important Information Slow Extraction . In comparison to Aluminium Nespresso(r) capsules, our Platō pods are different. Here are some reasons why: Each capsule is filled with 6.0g of freshly roasted coffee, in comparison to the 5.4g you would find in a Nespresso(r) capsule.",
     "images": [
       "/assets/products/plato-coffee-pods-pack-of-10-1.jpg",
       "/assets/products/plato-coffee-pods-pack-of-10-2.jpg",
@@ -189,7 +189,7 @@ export const PRODUCTS: Product[] = [
     "handle": "decaf-plato-coffee-pods-pack-of-10-nespresso-compatible-pods",
     "title": "Decaf Platō Coffee Pods (Pack of 10 Nespresso Compatible Pods)",
     "category": "pods",
-    "description": "Indulge in the exclusive luxury of Platō Decaf Coffee Pods. With a partnership with @4wks_coffee, you can enjoy the smooth taste of our eco-friendly, compostable pods. 100% Nespresso Machine compatible for a convenient and premium decaf coffee experience. Start your morning ritual with Platō. Important Information Slow Extraction . In comparison to Aluminium Nespresso capsules, our Platō decaf coffee pods are different. Here are some reasons why: Each capsule is filled with 6.0g of freshly roasted decaf coffee, in comparison to the 5.4g you would find in a Nespresso capsule.",
+    "description": "Indulge in the exclusive luxury of Platō Decaf Coffee Pods. With a partnership with 4WKS Coffee, you can enjoy the smooth taste of our eco-friendly, compostable pods. 100% Nespresso Machine compatible for a convenient and premium decaf coffee experience. Start your morning ritual with Platō. Important Information Slow Extraction . In comparison to Aluminium Nespresso capsules, our Platō decaf coffee pods are different. Here are some reasons why: Each capsule is filled with 6.0g of freshly roasted decaf coffee, in comparison to the 5.4g you would find in a Nespresso capsule.",
     "images": [
       "/assets/products/decaf-plato-coffee-pods-pack-of-10-nespresso-compatible-pods-1.jpg"
     ],
@@ -206,7 +206,7 @@ export const PRODUCTS: Product[] = [
     "handle": "plato-coffee-pods-box-of-50",
     "title": "Platō Coffee Pods (Box of 50)",
     "category": "pods",
-    "description": "Discover the rich taste of Platō Coffee Pods. In partnership with @4wks_coffee, we bring you the smooth, balanced flavour of Platō’s signature roast in biodegradable pods. Compatible with all Nespresso® machines, they offer a simple, sustainable way to enjoy exceptional coffee every day. Begin your ritual with Platō. This carton contains 50 pods . Important Information Slow Extraction . In comparison to Aluminium Nespresso(r) capsules, our Platō pods are different. Here are some reasons why: Each capsule is filled with 6.0g of freshly roasted coffee, in comparison to the 5.4g you would find in a Nespresso(r) capsule.",
+    "description": "Discover the rich taste of Platō Coffee Pods. In partnership with 4WKS Coffee, we bring you the smooth, balanced flavour of Platō’s signature roast in biodegradable pods. Compatible with all Nespresso® machines, they offer a simple, sustainable way to enjoy exceptional coffee every day. Begin your ritual with Platō. This carton contains 50 pods . Important Information Slow Extraction . In comparison to Aluminium Nespresso(r) capsules, our Platō pods are different. Here are some reasons why: Each capsule is filled with 6.0g of freshly roasted coffee, in comparison to the 5.4g you would find in a Nespresso(r) capsule.",
     "images": [
       "/assets/products/plato-coffee-pods-box-of-50-1.jpg"
     ],
@@ -223,7 +223,7 @@ export const PRODUCTS: Product[] = [
     "handle": "plato-coffee-pods-carton-12-sleeves",
     "title": "Platō Coffee Pods Carton (12 Sleeves of 10 Pods)",
     "category": "pods",
-    "description": "Experience the opulent indulgence of Platō Coffee Pods. Our partnership with @4wks_coffee allows you to savor the velvety flavor of our environmentally-friendly, biodegradable pods. 100% compatible with Nespresso Machines for a sophisticated and lavish coffee experience. Begin your daily ritual with Platō. This carton contains 12 sleeves of 10 pods making a total of 120 pods. Important Information Slow Extraction . In comparison to Aluminium Nespresso(r) capsules, our Platō pods are different. Here are some reasons why: Each capsule is filled with 6.0g of freshly roasted coffee, in comparison to the 5.4g you would find in a Nespresso(r) capsule.",
+    "description": "Experience the opulent indulgence of Platō Coffee Pods. Our partnership with 4WKS Coffee allows you to savour the velvety flavour of our environmentally-friendly, biodegradable pods. 100% compatible with Nespresso Machines for a sophisticated and lavish coffee experience. Begin your daily ritual with Platō. This carton contains 12 sleeves of 10 pods making a total of 120 pods. Important Information Slow Extraction . In comparison to Aluminium Nespresso(r) capsules, our Platō pods are different. Here are some reasons why: Each capsule is filled with 6.0g of freshly roasted coffee, in comparison to the 5.4g you would find in a Nespresso(r) capsule.",
     "images": [
       "/assets/products/plato-coffee-pods-carton-12-sleeves-1.jpg",
       "/assets/products/plato-coffee-pods-carton-12-sleeves-2.jpg",
@@ -757,7 +757,7 @@ export const PRODUCTS: Product[] = [
     "category": "academy",
     "description": "Home Brewing (Espresso) at The Academy by Platō is a practical, hands-on course designed to help you make better coffee at home. We’ll cover the essentials of espresso extraction and milk steaming, giving you a solid understanding of what to do when the coffee doesn’t taste quite right. The session is relaxed and interactive, with plenty of hands-on practice. You’re welcome to bring your own home espresso setup, and our coffee professional will help you apply what you learn to your equipment. You’ll leave with practical skills, a clearer understanding of espresso and milk, and a bag of coffee to take home so you can keep practising.",
     "images": [
-      "/assets/products/home-brewing-filter-copy-1.jpg"
+      "/assets/academy/group-head.webp"
     ],
     "variants": [
       {
@@ -781,7 +781,7 @@ export const PRODUCTS: Product[] = [
     "category": "academy",
     "description": "Home Brewing (Filter) at The Academy by Platō is an intentionally designed alternative brewing experience that helps you master key brewing variables to achieve optimal extraction and flavour. We explore each of the seven variables in a purposeful, hands on way, evaluating the impact of each on the overall taste experience. This course is fun, practical, and informative. Whether you are a seasoned professional or just starting your journey into drip coffee, this is the class for you. Venue 40 Canterbury Str, District Six, Cape Town",
     "images": [
-      "/assets/products/home-brewing-filter-1.jpg"
+      "/assets/academy/pour-over.webp"
     ],
     "variants": [
       {
@@ -805,7 +805,7 @@ export const PRODUCTS: Product[] = [
     "category": "academy",
     "description": "Join us for an introductory sensory workshop presented by our Head of Academy: Shan Black. She will open up the sensory world by teaching you what the basic tastes encompass and how all your senses work together to bring flavour to life. This fully immersive experience is one that will truly change the way you taste coffee! Venue 40 Canterbury Str, District Six, Cape Town",
     "images": [
-      "/assets/products/sensory-evaluation-and-tasting-1.jpg"
+      "/assets/academy/cupping.webp"
     ],
     "variants": [
       {
@@ -851,13 +851,26 @@ export const PRODUCTS: Product[] = [
 
 export const productByHandle = (handle: string) => PRODUCTS.find((p) => p.handle === handle);
 
-const todayIso = () => new Date().toISOString().slice(0, 10);
+/**
+ * When a dated variant (an Academy course) starts, as epoch ms. The start time
+ * is read from the variant title ("13 October 2026 | 09:00 - 15:00"; 00:00
+ * when there is none) on the course date, in South African time (SAST, UTC+2,
+ * no daylight saving), so the server, the Worker and every browser agree
+ * whatever their own time zone.
+ */
+export const variantStart = (variant: Variant) => {
+  if (!variant.date) return Number.NaN;
+  const time = /\|\s*(\d{1,2}):(\d{2})/.exec(variant.title);
+  const hh = (time?.[1] ?? "0").padStart(2, "0");
+  const mm = time?.[2] ?? "00";
+  return Date.parse(`${variant.date}T${hh}:${mm}:00+02:00`);
+};
 
-/** Variants still on sale: undated, or dated today or later. */
-export const liveVariants = (product: Product) =>
-  product.variants.filter((v) => !v.date || v.date >= todayIso());
+/** On sale: undated, or the course has not started yet. Sales close at the start time. */
+export const isLiveVariant = (variant: Variant) => !variant.date || Date.now() < variantStart(variant);
 
-export const isLiveVariant = (variant: Variant) => !variant.date || variant.date >= todayIso();
+/** Variants still on sale (see isLiveVariant). */
+export const liveVariants = (product: Product) => product.variants.filter(isLiveVariant);
 
 export const findVariant = (variantId: string) => {
   for (const product of PRODUCTS) {

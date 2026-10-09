@@ -1,5 +1,6 @@
-// The stone floor and its soft baked shadows. The floor is a large plane whose
-// alpha falls off radially, so the stone (#e7e5df) melts into the paper page
+// The stone floor and its soft baked shadows. The floor is a large plane with a
+// flat, fully opaque stone core (#e7e5df) where the objects stand, whose alpha
+// then falls off toward the rim, so the stone melts into the paper page
 // background with no visible edge. Shadows are blurred blobs (contact + cast)
 // drawn on top of it: deterministic, soft as a big studio softbox, and free.
 import * as THREE from "three";
@@ -21,6 +22,10 @@ const FLOOR_FRAGMENT = /* glsl */ `
   uniform vec2 uCenter;
   // x: half width, y: reach toward the camera, z: reach away from it.
   uniform vec3 uRadius;
+  // The flat full-alpha core, same layout (0 = a point, the old radial pool).
+  uniform vec3 uCore;
+  // Where the melt starts, as a fraction of the way from the core to the rim.
+  uniform float uInner;
   uniform float uOpacity;
   varying vec3 vWorld;
 
@@ -30,10 +35,13 @@ const FLOOR_FRAGMENT = /* glsl */ `
 
   void main() {
     vec2 rel = vWorld.xz - uCenter;
-    vec2 d = vec2(rel.x / uRadius.x, rel.y / (rel.y > 0.0 ? uRadius.y : uRadius.z));
+    bool front = rel.y > 0.0;
+    vec2 radius = vec2(uRadius.x, front ? uRadius.y : uRadius.z);
+    vec2 core = min(vec2(uCore.x, front ? uCore.y : uCore.z), radius * 0.9);
+    vec2 d = max(abs(rel) - core, 0.0) / (radius - core);
     float r = length(d);
     // Long, soft shoulder: flat stone in the middle, a very gradual melt at the rim.
-    float a = 1.0 - smoothstep(0.18, 1.0, r);
+    float a = 1.0 - smoothstep(uInner, 1.0, r);
     a = a * a * (3.0 - 2.0 * a);
     // Dither so the 8-bit gradient never bands on a large monitor.
     a += (hash(gl_FragCoord.xy) - 0.5) / 255.0;
@@ -42,10 +50,23 @@ const FLOOR_FRAGMENT = /* glsl */ `
   }
 `;
 
+export interface FloorReach {
+  /** Half width. */
+  x: number;
+  /** Reach toward the camera. */
+  front: number;
+  /** Reach away from the camera. */
+  back: number;
+}
+
 export interface FloorPool {
   mesh: THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>;
-  /** Centre on the floor, half width, reach toward the camera (front) and away from it (back). */
-  set(center: { x: number; z: number }, radius: { x: number; front: number; back: number }, opacity?: number): void;
+  /**
+   * Centre on the floor and the rim where the stone has melted into the page.
+   * `core` is an optional flat, fully opaque stone area around the centre (the
+   * melt then runs from its edge to the rim); without it the pool is radial.
+   */
+  set(center: { x: number; z: number }, radius: FloorReach, opacity?: number, core?: FloorReach): void;
   dispose(): void;
 }
 
@@ -59,6 +80,8 @@ export function createFloorPool(colour: string): FloorPool {
       uColor: { value: new THREE.Color(colour) },
       uCenter: { value: new THREE.Vector2(0, 0) },
       uRadius: { value: new THREE.Vector3(3, 2, 2) },
+      uCore: { value: new THREE.Vector3(0, 0, 0) },
+      uInner: { value: 0.18 },
       uOpacity: { value: 1 },
     },
     transparent: true,
@@ -70,9 +93,13 @@ export function createFloorPool(colour: string): FloorPool {
   mesh.frustumCulled = false;
   return {
     mesh,
-    set(center, radius, opacity = 1) {
+    set(center, radius, opacity = 1, core) {
       material.uniforms.uCenter.value.set(center.x, center.z);
       material.uniforms.uRadius.value.set(radius.x, radius.front, radius.back);
+      if (core) material.uniforms.uCore.value.set(core.x, core.front, core.back);
+      else material.uniforms.uCore.value.set(0, 0, 0);
+      // A flat core already holds the stone: start the melt right at its edge.
+      material.uniforms.uInner.value = core ? 0 : 0.18;
       material.uniforms.uOpacity.value = opacity;
     },
     dispose() {

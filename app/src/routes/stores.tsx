@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { StoresPage } from "@/components/pages/stores";
+import { STORE_COUNT } from "@/lib/site";
 
 const TITLE = "Find your Platō | PLATŌ Coffee";
-const DESCRIPTION =
-  "Find a Platō café near you: search by name, suburb or city across Gauteng, the Western Cape, Mpumalanga, Limpopo and North West, with hours and directions. Over 140 locations, and London.";
+const DESCRIPTION = `Find a Platō café near you: search by name, suburb or city across Gauteng, the Western Cape, Mpumalanga, Limpopo and North West, with hours and directions. About ${STORE_COUNT} locations, and London.`;
 
 export const Route = createFileRoute("/stores")({
   head: () => ({

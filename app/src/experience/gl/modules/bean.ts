@@ -17,13 +17,16 @@ import { FIRST_CRACK_AT } from "../../story";
 import type { FrameId } from "../../story";
 import type { FrameView, GLContext, SceneModule } from "../engine";
 import { createBeanGeometry, createBeanNoiseTexture } from "../lib/bean";
+import { prewarmScene } from "../lib/prewarm";
 import type { CupSet } from "./bean/cups";
 import { createCupSet } from "./bean/cups";
 import type { DrumSet } from "./bean/drum";
 import { createDrumSet, DRUM_MASS, DRUM_ORIGIN } from "./bean/drum";
 import type { FilmState, Kit } from "./bean/kit";
+import type { CopyBounds } from "./bean/copy";
+import { measureCopy, sameCopy } from "./bean/copy";
 import type { PourSet } from "./bean/pour";
-import { createPourSet } from "./bean/pour";
+import { createPourSet, HOPPER_OUTLET_R, HOPPER_OUTLET_Y, HOPPER_RIM_RADIUS, HOPPER_RIM_TUBE } from "./bean/pour";
 import type { LightRig, Shot } from "./bean/rig";
 import { applyShot, copyShot, createLightRig, fitDistance, lerpShot, shot, shotQuaternion } from "./bean/rig";
 import { ScreenGrade } from "./bean/sprites";
@@ -68,12 +71,22 @@ interface Built {
 const _t = new THREE.Vector3();
 const _q = new THREE.Quaternion();
 const _up = new THREE.Vector3();
+const _v = new THREE.Vector3();
+/** Scratch camera for measuring where a shot puts the hopper on screen. */
+const _probe = new THREE.PerspectiveCamera(35, 1, 0.04, 160);
+/** Outer edge of the chrome bezel and of the bolted flange ring around the sight glass. */
+const BEZEL_R = HOPPER_RIM_RADIUS + HOPPER_RIM_TUBE;
+const DRUM_FLANGE_R = 1.98;
+/** How often (ms) the stacked layout re-reads the DOM copy while chapter one is on screen. */
+const COPY_REMEASURE_MS = 1000;
 
 export function createBeanModule(): SceneModule {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(35, 1, 0.04, 160);
   let built: Built | null = null;
   let plan: Plan | null = null;
+  let copy: CopyBounds | null = null;
+  let copyAt = 0;
   const cur = shot();
   const state: FilmState = {
     b: 0,
@@ -86,22 +99,101 @@ export function createBeanModule(): SceneModule {
     camera,
   };
 
+  /** Hopper shots for f02 (start and end of the pin) at distance `dist`, lens shift (sx, sy). */
+  function pourShots(dist: number, sx: number, sy: number) {
+    return [
+      shot({ tx: 0, ty: -1.05, tz: 0, dist, yaw: -0.22, pitch: -0.24, sx, sy }),
+      shot({ tx: 0, ty: -0.75, tz: 0, dist: dist * 0.88, yaw: -0.08, pitch: -0.4, sx, sy }),
+    ] as const;
+  }
+
+  /**
+   * Stacked portrait f02: the hopper (rim down to the outlet flange; the stem is
+   * off) sits between the header and the copy block, at least 24px above the
+   * kicker through the whole pin. Shrinks the hopper only when it cannot fit.
+   */
+  function fitHopper(ctx: GLContext, copy: CopyBounds, dist: number) {
+    const aspect = ctx.width / Math.max(1, ctx.height);
+    const H = Math.max(1, ctx.height);
+    const topN = 1 - (2 * (copy.header + 12)) / H;
+    const botN = 1 - (2 * (copy.pourTop - 24)) / H;
+    const avail = topN - botN;
+    let hi = 0;
+    let lo = 0;
+    for (let i = 0; i < 5; i += 1) {
+      hi = -Infinity;
+      lo = Infinity;
+      for (const s of pourShots(dist, 0, 0)) {
+        _probe.aspect = aspect;
+        applyShot(_probe, s, 0, 0);
+        for (let k = 0; k < 16; k += 1) {
+          const a = (k / 16) * Math.PI * 2;
+          const rr = HOPPER_RIM_RADIUS + HOPPER_RIM_TUBE;
+          hi = Math.max(hi, _v.set(Math.cos(a) * rr, HOPPER_RIM_TUBE, Math.sin(a) * rr).project(_probe).y);
+          lo = Math.min(lo, _v.set(Math.cos(a) * HOPPER_OUTLET_R, HOPPER_OUTLET_Y, Math.sin(a) * HOPPER_OUTLET_R).project(_probe).y);
+        }
+      }
+      const span = hi - lo;
+      if (span <= avail || avail < 0.3) break;
+      dist *= (span / avail) * 1.01;
+    }
+    const centred = (topN + botN) / 2 - (hi + lo) / 2;
+    // Clearing the copy wins over clearing the header.
+    const sy = Math.max(botN - lo, Math.min(centred, topN - hi));
+    return { dist, sy };
+  }
+
+  /**
+   * Stacked portrait f03: the drum window sits centred between the title and the
+   * roast readout, the chrome bezel at least 24px and the flange ring at least
+   * 12px clear of both, up to the closest push-in (`push` x the distance).
+   */
+  function fitDrum(ctx: GLContext, copy: CopyBounds, dist: number, push: number) {
+    const H = Math.max(1, ctx.height);
+    const tanHalf = Math.tan(THREE.MathUtils.degToRad(35) / 2);
+    const half = (copy.roastTop - copy.titleBottom) / 2;
+    const ppu = H / (2 * dist * push * tanHalf);
+    const need = Math.max(DRUM_FLANGE_R * ppu + 12, BEZEL_R * ppu + 24);
+    if (need > half && half > 40) {
+      const fit = Math.min((half - 12) / DRUM_FLANGE_R, (half - 24) / BEZEL_R);
+      dist *= ppu / Math.max(ppu * 0.35, fit);
+    }
+    const sy = 1 - (copy.titleBottom + copy.roastTop) / H;
+    return { dist, sy };
+  }
+
   function layout(ctx: GLContext) {
     if (!built) return;
     const aspect = ctx.width / Math.max(1, ctx.height);
     const mob = ctx.isMobile;
-    // Hopper: rim spans ~36% of the width on desktop (cropped at the bottom), ~62% on mobile.
+    // Stacked portrait: the CSS stacks the copy (f02 bottom, f03 title top and
+    // readout bottom) below 820px, and the hopper and drum sit centred between.
+    const stacked = mob && aspect < 1 && ctx.width < 820;
+    copy = stacked ? measureCopy(ctx.height) : null;
+    copyAt = performance.now();
+    // Hopper: rim spans ~36% of the width on desktop (cropped at the bottom), ~56% on mobile.
     const tanHalf = Math.tan(THREE.MathUtils.degToRad(35) / 2);
-    const Dp = Math.max(fitDistance(2.3, mob ? 0.9 : 0.98, aspect), 1.47 / ((mob ? 0.56 : 0.36) * tanHalf * aspect));
-    const Dc = fitDistance(1.98, mob ? 0.84 : 0.62, aspect);
+    let Dp = Math.max(fitDistance(2.3, mob ? 0.9 : 0.98, aspect), 1.47 / ((mob ? 0.56 : 0.36) * tanHalf * aspect));
+    // Drum: on tablets in portrait the full-width drum would run into the copy.
+    const drumFrac = stacked && aspect > 0.6 ? Math.min(0.84, (0.6 / aspect) * 0.75) : mob ? 0.84 : 0.62;
+    let Dc = fitDistance(1.98, drumFrac, aspect);
+    const push = stacked ? 0.92 : 0.84;
     const Dt = fitDistance(TRAY_RADIUS + 0.15, mob ? 0.9 : 0.78, aspect);
     const Dg = mob ? Dt * 1.05 : Dt * 1.72;
     const pourS = mob ? [0, 0.3] : [0.3, -0.02];
     const drumS = mob ? [0, 0.24] : [-0.25, 0.01];
     const trayS = mob ? [0, 0.22] : [0.42, -0.02];
     const gridS = mob ? [0, 0.16] : [0.31, 0.02];
+    if (copy) {
+      const hop = fitHopper(ctx, copy, Dp);
+      Dp = hop.dist;
+      pourS[1] = hop.sy;
+      const drum = fitDrum(ctx, copy, Dc, push);
+      Dc = drum.dist;
+      drumS[1] = drum.sy;
+    }
 
-    const s02a = shot({ tx: 0, ty: -1.05, tz: 0, dist: Dp, yaw: -0.22, pitch: -0.24, sx: pourS[0], sy: pourS[1] });
+    const [s02a, s02b] = pourShots(Dp, pourS[0], pourS[1]);
     // f01 sits exactly one screen above f02, so the hopper rises with the page (1x).
     shotQuaternion(s02a, _q);
     _up.set(0, 1, 0).applyQuaternion(_q);
@@ -110,10 +202,9 @@ export function createBeanModule(): SceneModule {
     s01.tx += _up.x * hv;
     s01.ty += _up.y * hv;
     s01.tz += _up.z * hv;
-    const s02b = shot({ tx: 0, ty: -0.75, tz: 0, dist: Dp * 0.88, yaw: -0.08, pitch: -0.4, sx: pourS[0], sy: pourS[1] });
     const sDive = shot({ tx: 0, ty: 0, tz: 0, dist: Dc, yaw: 0.6, pitch: -HALF_PI, sx: drumS[0], sy: drumS[1] });
     const s03a = shot({ tx: DRUM_ORIGIN.x, ty: DRUM_ORIGIN.y, tz: DRUM_ORIGIN.z, dist: Dc, yaw: 0, pitch: 0, sx: drumS[0], sy: drumS[1] });
-    const s03b = shot({ tx: DRUM_ORIGIN.x, ty: DRUM_ORIGIN.y, tz: DRUM_ORIGIN.z, dist: Dc * 0.84, yaw: 0.07, pitch: -0.035, sx: drumS[0], sy: drumS[1] });
+    const s03b = shot({ tx: DRUM_ORIGIN.x, ty: DRUM_ORIGIN.y, tz: DRUM_ORIGIN.z, dist: Dc * push, yaw: 0.07, pitch: -0.035, sx: drumS[0], sy: drumS[1] });
     const sPush = shot({
       tx: DRUM_ORIGIN.x + DRUM_MASS.x,
       ty: DRUM_ORIGIN.y + DRUM_MASS.y,
@@ -137,7 +228,7 @@ export function createBeanModule(): SceneModule {
     const sGridHold = copyShot(shot(), sGrid);
     sGridHold.dist = Dg * 0.95;
 
-    built.pour.layout(s02a, aspect, ctx.dpr);
+    built.pour.layout(s02a, aspect, ctx.dpr, !stacked);
     const grid = built.cups.layout(sGrid, aspect, mob);
     built.tray.setGrid(grid);
     built.cups.diveTarget(_t);
@@ -201,22 +292,13 @@ export function createBeanModule(): SceneModule {
       camera.aspect = ctx.width / Math.max(1, ctx.height);
       layout(ctx);
 
-      // Compile every set up front so the cuts never hitch on a shader compile.
+      // Compile every set up front (and the shadow-depth programs of every
+      // caster, the tray included) so the cuts never hitch on a shader compile.
       const groups = [pour.group, drum.group, tray.group, cups.group];
-      for (const g of groups) g.visible = true;
       applyShot(camera, plan!.s02a, 0, 0);
-      try {
-        await ctx.renderer.compileAsync(scene, camera);
-      } catch {
-        ctx.renderer.compile(scene, camera);
-      }
-      // One tiny off-screen render also builds the shadow-depth programs.
-      const warm = new THREE.WebGLRenderTarget(16, 16);
-      const prev = ctx.renderer.getRenderTarget();
-      ctx.renderer.setRenderTarget(warm);
-      ctx.renderer.render(scene, camera);
-      ctx.renderer.setRenderTarget(prev);
-      warm.dispose();
+      _t.set(plan!.s02a.tx, plan!.s02a.ty, plan!.s02a.tz);
+      rig.aim(camera, _t, 8, 0);
+      await prewarmScene(ctx.renderer, scene, camera, { show: groups });
       for (const g of groups) g.visible = false;
     },
 
@@ -237,6 +319,11 @@ export function createBeanModule(): SceneModule {
       const { rig, pour, drum, tray, cups, grade, fog } = built;
       const reduced = ctx.reduced;
       const b = reduced ? stillBeat(frames) : beatFromViews(frames);
+      // Stacked layouts follow the DOM copy if it reflows without a resize (fonts, copy edits).
+      if (copy && b < 4.6 && performance.now() - copyAt > COPY_REMEASURE_MS) {
+        copyAt = performance.now();
+        if (!sameCopy(copy, measureCopy(ctx.height))) layout(ctx);
+      }
       state.b = b;
       state.time = ctx.time;
       state.delta = ctx.delta;

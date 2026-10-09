@@ -312,11 +312,47 @@
   color: var(--plato-ink);
 }
 
-/* Frame 08's line waits for the white to resolve before it is read. */
+/* Frame 08's line waits for the white to resolve before it is read, and leaves
+ * (rising faster than the page and blurring out) before the stage scrolls it
+ * under the header. */
 .scroll-scrub__chapter[data-ss-late] .scroll-scrub__copy {
-  opacity: var(--ss-f08, 1);
-  transform: translate3d(0, calc((1 - var(--ss-f08, 1)) * 32px), 0);
-  filter: blur(calc((1 - var(--ss-f08, 1)) * 8px));
+  opacity: calc(var(--ss-f08, 1) * (1 - var(--ss-f08-out, 0)));
+  transform: translate3d(
+    0,
+    calc((1 - var(--ss-f08, 1)) * 32px - var(--ss-f08-out, 0) * 12vh),
+    0
+  );
+  filter: blur(calc((1 - var(--ss-f08, 1)) * 8px + var(--ss-f08-out, 0) * 8px));
+}
+
+/* Frame 08 on wider screens: the copy keeps to a right column that clears the
+ * cup, over a soft paper scrim. Below a 1.6 aspect ratio the cover crop narrows,
+ * so the picture shifts left (object-position x above 50%) to keep the cup clear. */
+.ch-film {
+  --ch-f08-x: 35%;
+}
+@media (min-width: 861px) {
+  #f08 .scroll-scrub__copy {
+    width: min(34rem, calc(42vw - clamp(1.25rem, 6vw, 6rem)));
+  }
+  #f08 .scroll-scrub__title {
+    max-width: none;
+    font-size: clamp(2.75rem, 4.6vw, 5.5rem);
+  }
+  #f08 .scroll-scrub__copy::before {
+    inset: -5rem -4rem -5rem -6rem;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--ss-bg) 94%, transparent) 0%,
+      color-mix(in srgb, var(--ss-bg) 86%, transparent) 60%,
+      color-mix(in srgb, var(--ss-bg) 0%, transparent) 100%
+    );
+  }
+}
+@media (min-width: 861px) and (max-aspect-ratio: 8 / 5) {
+  .ch-film {
+    --ch-f08-x: 62%;
+  }
 }
 
 @media (max-width: 860px) {
@@ -350,8 +386,9 @@
     width: min(100%, 36rem);
   }
 
+  /* The scrim runs to the bottom edge of the screen (no hard band under the copy). */
   .scroll-scrub__copy::before {
-    inset: -3rem -2rem;
+    inset: -3rem -2rem calc(-5.75rem - env(safe-area-inset-bottom)) -2rem;
     background: linear-gradient(
       to top,
       var(--ss-bg) 0%,

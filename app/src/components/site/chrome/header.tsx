@@ -1,12 +1,13 @@
-// SiteHeader: wordmark, the four chapters, account, cart and the burger, plus a
+// SiteHeader: wordmark, the four chapters, account, bag and the burger, plus a
 // hairline progress line along the top edge. Colours come from the story theme
-// vars, so the whole bar flips with the pour (dark to white) and the menu (forest).
+// vars, so the whole bar flips with the pour (dark to white) and the menu (forest);
+// it turns ink early over the bright milk film, and forest over the footer.
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, MouseEvent } from "react";
 
 import { RollText } from "@/components/site/text/reveal";
 import { Wordmark } from "@/components/site/wordmark";
-import { useStory } from "@/experience/story";
+import { POUR_WHITE_WINDOW, story, useStory } from "@/experience/story";
 import { getSessionSummary } from "@/lib/api/account.functions";
 import { cart, cartCount, useCart } from "@/lib/cart";
 import { ensureGsap, prefersReducedMotion, scrollToTarget } from "@/lib/motion/smooth";
@@ -17,10 +18,26 @@ import { ui, useUi } from "@/lib/ui";
 import { BurgerLines } from "./burger";
 import { BagIcon, UserIcon } from "./icons";
 import { ChromeLink } from "./link";
-import { FOOTER_ID, MENU_ID, chrome, useChrome, usePathname } from "./shared";
+import {
+  FOOTER_ID,
+  MENU_ID,
+  chrome,
+  focusJumpTarget,
+  measureStoryOnScreen,
+  observeStory,
+  useChrome,
+  usePathname,
+} from "./shared";
 import "./header.css";
 
 const CONDENSE_AT = 80;
+/** f07 progress from which the milk film is bright enough under the bar to need ink. */
+const POUR_LIGHT_FROM = 0.25;
+/** Fired by the account forms after a successful sign in, account creation or sign out. */
+const SESSION_EVENT = "plato:session-changed";
+
+type Tone = "theme" | "forest" | "ink";
+type ScrollTriggerInstance = ReturnType<ReturnType<typeof ensureGsap>["ScrollTrigger"]["create"]>;
 
 function supportsScrollTimeline() {
   return (
@@ -33,11 +50,11 @@ function supportsScrollTimeline() {
 export function SiteHeader() {
   const pathname = usePathname();
   const isHome = pathname === "/";
-  const { chapter } = useStory();
+  const { chapter, theme } = useStory();
   const { menuOpen, ready } = useUi();
   const { condensed } = useChrome();
 
-  const [tone, setTone] = useState<"theme" | "forest">("theme");
+  const [tone, setTone] = useState<Tone>("theme");
   const [pastStory, setPastStory] = useState(false);
   const [intro, setIntro] = useState<"none" | "idle" | "play" | "done">("none");
   const [firstName, setFirstName] = useState<string | null>(null);
@@ -46,6 +63,9 @@ export function SiteHeader() {
 
   const active: ChapterId | null = isHome && !pastStory ? chapter : null;
   const activeSpec = CHAPTERS.find((c) => c.id === active) ?? null;
+  // A soft gradient only over the dark roast frames and the film; a solid band
+  // everywhere else so paper content never reads through the bar.
+  const scrim = isHome && theme === "roast" ? "soft" : "solid";
 
   /* Intro: on the first load the header waits behind the preloader, then drops in. */
   useEffect(() => {
@@ -61,31 +81,49 @@ export function SiteHeader() {
     return () => window.clearTimeout(id);
   }, [intro]);
 
-  /* Signed-in state for the profile button (re-checked per page, since signing
-     in or out happens on /account). Never throws; no database means signed out. */
+  /* Signed-in state for the profile button: re-checked per page, and whenever the
+     account forms report a sign in, a new account or a sign out (those stay on
+     /account). Never throws; no database means signed out. */
   useEffect(() => {
     let live = true;
-    getSessionSummary()
-      .then((s) => {
-        if (live) setFirstName(s.signedIn ? (s.firstName ?? "") : null);
-      })
-      .catch(() => {
-        if (live) setFirstName(null);
-      });
+    let request = 0;
+    const refetch = () => {
+      const id = (request += 1);
+      getSessionSummary()
+        .then((s) => {
+          if (live && id === request) setFirstName(s.signedIn ? (s.firstName ?? "") : null);
+        })
+        .catch(() => {
+          if (live && id === request) setFirstName(null);
+        });
+    };
+    refetch();
+    window.addEventListener(SESSION_EVENT, refetch);
     return () => {
       live = false;
+      window.removeEventListener(SESSION_EVENT, refetch);
     };
   }, [pathname]);
 
-  /* Condense after 80px, and switch to the forest tone while the footer sits under the bar. */
+  /* One rAF measure per scroll: condense after 80px, publish whether the story is
+     on screen (sound, store pill), turn ink over the bright milk film before the
+     theme flips, and borrow the forest tone while the footer sits under the bar. */
   useEffect(() => {
     let raf = 0;
     const measure = () => {
       raf = 0;
-      chrome.setCondensed(window.scrollY > CONDENSE_AT);
       const footer = document.getElementById(FOOTER_ID);
       const overFooter = !!footer && footer.getBoundingClientRect().top < 38;
-      setTone(overFooter ? "forest" : "theme");
+      const storyOnScreen = isHome && measureStoryOnScreen();
+      const p7 = story.progress.f07 ?? 0;
+      const light =
+        isHome &&
+        document.documentElement.dataset.story === "roast" &&
+        p7 >= POUR_LIGHT_FROM &&
+        p7 < POUR_WHITE_WINDOW.cover;
+      const ink = light && !overFooter;
+      chrome.setScroll({ condensed: window.scrollY > CONDENSE_AT, storyOnScreen, inkTone: ink });
+      setTone(overFooter ? "forest" : ink ? "ink" : "theme");
     };
     const schedule = () => {
       if (!raf) raf = requestAnimationFrame(measure);
@@ -93,12 +131,15 @@ export function SiteHeader() {
     measure();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
+    // The story mounts and grows after hydration; re-measure when it does.
+    const stopWatching = isHome ? observeStory(schedule) : null;
     return () => {
       cancelAnimationFrame(raf);
+      stopWatching?.();
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
     };
-  }, [pathname]);
+  }, [isHome, pathname]);
 
   /* Progress line: story progress on the home page, page progress elsewhere. */
   useEffect(() => {
@@ -109,49 +150,65 @@ export function SiteHeader() {
     const setFill = (p: number) => {
       fill.style.transform = `scaleX(${Math.min(1, Math.max(0, p)).toFixed(4)})`;
     };
-    let trigger: ReturnType<typeof ScrollTrigger.create> | null = null;
-    let retry = 0;
-    let tries = 0;
+    let pageTrigger: ScrollTriggerInstance | null = null;
+    let fillTrigger: ScrollTriggerInstance | null = null;
+    let pastTrigger: ScrollTriggerInstance | null = null;
+    let armed: HTMLElement | null = null;
+    let refreshRaf = 0;
     let past = false;
 
-    const setupStory = (story: HTMLElement) => {
+    const setPast = (next: boolean) => {
+      if (next === past) return;
+      past = next;
+      setPastStory(next);
+    };
+
+    const ticks = Array.from(bar.querySelectorAll<HTMLElement>("[data-tick]"));
+    const placeTicks = (start: number, end: number) => {
+      const range = end - start;
+      for (const tick of ticks) {
+        const target = document.getElementById(tick.dataset.tick ?? "");
+        if (!target || range <= 0) {
+          tick.style.opacity = "0";
+          continue;
+        }
+        const top = target.getBoundingClientRect().top + window.scrollY;
+        tick.style.left = `${(Math.min(1, Math.max(0, (top - start) / range)) * 100).toFixed(3)}%`;
+        tick.style.opacity = "";
+      }
+    };
+
+    const setupStory = (storyEl: HTMLElement) => {
+      pageTrigger?.kill();
+      pageTrigger = null;
+      fillTrigger?.kill();
+      pastTrigger?.kill();
       bar.dataset.mode = "story";
       fill.style.animation = "";
-      const ticks = Array.from(bar.querySelectorAll<HTMLElement>("[data-tick]"));
-      const placeTicks = (start: number, end: number) => {
-        const range = end - start;
-        for (const tick of ticks) {
-          const target = document.getElementById(tick.dataset.tick ?? "");
-          if (!target || range <= 0) {
-            tick.style.opacity = "0";
-            continue;
-          }
-          const top = target.getBoundingClientRect().top + window.scrollY;
-          tick.style.left = `${(Math.min(1, Math.max(0, (top - start) / range)) * 100).toFixed(3)}%`;
-          tick.style.opacity = "";
-        }
-      };
-      trigger = ScrollTrigger.create({
-        trigger: story,
+      // The fill runs to the very end of the story...
+      fillTrigger = ScrollTrigger.create({
+        trigger: storyEl,
         start: "top top",
         end: "bottom bottom",
-        onUpdate: (self) => {
-          setFill(self.progress);
-          const nowPast = self.progress >= 0.999;
-          if (nowPast !== past) {
-            past = nowPast;
-            setPastStory(nowPast);
-          }
-        },
+        onUpdate: (self) => setFill(self.progress),
         onRefresh: (self) => {
           setFill(self.progress);
           placeTicks(self.start, self.end);
         },
       });
-      setFill(trigger.progress);
-      placeTicks(trigger.start, trigger.end);
-      past = trigger.progress >= 0.999;
-      setPastStory(past);
+      // ...but the chapter only clears once the sections after it hold mid-viewport,
+      // so "04 Menu" stays lit through all of f14.
+      pastTrigger = ScrollTrigger.create({
+        trigger: storyEl,
+        start: "top top",
+        end: "bottom 50%",
+        onUpdate: (self) => setPast(self.progress >= 1),
+        onRefresh: (self) => setPast(self.progress >= 1),
+      });
+      setFill(fillTrigger.progress);
+      placeTicks(fillTrigger.start, fillTrigger.end);
+      setPast(pastTrigger.progress >= 1);
+      armed = storyEl;
     };
 
     const setupPage = () => {
@@ -163,35 +220,40 @@ export function SiteHeader() {
         return;
       }
       bar.dataset.mode = "page";
-      trigger = ScrollTrigger.create({
+      pageTrigger = ScrollTrigger.create({
         start: 0,
         end: "max",
         onUpdate: (self) => setFill(self.progress),
         onRefresh: (self) => setFill(self.progress),
       });
-      setFill(trigger.progress);
+      setFill(pageTrigger.progress);
     };
 
-    const attempt = () => {
-      const story = isHome ? document.getElementById("story") : null;
-      if (story && story.offsetHeight > window.innerHeight) {
-        trigger?.kill();
-        trigger = null;
-        setupStory(story);
+    // Page progress until the story is taller than the viewport; then story mode,
+    // armed by the story's own mount and growth (however slow the load).
+    setupPage();
+    const arm = (storyEl: HTMLElement) => {
+      if (storyEl.offsetHeight <= window.innerHeight) return;
+      if (armed !== storyEl) {
+        setupStory(storyEl);
         return;
       }
-      // Page progress meanwhile; the story may still be mounting its frames.
-      if (!trigger && bar.dataset.mode !== "css") setupPage();
-      if (isHome && tries < 6) {
-        tries += 1;
-        retry = window.setTimeout(attempt, 450);
-      }
+      // Grew after arming: re-measure our own two triggers.
+      if (!refreshRaf)
+        refreshRaf = requestAnimationFrame(() => {
+          refreshRaf = 0;
+          fillTrigger?.refresh();
+          pastTrigger?.refresh();
+        });
     };
-    attempt();
+    const stopWatching = isHome ? observeStory(arm) : null;
 
     return () => {
-      window.clearTimeout(retry);
-      trigger?.kill();
+      stopWatching?.();
+      cancelAnimationFrame(refreshRaf);
+      pageTrigger?.kill();
+      fillTrigger?.kill();
+      pastTrigger?.kill();
       fill.style.transform = "";
     };
   }, [isHome]);
@@ -202,6 +264,8 @@ export function SiteHeader() {
     if (!target) return;
     event.preventDefault();
     scrollToTarget(target);
+    // Keyboard focus travels with the view, so the next Tab continues in the chapter.
+    focusJumpTarget(target);
   };
 
   const onLogoClick = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -216,6 +280,7 @@ export function SiteHeader() {
       data-condensed={condensed ? "true" : "false"}
       data-intro={intro}
       data-menu={menuOpen ? "open" : "closed"}
+      data-scrim={scrim}
       data-tone={tone}
     >
       <div aria-hidden="true" className="hdr-scrim" />
@@ -308,7 +373,7 @@ function CartTrigger() {
   const state = useCart();
   const count = cartCount(state);
   const bumped = state.bump > 0;
-  const label = count === 0 ? "Cart, empty" : `Cart, ${count} ${count === 1 ? "item" : "items"}`;
+  const label = count === 0 ? "Bag, empty" : `Bag, ${count} ${count === 1 ? "item" : "items"}`;
 
   return (
     <button
