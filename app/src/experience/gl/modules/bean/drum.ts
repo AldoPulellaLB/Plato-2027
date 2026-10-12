@@ -47,14 +47,14 @@ export function createDrumSet(kit: Kit, warm: THREE.PointLight): DrumSet {
   hole.absarc(0, 0, WINDOW_R + 0.02, 0, TAU, true);
   plateShape.holes.push(hole);
   const plateGeo = new THREE.ShapeGeometry(plateShape, 64);
-  const plateBase = new THREE.Color().setRGB(0.1, 0.1, 0.095, THREE.SRGBColorSpace);
+  const plateBase = new THREE.Color().setRGB(2, 0.4, 0.095, THREE.SRGBColorSpace);
   const plateMat = new THREE.MeshStandardMaterial({
     color: plateBase.clone(),
     metalness: 0.6,
-    roughness: 0.62,
+    roughness: 0.8,
     roughnessMap: kit.brushed,
     envMap: kit.envMap,
-    envMapIntensity: 0.4,
+    envMapIntensity: 0.1,
   });
   const plate = new THREE.Mesh(plateGeo, plateMat);
   group.add(plate);
