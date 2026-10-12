@@ -10,10 +10,13 @@ import {
   FIRST_CRACK_AT,
   ROAST_STAGES,
   emitStoryEvent,
+  roastBackground,
+  roastBackground2,
   roastColor,
   roastTemperature,
   story,
 } from "@/experience/story";
+import { ensureGsap } from "@/lib/motion/smooth";
 import { useUi } from "@/lib/ui";
 
 import { ChapterLabel, ScrollCue } from "../shared/parts";
@@ -237,6 +240,43 @@ function BeansFall() {
 
 function Roast() {
   const ref = useRef<HTMLDivElement>(null);
+
+  // The page background roasts with the beans: olive at the start of f03,
+  // roasted brown as the temperature climbs, back to olive when scrolling up.
+  // Written to the brand variable on <html>, so the page, scrims and film stage
+  // all follow. Runs under reduced motion too (it is colour, not movement).
+  useEffect(() => {
+    const frame = ref.current?.closest("section");
+    if (!frame) return;
+    const { ScrollTrigger } = ensureGsap();
+    const root = document.documentElement;
+    const bg = [0, 0, 0];
+    const bg2 = [0, 0, 0];
+    let last = "";
+    const apply = (p: number) => {
+      roastBackground(p, bg);
+      const key = bg.join(",");
+      if (key === last) return;
+      last = key;
+      roastBackground2(p, bg2);
+      root.style.setProperty("--plato-roast", `rgb(${bg[0]} ${bg[1]} ${bg[2]})`);
+      root.style.setProperty("--plato-roast-2", `rgb(${bg2[0]} ${bg2[1]} ${bg2[2]})`);
+    };
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const st = ScrollTrigger.create({
+      trigger: frame,
+      start: reduced ? "top 60%" : "top top",
+      end: reduced ? "bottom 40%" : "bottom bottom",
+      onUpdate: (self) => apply(self.progress),
+      onRefresh: (self) => apply(self.progress),
+    });
+    apply(st.progress);
+    return () => {
+      st.kill();
+      root.style.removeProperty("--plato-roast");
+      root.style.removeProperty("--plato-roast-2");
+    };
+  }, []);
 
   useScrollScene(ref, ({ el, gsap, ScrollTrigger, reduced, isMobile }) => {
     if (reduced) return;

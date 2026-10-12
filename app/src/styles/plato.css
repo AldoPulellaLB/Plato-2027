@@ -52,8 +52,8 @@
 
 :root {
   /* Brand primitives (locked palette) */
-  --plato-roast: #121600;
-  --plato-roast-2: #1b1f08;
+  --plato-roast: #0e1008;
+  --plato-roast-2: #0e1008;
   --plato-green: #003c2f;
   --plato-green-2: #0b4a3b;
   --plato-forest: #062a21;
@@ -184,6 +184,12 @@
   html[data-story="roast"],
   html[data-story="forest"] {
     color-scheme: dark;
+  }
+
+  /* In the roast chapter the background is scroll-driven (it browns with the
+     roast in f03), so it must track the scroll exactly instead of easing. */
+  html[data-story="roast"] {
+    transition: none;
   }
 
   body {

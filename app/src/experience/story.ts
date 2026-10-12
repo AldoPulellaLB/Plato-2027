@@ -190,3 +190,41 @@ export function roastColor(p: number): [number, number, number] {
   }
   return RAMP[RAMP.length - 1][1];
 }
+
+/* ------------------------------------------------------------------ */
+/* Page background through the roast (frame 03). As the bean temperature
+ * climbs, the chapter-one background moves from roast olive to a roasted
+ * brown, and back when scrolling up. The DOM (--plato-roast on <html>) and
+ * the WebGL fog/grade both read these, so the 3D edges always match the page. */
+
+/** sRGB 0..255. Start: the brand roast olive (#121600). End: roasted brown (#100d08). */
+export const ROAST_BG_FROM: readonly [number, number, number] = [18, 22, 0];
+export const ROAST_BG_TO: readonly [number, number, number] = [16, 13, 8];
+/** The lighter companion shade (--plato-roast-2) for each end. */
+const ROAST_BG2_FROM: readonly [number, number, number] = [27, 31, 8];
+const ROAST_BG2_TO: readonly [number, number, number] = [25, 22, 16];
+
+const T_MIN = roastTemperature(0);
+const T_MAX = roastTemperature(1);
+
+/** 0..1 blend toward the roasted brown for f03 progress, following the temperature. */
+export function roastBackgroundMix(p: number) {
+  return Math.min(1, Math.max(0, (roastTemperature(p) - T_MIN) / (T_MAX - T_MIN)));
+}
+
+function mixInto(a: readonly number[], b: readonly number[], t: number, out: number[]) {
+  out[0] = Math.round(a[0] + (b[0] - a[0]) * t);
+  out[1] = Math.round(a[1] + (b[1] - a[1]) * t);
+  out[2] = Math.round(a[2] + (b[2] - a[2]) * t);
+  return out;
+}
+
+/** Page background (sRGB 0..255) for f03 progress. Pass `out` to avoid allocating per frame. */
+export function roastBackground(p: number, out: number[] = [0, 0, 0]) {
+  return mixInto(ROAST_BG_FROM, ROAST_BG_TO, roastBackgroundMix(p), out);
+}
+
+/** Companion shade (sRGB 0..255) for f03 progress. */
+export function roastBackground2(p: number, out: number[] = [0, 0, 0]) {
+  return mixInto(ROAST_BG2_FROM, ROAST_BG2_TO, roastBackgroundMix(p), out);
+}

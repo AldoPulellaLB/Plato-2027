@@ -13,7 +13,7 @@
 // tumble jitter, the tray arm, smoke and steam, dust) read ctx.time.
 import * as THREE from "three";
 
-import { FIRST_CRACK_AT } from "../../story";
+import { FIRST_CRACK_AT, roastBackground } from "../../story";
 import type { FrameId } from "../../story";
 import type { FrameView, GLContext, SceneModule } from "../engine";
 import { createBeanGeometry, createBeanNoiseTexture } from "../lib/bean";
@@ -74,6 +74,9 @@ const _up = new THREE.Vector3();
 const _v = new THREE.Vector3();
 /** Scratch camera for measuring where a shot puts the hopper on screen. */
 const _probe = new THREE.PerspectiveCamera(35, 1, 0.04, 160);
+/** Page background (sRGB 0..255) through the roast, and the last value applied to the fog. */
+const _bg = [0, 0, 0];
+let lastBgHex = -1;
 /** Outer edge of the chrome bezel and of the bolted flange ring around the sight glass. */
 const BEZEL_R = HOPPER_RIM_RADIUS + HOPPER_RIM_TUBE;
 const DRUM_FLANGE_R = 1.98;
@@ -281,6 +284,7 @@ export function createBeanModule(): SceneModule {
       };
       const fog = new THREE.FogExp2(0x121600, 0.034);
       scene.fog = fog;
+      lastBgHex = -1; // a fresh fog/rig must pick up the current roast colour
       const rig = createLightRig(scene, mob);
       const pour = createPourSet(kit);
       const drum = createDrumSet(kit, rig.warm);
@@ -389,7 +393,17 @@ export function createBeanModule(): SceneModule {
       tray.update(state);
       cups.update(state);
 
+      // Match the page background as it browns through the roast (story.ts).
+      roastBackground(frames.f03.progress, _bg);
+      const bgHex = (_bg[0] << 16) | (_bg[1] << 8) | _bg[2];
+      if (bgHex !== lastBgHex) {
+        lastBgHex = bgHex;
+        fog.color.setHex(bgHex);
+        rig.ambient.groundColor.setHex(bgHex);
+      }
+
       const u = grade.material.uniforms;
+      u.uRoast.value.set(_bg[0] / 255, _bg[1] / 255, _bg[2] / 255);
       u.uAspect.value = state.aspect;
       u.uVignette.value = vignette;
       u.uCentre.value.set(cur.sx, cur.sy);
