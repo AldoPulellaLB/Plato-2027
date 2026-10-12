@@ -1,9 +1,11 @@
 /**
  * Scene data for the scroll-scrub film in chapter two (frames 06, 07, 08).
  * Three legs cut from two continuous takes:
- *   f06 "pour-cup-shot"  frames 0-163 of The Pour (ristretto into the Platō takeaway cup)
- *   f07 "pour-cup-milk"  frames 164-360 of The Pour (milk, latte art in the cup, white-out)
+ *   f06 "pour-hq-shot"  frames 0-159 of The Pour (ristretto into the Platō takeaway cup)
+ *   f07 "pour-hq-milk"  frames 160-360 of The Pour (milk, latte art in the cup, white-out)
  *   f08 "counter"    The Counter (hands slide the cup across, pull back to the cafe)
+ * The Pour is rendered at 1080p from the client's opening frame, upscaled to 2560x1440,
+ * then encoded at 1440p for desktop and 1080p for phones.
  * f06 -> f07 is frame-exact (consecutive frames). f07 ends on white foam; the page's
  * white mask and theme flip carry the seam into f08, which opens high-key white.
  *
@@ -26,10 +28,10 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     title: "Three ristretto shots. Every time.",
     body: "Our signature drinks are built on ristretto: the short, dense first part of the shot. Aristotle and Platō both start with three.",
     tags: ["Ristretto", "100% Arabica"],
-    clip: "/assets/world/pour-cup-shot.mp4",
-    poster: "/assets/world/pour-cup-shot-poster.webp",
-    mobileClip: "/assets/world/pour-cup-shot-mobile.mp4",
-    mobilePoster: "/assets/world/pour-cup-shot-mobile-poster.webp",
+    clip: "/assets/world/pour-hq-shot.mp4",
+    poster: "/assets/world/pour-hq-shot-poster.webp",
+    mobileClip: "/assets/world/pour-hq-shot-mobile.mp4",
+    mobilePoster: "/assets/world/pour-hq-shot-mobile-poster.webp",
     // Desktop: shift the frame right so the cup clears the copy column; both pour legs
     // share it so the f06 to f07 seam stays frame-exact. Phones stay centred.
     objectPosition: "8% 50%",
@@ -43,10 +45,10 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     title: "Then it’s handed over.",
     // No words during the pour: the line appears in ink once the white covers the frame.
     body: "",
-    clip: "/assets/world/pour-cup-milk.mp4",
-    poster: "/assets/world/pour-cup-milk-poster.webp",
-    mobileClip: "/assets/world/pour-cup-milk-mobile.mp4",
-    mobilePoster: "/assets/world/pour-cup-milk-mobile-poster.webp",
+    clip: "/assets/world/pour-hq-milk.mp4",
+    poster: "/assets/world/pour-hq-milk-poster.webp",
+    mobileClip: "/assets/world/pour-hq-milk-mobile.mp4",
+    mobilePoster: "/assets/world/pour-hq-milk-mobile-poster.webp",
     // Desktop: shift the frame right so the cup clears the copy column; both pour legs
     // share it so the f06 to f07 seam stays frame-exact. Phones stay centred.
     objectPosition: "8% 50%",
