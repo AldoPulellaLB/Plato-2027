@@ -155,7 +155,7 @@ export class ScreenGrade {
         uCoffee: { value: 0 },
         uAspect: { value: 1 },
         // Display-space values: this shader writes straight to the sRGB canvas.
-        uRoast: { value: new THREE.Vector3(14 / 255, 13 / 255, 11 / 255) },
+        uRoast: { value: new THREE.Vector3(18 / 255, 22 / 255, 0) },
         uCoffeeColor: { value: new THREE.Vector3(20 / 255, 12 / 255, 8 / 255) },
         uCentre: { value: new THREE.Vector2(0, 0) },
       },

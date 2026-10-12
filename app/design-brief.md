@@ -28,7 +28,7 @@ Journey shape: **multi-leg hybrid.** Chapters 1 and 3 are carried by a live WebG
 
 ## Locked palette (the client's brand, from plato.coffee, packaging and cups)
 
-- Roast black `#0E0D0B`: chapter one, warm near-black with soft grain
+- Roast olive `#121600`: chapter one, a deep green-brown near-black with soft grain (was `#0E0D0B`, changed at the client's request)
 - Platō green `#003C2F`: the logo green; ink on white and the primary accent
 - Forest `#062A21`: chapter four (menu) and the footer; owned dark green instead of black
 - Paper `#FBFBF8`: the white café world

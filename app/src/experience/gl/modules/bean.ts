@@ -279,7 +279,7 @@ export function createBeanModule(): SceneModule {
         smoke: smokeTexture(),
         maxAnisotropy: ctx.renderer.capabilities.getMaxAnisotropy(),
       };
-      const fog = new THREE.FogExp2(0x0e0d0b, 0.034);
+      const fog = new THREE.FogExp2(0x121600, 0.034);
       scene.fog = fog;
       const rig = createLightRig(scene, mob);
       const pour = createPourSet(kit);

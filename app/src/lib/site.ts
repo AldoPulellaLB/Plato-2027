@@ -164,4 +164,4 @@ export const LOCAL_STORES: { name: string; line: string; image: string }[] = [
 ];
 
 /** Browser chrome colour (roast black) for the theme-color meta tag. */
-export const THEME_COLOR = "#0e0d0b";
+export const THEME_COLOR = "#121600";

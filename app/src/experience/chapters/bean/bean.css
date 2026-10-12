@@ -79,6 +79,9 @@
     color-mix(in srgb, var(--plato-roast) 60%, transparent) 72%,
     color-mix(in srgb, var(--plato-roast) 0%, transparent) 100%
   );
+  /* Driven by the f01 exit scrub (bean-chapter.tsx): fades out with the foot row
+   * as the page scrolls up, so no band is left across the beans. */
+  opacity: var(--ch-floor, 1);
   pointer-events: none;
 }
 .ch-f01__foot {

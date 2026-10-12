@@ -104,6 +104,12 @@ function ColdOpen() {
       { opacity: 1, y: 0 },
       { opacity: 0, y: -24, ease: "none", scrollTrigger: { ...st, end: "22% top" } },
     );
+    // The soft floor behind the foot row fades with it, a touch longer so it melts away.
+    gsap.fromTo(
+      el,
+      { "--ch-floor": 1 },
+      { "--ch-floor": 0, ease: "none", scrollTrigger: { ...st, end: "30% top" } },
+    );
   });
 
   return (

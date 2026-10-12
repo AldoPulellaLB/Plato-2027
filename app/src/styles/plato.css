@@ -52,8 +52,8 @@
 
 :root {
   /* Brand primitives (locked palette) */
-  --plato-roast: #0e0d0b;
-  --plato-roast-2: #171512;
+  --plato-roast: #121600;
+  --plato-roast-2: #1b1f08;
   --plato-green: #003c2f;
   --plato-green-2: #0b4a3b;
   --plato-forest: #062a21;
@@ -126,7 +126,7 @@
   --line: color-mix(in srgb, #f3f1ea 14%, transparent);
   --accent: var(--plato-sage);
   --accent-ink: var(--plato-roast);
-  --surface: #1d1b17;
+  --surface: #22260d;
 }
 
 :root[data-story="forest"] {
@@ -143,7 +143,7 @@
 
 /* Tailwind utilities for the brand (bg-plato-green, text-plato-ink, font-serif ...) */
 @theme {
-  --color-plato-roast: #0e0d0b;
+  --color-plato-roast: #121600;
   --color-plato-green: #003c2f;
   --color-plato-forest: #062a21;
   --color-plato-paper: #fbfbf8;
