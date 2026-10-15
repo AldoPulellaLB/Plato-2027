@@ -20,9 +20,9 @@ import type { CupRow, CupRowStage } from "./brand/cups";
 import { createBlobTexture, createFloorPool } from "./brand/floor";
 import type { FloorPool } from "./brand/floor";
 import { range, smooth } from "./brand/math";
+import { CUP_EMBLEM_SRC } from "./brand/livery";
 import { readBrandPalette } from "./brand/palette";
 
-const FONT_STACK = `"Jost", "Futura", "Avenir Next", system-ui, sans-serif`;
 const EXPOSURE = 1.02;
 const ANCHOR_KEYS = ["cup-s", "cup-m", "cup-l"] as const;
 
@@ -30,10 +30,14 @@ function specLength(id: FrameId) {
   return (FRAMES.find((f) => f.id === id)?.vh ?? 100) / 100;
 }
 
-async function fontsReady() {
-  if (typeof document === "undefined" || !("fonts" in document)) return;
-  const timeout = new Promise<void>((resolve) => window.setTimeout(resolve, 1500));
-  await Promise.race([document.fonts.load(`500 48px "Jost"`).then(() => undefined), timeout]).catch(() => undefined);
+/** The printed cup emblem; the cups still render (blank) if it fails to load. */
+async function loadCupEmblem() {
+  try {
+    return await new THREE.ImageLoader().loadAsync(CUP_EMBLEM_SRC);
+  } catch (error) {
+    console.error("Brand scene: cup emblem failed to load", error);
+    return null;
+  }
 }
 
 export function createBrandModule(): SceneModule {
@@ -118,7 +122,7 @@ export function createBrandModule(): SceneModule {
 
     async init(ctx) {
       const palette = readBrandPalette();
-      await fontsReady();
+      const emblem = await loadCupEmblem();
       if (disposed) return;
 
       scene.environment = ctx.envMap;
@@ -140,7 +144,7 @@ export function createBrandModule(): SceneModule {
       floor = createFloorPool(palette.stone);
       scene.add(floor.mesh);
 
-      cups = createCupRow(ctx, palette, blob, FONT_STACK);
+      cups = createCupRow(ctx, palette, blob, emblem);
       scene.add(cups.group);
 
       try {

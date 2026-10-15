@@ -31,6 +31,89 @@
   color: var(--fg);
 }
 
+/* The theme cup behind the headline (hero-cup.tsx), with its soft glow. The
+ * photo, its size and the glow follow <html data-roast> (hero-theme.ts), which
+ * the head script sets before first paint. Every theme shares one scale, so the
+ * 250, 350 and 500ml cups keep their real sizes; the 500ml cup is 53% of the
+ * viewport height, as in the client's layouts. */
+.ch-f01__head {
+  position: relative;
+  isolation: isolate;
+}
+.ch-f01__label,
+.ch-f01__title-wrap {
+  position: relative;
+  z-index: 1;
+}
+.ch-f01__cup {
+  --cup-w: 657;
+  --cup-h: 1095;
+  --cup-photo: url("/assets/hero/cup-seagreen.webp");
+  --cup-glow: url("/assets/hero/glow-seagreen.png");
+  /* px per photo pixel */
+  --cup-u: calc(min(53svh, 110vw) / 1095);
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  /* Centred on the headline, not the label above it (half the label row). */
+  top: calc(50% + 0.5rem);
+  width: calc(var(--cup-w) * var(--cup-u));
+  height: calc(var(--cup-h) * var(--cup-u));
+  translate: -50% -50%;
+  pointer-events: none;
+}
+:root[data-roast="magenta"] .ch-f01__cup {
+  --cup-w: 655;
+  --cup-h: 910;
+  --cup-photo: url("/assets/hero/cup-magenta.webp");
+  --cup-glow: url("/assets/hero/glow-magenta.png");
+}
+:root[data-roast="olive"] .ch-f01__cup {
+  --cup-w: 597;
+  --cup-h: 998;
+  --cup-photo: url("/assets/hero/cup-olive.webp");
+  --cup-glow: url("/assets/hero/glow-olive.png");
+}
+.ch-f01__cup-lift,
+.ch-f01__cup-in {
+  position: absolute;
+  inset: 0;
+}
+.ch-f01__cup-in {
+  transition:
+    opacity 1600ms var(--ease-out-quart) 250ms,
+    transform 1800ms var(--ease-out-expo) 250ms;
+}
+.ch-f01__inner[data-armed]:not([data-in]) .ch-f01__cup-in {
+  opacity: 0;
+  transform: translateY(3svh) scale(0.97);
+  transition-duration: 200ms;
+  transition-delay: 0ms;
+}
+.ch-f01__glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* The glow spans about 1.64 cup heights of the 500ml cup, as laid out. */
+  width: calc(min(53svh, 110vw) * 1.64);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: var(--cup-glow) center / contain no-repeat;
+}
+.ch-f01__cup-body {
+  position: absolute;
+  inset: 0;
+  background: var(--cup-photo) center / 100% 100% no-repeat;
+}
+.ch-f01__cup-body[data-live] {
+  background: none;
+}
+.ch-f01__cup-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .ch-f01__foot {
   position: absolute;
   left: 0;

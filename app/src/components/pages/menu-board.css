@@ -15,14 +15,14 @@
   vertical-align: middle;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--plato-ink) 14%, transparent);
 }
-.mb-dot[data-cup="sage"] {
-  background: var(--plato-sage);
+.mb-dot[data-cup="pink"] {
+  background: var(--plato-cup-pink);
 }
-.mb-dot[data-cup="peach"] {
-  background: var(--plato-peach);
+.mb-dot[data-cup="sage"] {
+  background: var(--plato-cup-sage);
 }
 .mb-dot[data-cup="green"] {
-  background: var(--plato-green);
+  background: var(--plato-cup-green);
 }
 
 /* ------------------------------------------------------------------ hero */

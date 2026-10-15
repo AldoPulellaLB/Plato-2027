@@ -28,7 +28,7 @@ Journey shape: **multi-leg hybrid.** Chapters 1 and 3 are carried by a live WebG
 
 ## Locked palette (the client's brand, from plato.coffee, packaging and cups)
 
-- Roast olive `#121600`: chapter one, a deep green-brown near-black with soft grain (was `#0E0D0B`, changed at the client's request)
+- Roast background, chapter one: one of three hero themes per page load, each with its own cup behind the headline (src/experience/hero-theme.ts): sea green `#010e08`, magenta `#0f0b08`, olive `#0c0d0a`, near-black with soft grain (was sea green `#011e10`, olive `#121600`, `#0E0D0B`; all changed at the client’s request)
 - Platō green `#003C2F`: the logo green; ink on white and the primary accent
 - Forest `#062A21`: chapter four (menu) and the footer; owned dark green instead of black
 - Paper `#FBFBF8`: the white café world

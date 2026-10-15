@@ -22,7 +22,7 @@ export const PAGES: (LinkItem & { image: string; caption: string })[] = [
   { label: "Shop", href: "/shop", image: "/assets/brand/house-blend-250g.webp", caption: "Coffee, pods, pantry and wear" },
   { label: "Equipment", href: "/equipment", image: "/assets/equipment/appartamento.webp", caption: "Rocket and Eureka for home" },
   { label: "The Academy", href: "/academy", image: "/assets/academy/group-head.webp", caption: "Courses for every level" },
-  { label: "Our Menu", href: "/menu", image: "/assets/drinks/aristotle.webp", caption: "Built on ristretto" },
+  { label: "Our Menu", href: "/menu", image: "/assets/drinks/aristotle-cup.webp", caption: "Built on ristretto" },
   { label: "Stores", href: "/stores", image: "/assets/stores/hermanus.webp", caption: "Find your Platō" },
   { label: "Our Story", href: "/our-story", image: "/assets/interiors/green-wall-bust.webp", caption: "Coffee sculpted. Community included." },
   { label: "Account", href: "/account", image: "/assets/community/baristas-smile.webp", caption: "Orders and details" },
@@ -164,4 +164,4 @@ export const LOCAL_STORES: { name: string; line: string; image: string }[] = [
 ];
 
 /** Browser chrome colour (roast black) for the theme-color meta tag. */
-export const THEME_COLOR = "#121600";
+export const THEME_COLOR = "#010e08";

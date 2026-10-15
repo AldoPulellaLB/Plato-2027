@@ -24,8 +24,8 @@ const SECTION_LINES: Record<MenuSection, string> = {
 };
 
 const SIZES = [
-  { key: "S", label: "Small", cup: "sage" },
-  { key: "M", label: "Medium", cup: "peach" },
+  { key: "S", label: "Small", cup: "pink" },
+  { key: "M", label: "Medium", cup: "sage" },
   { key: "L", label: "Large", cup: "green" },
 ] as const;
 
@@ -62,9 +62,9 @@ export function MenuPage() {
 /* ------------------------------------------------------------------ hero */
 
 const TRIO = [
-  { name: "Aristotle", size: "S", cup: "sage", img: "/assets/drinks/aristotle.webp" },
-  { name: "Platō", size: "M", cup: "peach", img: "/assets/drinks/plato.webp" },
-  { name: "Socrates", size: "L", cup: "green", img: "/assets/drinks/socrates.webp" },
+  { name: "Aristotle", size: "S", cup: "pink", img: "/assets/drinks/aristotle-cup.webp" },
+  { name: "Platō", size: "M", cup: "sage", img: "/assets/drinks/plato-cup.webp" },
+  { name: "Socrates", size: "L", cup: "green", img: "/assets/drinks/socrates-cup.webp" },
 ] as const;
 
 function MenuHero() {
@@ -281,8 +281,8 @@ function Board({ grouped }: { grouped: Group[] }) {
           <Rise className="mb-notes">
             <p className="mb-notes__milk">
               <span className="mb-notes__dots" aria-hidden="true">
+                <span className="mb-dot" data-cup="pink" />
                 <span className="mb-dot" data-cup="sage" />
-                <span className="mb-dot" data-cup="peach" />
                 <span className="mb-dot" data-cup="green" />
               </span>
               Ask for any drink with milk alternatives: almond, soy, oat, macadamia, coconut or lactose-free.

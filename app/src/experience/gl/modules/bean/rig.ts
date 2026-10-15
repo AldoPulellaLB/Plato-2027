@@ -108,7 +108,7 @@ const _kd = new THREE.Vector3();
 const _rd = new THREE.Vector3();
 
 export function createLightRig(scene: THREE.Scene, isMobile: boolean): LightRig {
-  const ambient = new THREE.HemisphereLight(0xcfc6b8, 0x121600, 0.22);
+  const ambient = new THREE.HemisphereLight(0xcfc6b8, 0x010e08, 0.22);
   const key = new THREE.DirectionalLight(0xfff1e0, 2.6);
   key.castShadow = true;
   key.shadow.mapSize.set(isMobile ? 1024 : 2048, isMobile ? 1024 : 2048);

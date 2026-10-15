@@ -20,6 +20,7 @@ import { ensureGsap } from "@/lib/motion/smooth";
 import { useUi } from "@/lib/ui";
 
 import { ChapterLabel, ScrollCue } from "../shared/parts";
+import { HeroCup } from "./hero-cup";
 import {
   linearToCss,
   range,
@@ -57,6 +58,7 @@ function ColdOpen() {
   const titleRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLParagraphElement>(null);
   const footRef = useRef<HTMLDivElement>(null);
+  const cupRef = useRef<HTMLDivElement>(null);
 
   // The preloader hands over through ui.ready; never wait more than 2.5s.
   useEffect(() => {
@@ -107,6 +109,17 @@ function ColdOpen() {
       { opacity: 1, y: 0 },
       { opacity: 0, y: -24, ease: "none", scrollTrigger: { ...st, end: "22% top" } },
     );
+    // The cup rises a little slower than the headline and fades, no blur (it is a canvas).
+    gsap.fromTo(
+      cupRef.current,
+      { y: 0, opacity: 1 },
+      {
+        y: () => -0.22 * window.innerHeight,
+        opacity: 0,
+        ease: "none",
+        scrollTrigger: { ...st, end: "70% top", invalidateOnRefresh: true },
+      },
+    );
     // The soft floor behind the foot row fades with it, a touch longer so it melts away.
     gsap.fromTo(
       el,
@@ -119,6 +132,7 @@ function ColdOpen() {
     <Frame className="ch-frame ch-f01" id="f01" stageClassName="ch-stage ch-f01__stage">
       <div className="ch-f01__inner" ref={rootRef}>
         <div className="ch-f01__head">
+          <HeroCup ref={cupRef} />
           <ChapterLabel chapter="bean" className="ch-f01__label" ref={labelRef} />
           <div className="ch-f01__title-wrap" ref={titleRef}>
             <GhostHeadline as="h1" className="t-display ch-f01__title" play={play} trigger="manual">
@@ -241,8 +255,8 @@ function BeansFall() {
 function Roast() {
   const ref = useRef<HTMLDivElement>(null);
 
-  // The page background roasts with the beans: olive at the start of f03,
-  // roasted brown as the temperature climbs, back to olive when scrolling up.
+  // The page background roasts with the beans: sea green at the start of f03,
+  // roasted brown as the temperature climbs, back to sea green when scrolling up.
   // Written to the brand variable on <html>, so the page, scrims and film stage
   // all follow. Runs under reduced motion too (it is colour, not movement).
   useEffect(() => {

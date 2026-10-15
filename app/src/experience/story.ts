@@ -5,6 +5,8 @@ import { useSyncExternalStore } from "react";
 
 import type { ChapterId } from "@/lib/site";
 
+import { heroTheme } from "./hero-theme";
+
 export type StoryTheme = "roast" | "paper" | "forest";
 
 export type FrameId =
@@ -193,15 +195,14 @@ export function roastColor(p: number): [number, number, number] {
 
 /* ------------------------------------------------------------------ */
 /* Page background through the roast (frame 03). As the bean temperature
- * climbs, the chapter-one background moves from roast olive to a roasted
+ * climbs, the chapter-one background moves from roast sea green to a roasted
  * brown, and back when scrolling up. The DOM (--plato-roast on <html>) and
  * the WebGL fog/grade both read these, so the 3D edges always match the page. */
 
-/** sRGB 0..255. Start: the brand roast olive (#121600). End: roasted brown (#100d08). */
-export const ROAST_BG_FROM: readonly [number, number, number] = [18, 22, 0];
+/** sRGB 0..255. The start is this page load's hero theme (hero-theme.ts: sea green
+ * #010e08, magenta #0f0b08 or olive #0c0d0a); the end is the same roasted brown (#100d08) for all. */
 export const ROAST_BG_TO: readonly [number, number, number] = [16, 13, 8];
-/** The lighter companion shade (--plato-roast-2) for each end. */
-const ROAST_BG2_FROM: readonly [number, number, number] = [27, 31, 8];
+/** The lighter companion shade (--plato-roast-2) at the roasted end. */
 const ROAST_BG2_TO: readonly [number, number, number] = [25, 22, 16];
 
 const T_MIN = roastTemperature(0);
@@ -221,10 +222,10 @@ function mixInto(a: readonly number[], b: readonly number[], t: number, out: num
 
 /** Page background (sRGB 0..255) for f03 progress. Pass `out` to avoid allocating per frame. */
 export function roastBackground(p: number, out: number[] = [0, 0, 0]) {
-  return mixInto(ROAST_BG_FROM, ROAST_BG_TO, roastBackgroundMix(p), out);
+  return mixInto(heroTheme().roast, ROAST_BG_TO, roastBackgroundMix(p), out);
 }
 
 /** Companion shade (sRGB 0..255) for f03 progress. */
 export function roastBackground2(p: number, out: number[] = [0, 0, 0]) {
-  return mixInto(ROAST_BG2_FROM, ROAST_BG2_TO, roastBackgroundMix(p), out);
+  return mixInto(heroTheme().roast2, ROAST_BG2_TO, roastBackgroundMix(p), out);
 }

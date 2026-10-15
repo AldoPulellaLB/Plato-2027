@@ -24,6 +24,7 @@ import {
   SoundToggle,
   StoreFinderPill,
 } from "@/components/site/chrome";
+import { HERO_THEME_SCRIPT } from "@/experience/hero-theme";
 import { setStoryTheme } from "@/experience/story";
 import { cart } from "@/lib/cart";
 import { THEME_COLOR } from "@/lib/site";
@@ -152,6 +153,8 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en-ZA" data-story={initialStory} suppressHydrationWarning>
       <head>
         <HeadContent />
+        {/* Picks this load's hero theme before first paint (after the theme-color meta it recolours). */}
+        <script dangerouslySetInnerHTML={{ __html: HERO_THEME_SCRIPT }} />
       </head>
       <body>
         {children}

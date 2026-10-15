@@ -38,8 +38,8 @@ export function BrandChapter() {
 /* Frame 10: the cup family                                            */
 
 const CUPS = [
-  { size: "Small", name: "Aristotle", tone: "sage", x: 30, mx: 22, anchor: "cup-s" },
-  { size: "Medium", name: "Platō", tone: "peach", x: 50, mx: 50, anchor: "cup-m" },
+  { size: "Small", name: "Aristotle", tone: "pink", x: 30, mx: 22, anchor: "cup-s" },
+  { size: "Medium", name: "Platō", tone: "sage", x: 50, mx: 50, anchor: "cup-m" },
   { size: "Large", name: "Socrates", tone: "green", x: 70, mx: 78, anchor: "cup-l" },
 ] as const;
 

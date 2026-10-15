@@ -282,7 +282,7 @@ export function createBeanModule(): SceneModule {
         smoke: smokeTexture(),
         maxAnisotropy: ctx.renderer.capabilities.getMaxAnisotropy(),
       };
-      const fog = new THREE.FogExp2(0x121600, 0.034);
+      const fog = new THREE.FogExp2(0x010e08, 0.034);
       scene.fog = fog;
       lastBgHex = -1; // a fresh fog/rig must pick up the current roast colour
       const rig = createLightRig(scene, mob);

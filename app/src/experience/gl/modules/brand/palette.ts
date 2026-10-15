@@ -11,6 +11,10 @@ export interface BrandPalette {
   peach: string;
   sage: string;
   ink: string;
+  /** Printed cup colours by size: 250ml pink, 350ml sage, 500ml dark green. */
+  cupPink: string;
+  cupSage: string;
+  cupGreen: string;
 }
 
 const FALLBACK: BrandPalette = {
@@ -22,6 +26,9 @@ const FALLBACK: BrandPalette = {
   peach: "#f2b9a3",
   sage: "#c9dccd",
   ink: "#0f1d18",
+  cupPink: "#ebbdb4",
+  cupSage: "#b7c7af",
+  cupGreen: "#2c4235",
 };
 
 const TOKENS: Record<keyof BrandPalette, string> = {
@@ -33,6 +40,9 @@ const TOKENS: Record<keyof BrandPalette, string> = {
   peach: "--plato-peach",
   sage: "--plato-sage",
   ink: "--plato-ink",
+  cupPink: "--plato-cup-pink",
+  cupSage: "--plato-cup-sage",
+  cupGreen: "--plato-cup-green",
 };
 
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;

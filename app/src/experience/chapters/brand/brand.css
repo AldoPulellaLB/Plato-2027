@@ -102,14 +102,14 @@
   border-radius: 50%;
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--plato-stone) 70%, transparent);
 }
-.ch-cup[data-tone="sage"] .ch-cup__dot {
-  background: var(--plato-sage);
+.ch-cup[data-tone="pink"] .ch-cup__dot {
+  background: var(--plato-cup-pink);
 }
-.ch-cup[data-tone="peach"] .ch-cup__dot {
-  background: var(--plato-peach);
+.ch-cup[data-tone="sage"] .ch-cup__dot {
+  background: var(--plato-cup-sage);
 }
 .ch-cup[data-tone="green"] .ch-cup__dot {
-  background: var(--plato-green);
+  background: var(--plato-cup-green);
 }
 .ch-cup__size {
   color: var(--fg-muted);

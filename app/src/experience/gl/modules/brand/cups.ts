@@ -1,5 +1,5 @@
-// Frame 10, the cup family: Small (Aristotle, sage), Medium (Platō, peach) and
-// Large (Socrates, green) takeaway cups drop one by one onto a stone floor
+// Frame 10, the cup family: Small (Aristotle, 250ml pink), Medium (Platō, 350ml
+// sage) and Large (Socrates, 500ml dark green) takeaway cups drop one by one onto a stone floor
 // (80ms apart, one small bounce: the only bounce on the site), then turn to
 // face the viewer as the frame scrolls, and slide away left on exit.
 //
@@ -15,6 +15,7 @@ import { CUP_ROW_SLIDE_VW, cupRowLook, cupRowSlide } from "./choreo";
 import { createShadowDecal } from "./floor";
 import type { FloorPool, FloorReach } from "./floor";
 import { paintCupLivery } from "./livery";
+import type { BlockSweep } from "./livery";
 import { bump, damp, lerp, range, smooth } from "./math";
 import type { BrandPalette } from "./palette";
 import { floorZAt, rowX, solveRig, widthAt } from "./rig";
@@ -22,7 +23,7 @@ import type { Rig } from "./rig";
 
 export const BRAND_FOV = 28;
 
-type Tone = "sage" | "peach" | "green";
+type Tone = "pink" | "sage" | "green";
 
 interface CupSpec {
   key: "S" | "M" | "L";
@@ -30,6 +31,8 @@ interface CupSpec {
   rTop: number;
   rBottom: number;
   tone: Tone;
+  /** Which way the colour block's edge runs across the front (as on the real cups). */
+  sweep: BlockSweep;
   /** Yaw while the row is still "looking away" (radians). */
   away: number;
   /** Extra spin carried through the fall (radians). */
@@ -41,11 +44,15 @@ interface CupSpec {
 // Proportions measured from the real cups photo (cups-trio.webp): the large
 // cup is the unit; 12oz and 16oz share a lid, the small is narrower.
 const CUPS: CupSpec[] = [
-  { key: "S", height: 0.6, rTop: 0.272, rBottom: 0.212, tone: "sage", away: -0.66, spin: -2.2, tilt: 0.075 },
-  { key: "M", height: 0.76, rTop: 0.3, rBottom: 0.232, tone: "peach", away: 0.52, spin: 1.9, tilt: -0.06 },
-  { key: "L", height: 0.89, rTop: 0.312, rBottom: 0.245, tone: "green", away: -0.38, spin: -1.7, tilt: 0.05 },
+  { key: "S", height: 0.6, rTop: 0.272, rBottom: 0.212, tone: "pink", sweep: "rise", away: -0.66, spin: -2.2, tilt: 0.075 },
+  { key: "M", height: 0.76, rTop: 0.3, rBottom: 0.232, tone: "sage", sweep: "rise", away: 0.52, spin: 1.9, tilt: -0.06 },
+  { key: "L", height: 0.89, rTop: 0.312, rBottom: 0.245, tone: "green", sweep: "fall", away: -0.38, spin: -1.7, tilt: 0.05 },
 ];
 
+/** The emblem is printed in plain black on every size, as on the real cups. */
+const CUP_INK = "#121212";
+/** How far the lid colour leans from paper toward the deep stone grey (0 = paper white). */
+const LID_SHADE = 0.9;
 const LID_OVERLAP = 0.034;
 const SKIRT = 0.012;
 const LID_TOP = 0.086;
@@ -142,7 +149,12 @@ export interface CupRow {
   dispose(): void;
 }
 
-export function createCupRow(ctx: GLContext, palette: BrandPalette, blob: THREE.Texture, fontFamily: string): CupRow {
+export function createCupRow(
+  ctx: GLContext,
+  palette: BrandPalette,
+  blob: THREE.Texture,
+  emblem: HTMLImageElement | null,
+): CupRow {
   const group = new THREE.Group();
   group.name = "cup-family";
   const disposables: { dispose(): void }[] = [];
@@ -150,7 +162,7 @@ export function createCupRow(ctx: GLContext, palette: BrandPalette, blob: THREE.
   const segments = ctx.isMobile ? 72 : 120;
   const textureWidth = ctx.isMobile ? 1024 : 1600;
 
-  const toneColour: Record<Tone, string> = { sage: palette.sage, peach: palette.peach, green: palette.green };
+  const toneColour: Record<Tone, string> = { pink: palette.cupPink, sage: palette.cupSage, green: palette.cupGreen };
 
   const sipGeometry = new THREE.CircleGeometry(1, 20);
   sipGeometry.rotateX(-Math.PI / 2);
@@ -160,14 +172,10 @@ export function createCupRow(ctx: GLContext, palette: BrandPalette, blob: THREE.
     const block = toneColour[spec.tone];
     const canvas = paintCupLivery(
       { height: spec.height, rTop: spec.rTop, rBottom: spec.rBottom, lidOverlap: LID_OVERLAP },
-      {
-        paper: palette.paper,
-        block,
-        ink: palette.green,
-        inkOnBlock: spec.tone === "green" ? palette.paper : palette.green,
-      },
+      { paper: palette.paper, block, ink: CUP_INK },
+      spec.sweep,
       textureWidth,
-      fontFamily,
+      emblem,
     );
     const map = new THREE.CanvasTexture(canvas);
     map.colorSpace = THREE.SRGBColorSpace;
@@ -200,7 +208,8 @@ export function createCupRow(ctx: GLContext, palette: BrandPalette, blob: THREE.
     const lidGeometry = new THREE.LatheGeometry(lidProfile(R), segments, -Math.PI, Math.PI * 2);
     lidGeometry.translate(0, spec.height - LID_OVERLAP, 0);
     const lidMaterial = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(palette.paperWarm),
+      // A shade below the paper so the white lid still reads against the white page.
+      color: new THREE.Color(palette.paperWarm).lerp(new THREE.Color(palette.stoneDeep), LID_SHADE),
       roughness: 0.4,
       metalness: 0,
       clearcoat: 0.22,
