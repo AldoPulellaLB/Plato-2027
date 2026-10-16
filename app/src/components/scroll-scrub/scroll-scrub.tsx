@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
+import { clipBlob } from "./clip-preload";
 import "./scroll-scrub.css";
 
 export interface ScrollScrubScene {
@@ -326,13 +327,8 @@ export function ScrollScrub({
       const request = segment.abort;
 
       try {
-        const response = await fetch(source, {
-          signal: request.signal,
-        });
-        if (!response.ok) {
-          throw new Error(`Clip failed: ${response.status}`);
-        }
-        const blob = await response.blob();
+        // The preloader usually has this clip under way, or finished, already.
+        const blob = await clipBlob(source, request.signal);
         if (
           destroyed ||
           request.signal.aborted ||

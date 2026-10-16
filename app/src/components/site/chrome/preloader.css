@@ -3,7 +3,9 @@
  *   0.10-0.80s  the faint ring and the mark ease in
  *   0.30-2.30s  the ring draws round from 12 o'clock (a time-based dial)
  *   2.15-2.90s  the macron settles on top as the ring closes
- *   3.00s       exit: the mark lifts away, the panel and its trail wipe up */
+ *   3.00s       exit: the mark lifts away, the panel and its trail wipe up
+ * On the home page the ring also waits for the films (preloader.tsx): same timeline
+ * when they are in, else it holds where the downloads have reached, up to 8s. */
 .pl {
   position: fixed;
   inset: 0;
@@ -23,6 +25,30 @@ html[data-pl="skip"] .pl {
     opacity: 0;
     visibility: hidden;
   }
+}
+/* Waiting for the films (the head script sets html[data-pl="wait"]): its own timer
+ * replaces the CSS failsafe, the dial runs as usual but stops at 60% until the app
+ * takes it over with the real download progress, and the macron waits for the ring
+ * to close. */
+html[data-pl="wait"] .pl {
+  animation: none;
+}
+/* Kept through the timeout too: a new animation name would restart the ring from empty. */
+html[data-pl="wait"] .pl-ring,
+html[data-pl="timeout"] .pl-ring {
+  animation-name: pl-draw-wait;
+}
+@keyframes pl-draw-wait {
+  to {
+    stroke-dashoffset: 0.4;
+  }
+}
+html[data-pl="wait"] .pl-macron,
+html[data-pl="timeout"] .pl-macron {
+  animation-play-state: paused;
+}
+html[data-pl="timeout"] .pl {
+  animation: pl-failsafe 600ms var(--ease-out-quart) forwards;
 }
 
 /* Two layers in the hero colour: the panel lifts first, its lighter companion follows. */

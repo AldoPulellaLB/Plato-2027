@@ -332,10 +332,14 @@
   --ch-f08-x: 35%;
 }
 @media (min-width: 861px) {
-  /* Frame 06: two balanced lines that clear the portafilter, stream and cup. */
+  /* Frame 06: two balanced lines that clear the portafilter, stream and cup. The
+   * copy sits on the shot's dark backdrop, so it needs no scrim. */
   #f06 .scroll-scrub__title {
     max-width: none;
     font-size: clamp(2.5rem, 4vw, 4.25rem);
+  }
+  #f06 .scroll-scrub__copy::before {
+    display: none;
   }
   #f08 .scroll-scrub__copy {
     width: min(34rem, calc(42vw - clamp(1.25rem, 6vw, 6rem)));

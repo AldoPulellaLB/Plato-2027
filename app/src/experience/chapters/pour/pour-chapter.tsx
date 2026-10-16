@@ -5,6 +5,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
+import { preloadFilms } from "@/components/scroll-scrub/clip-preload";
 import { ScrollScrub } from "@/components/scroll-scrub/scroll-scrub";
 import { GhostHeadline } from "@/components/site/text/reveal";
 import { Frame } from "@/experience/frame";
@@ -132,6 +133,9 @@ const FILM_IDS: FrameId[] = ["f06", "f07", "f08"];
 
 function PourFilm() {
   const ref = useRef<HTMLDivElement>(null);
+
+  // Arriving from another page (no preloader): start the films now, not as they near.
+  useEffect(() => preloadFilms(), []);
 
   useEffect(() => {
     const root = ref.current;

@@ -8,7 +8,8 @@ export interface UiState {
   ready: boolean;
 }
 
-const INITIAL: UiState = { menuOpen: false, soundOn: false, ready: false };
+// Sound is on by default; it starts with the visitor's first gesture (sound.tsx).
+const INITIAL: UiState = { menuOpen: false, soundOn: true, ready: false };
 let state: UiState = INITIAL;
 const listeners = new Set<() => void>();
 

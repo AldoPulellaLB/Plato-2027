@@ -1,7 +1,9 @@
-// Ambient sound for the story (client only, created on the first opt-in gesture).
+// Ambient sound for the story (client only, created on the visitor's first gesture).
 // Two seamless loops (roaster hum, café murmur) on their own gain nodes, crossfaded
 // with WebAudio ramps, plus a procedural first-crack crackle: short noise bursts
-// through a bandpass. Nothing is fetched until the visitor turns sound on.
+// through a bandpass. Sound is on by default, but browsers only let audio start
+// from a gesture, so nothing is created or fetched until the first one (unlock).
+import { useSyncExternalStore } from "react";
 
 export type Bed = "roaster" | "cafe";
 
@@ -31,18 +33,44 @@ class AmbientEngine {
   private suspended = false;
   private bed: Bed = "roaster";
   private suspendTimer = 0;
+  /** A gesture has happened, so the context may be created and started. */
+  private unlocked = false;
+  /** The context has run at least once: the browser has let audio start. */
+  private started = false;
+  private listeners = new Set<() => void>();
 
-  /** Create (or wake) the context. Call from inside a user gesture when possible. */
+  /** Create (or wake) the context. Call from inside a user gesture. */
   unlock() {
+    this.unlocked = true;
     if (!this.ensure()) return;
     if (this.ctx && this.ctx.state === "suspended" && this.audible()) {
       void this.ctx.resume().catch(() => undefined);
     }
+    this.apply();
+    this.noteStarted();
+  }
+
+  /** Audio has been allowed to start (until then, sound "on" is only a setting). */
+  isStarted() {
+    return this.started;
+  }
+
+  subscribe(listener: () => void) {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private noteStarted() {
+    if (this.started || this.ctx?.state !== "running") return;
+    this.started = true;
+    for (const listener of this.listeners) listener();
   }
 
   setEnabled(on: boolean) {
     this.enabled = on;
-    if (on) this.ensure();
+    if (on && this.unlocked) this.ensure();
     this.apply();
   }
 
@@ -111,6 +139,8 @@ class AmbientEngine {
     if (!Ctor) return false;
     try {
       const ctx = new Ctor();
+      // Safari can resume a gesture-created context a moment later.
+      ctx.addEventListener("statechange", () => this.noteStarted());
       const master = ctx.createGain();
       master.gain.value = 0;
       master.connect(ctx.destination);
@@ -209,4 +239,13 @@ let engine: AmbientEngine | null = null;
 export function ambient() {
   if (!engine) engine = new AmbientEngine();
   return engine;
+}
+
+const subscribeStarted = (listener: () => void) => ambient().subscribe(listener);
+const startedSnapshot = () => ambient().isStarted();
+const serverStarted = () => false;
+
+/** True once the browser has let the ambience start (the first gesture with sound on). */
+export function useAudioStarted() {
+  return useSyncExternalStore(subscribeStarted, startedSnapshot, serverStarted);
 }

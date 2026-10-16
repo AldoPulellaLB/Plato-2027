@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
+import { useAudioStarted } from "@/components/site/chrome/audio";
 import { GhostHeadline } from "@/components/site/text/reveal";
 import { Frame } from "@/experience/frame";
 import {
@@ -52,6 +53,9 @@ export function BeanChapter() {
 
 function ColdOpen() {
   const { ready, soundOn } = useUi();
+  // Sound is on by default but only plays after a gesture: invite one until then.
+  const audioStarted = useAudioStarted();
+  const soundPlaying = soundOn && audioStarted;
   const [fallback, setFallback] = useState(false);
   const play = ready || fallback;
   const rootRef = useRef<HTMLDivElement>(null);
@@ -142,7 +146,7 @@ function ColdOpen() {
         </div>
         <div className="ch-f01__foot" ref={footRef}>
           <div className="ch-f01__foot-in">
-            <p className="ch-sound-hint t-label" data-on={soundOn ? "" : undefined}>
+            <p className="ch-sound-hint t-label" data-on={soundPlaying ? "" : undefined}>
               <span aria-hidden="true" className="ch-sound-hint__bars">
                 <span />
                 <span />
@@ -150,9 +154,9 @@ function ColdOpen() {
                 <span />
               </span>
               <span className="ch-sound-hint__text">
-                {soundOn ? "Sound on: the roastery" : "Best with sound on"}
+                {soundPlaying ? "Sound on: the roastery" : "Best with sound on"}
               </span>
-              {soundOn ? null : (
+              {soundPlaying ? null : (
                 <svg
                   aria-hidden="true"
                   className="ch-sound-hint__arrow"
