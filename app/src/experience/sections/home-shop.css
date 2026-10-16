@@ -28,15 +28,15 @@
 .hshop-title {
   margin: 0;
   max-width: 8.6ch;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(3.4rem, 8.8vw, 10.5rem);
   line-height: 0.88;
   letter-spacing: -0.035em;
 }
 .hshop-title .split__w:last-child {
-  font-style: italic;
-  padding-right: 0.06em;
+  font-style: normal;
+  font-weight: 250;
 }
 .hshop-aside {
   grid-column: 9 / -1;
@@ -460,7 +460,7 @@
   color: color-mix(in srgb, var(--plato-paper) 70%, transparent);
 }
 .hshop-end__title {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(2.4rem, 3.4vw, 3.6rem);
   line-height: 0.95;
   letter-spacing: -0.02em;

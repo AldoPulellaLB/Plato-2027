@@ -27,8 +27,8 @@
 }
 .ac-hero__title {
   grid-column: 1 / -1;
-  margin: clamp(24px, 3.4vw, 56px) 0 clamp(24px, 3vw, 48px);
-  font-family: var(--font-serif);
+  margin: clamp(24px, 3.4vw, 56px) 0 calc(clamp(24px, 3vw, 48px) + 0.12em);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: var(--ac-h1);
   line-height: 0.82;
@@ -39,7 +39,8 @@
   display: block;
 }
 .ac-hero__l2 {
-  font-style: italic;
+  font-style: normal;
+  font-weight: 300;
   text-align: right;
   letter-spacing: -0.05em;
 }
@@ -133,7 +134,7 @@
 }
 .ac-intro__title {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2.6rem, 5.2vw, 5.75rem);
   line-height: 0.96;
@@ -197,7 +198,7 @@
   padding-bottom: clamp(24px, 3vw, 48px);
 }
 .ac-courses__title {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(3.5rem, 9.6vw, 11rem);
   line-height: 0.86;
@@ -264,8 +265,8 @@
 .ac-course__num {
   grid-column: 1;
   grid-row: 2;
-  font-family: var(--font-serif);
-  font-style: italic;
+  font-family: var(--font-display);
+  font-style: normal;
   font-size: clamp(1.25rem, 1.6vw, 1.5rem);
   color: var(--fg-muted);
 }
@@ -282,7 +283,7 @@
 }
 .ac-course__title {
   margin: 0 0 28px;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2.6rem, 4.6vw, 5.25rem);
   line-height: 0.95;
@@ -441,10 +442,10 @@
   color: var(--fg);
 }
 .ac-teams__title {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(3.25rem, 8.6vw, 10rem);
-  line-height: 0.88;
+  line-height: 0.96;
   letter-spacing: -0.035em;
 }
 .ac-teams__grid {
@@ -461,14 +462,14 @@
   border-top: 1px solid var(--line);
 }
 .ac-block__num {
-  font-family: var(--font-serif);
-  font-style: italic;
+  font-family: var(--font-display);
+  font-style: normal;
   font-size: 1.25rem;
   color: var(--plato-sage);
 }
 .ac-block__title {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2rem, 3.2vw, 3.25rem);
   line-height: 1;
@@ -503,7 +504,7 @@
   align-items: center;
   gap: 12px;
   padding-bottom: 8px;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(1.5rem, 2.4vw, 2.25rem);
   line-height: 1.1;
   overflow-wrap: anywhere;
@@ -548,7 +549,7 @@
 .ac-gallery__title {
   grid-column: 1 / span 7;
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2.75rem, 6vw, 6.5rem);
   line-height: 0.92;

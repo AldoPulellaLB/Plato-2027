@@ -17,6 +17,7 @@ import appMetaJson from "../app-meta.json";
 import { CartDrawer } from "@/components/commerce/cart-drawer";
 import { NotFoundPage } from "@/components/pages/not-found";
 import {
+  BackToTop,
   FullscreenMenu,
   Preloader,
   SiteFooter,
@@ -95,7 +96,7 @@ function buildHead(meta: AppMeta, notFound = false) {
     ],
     links: [
       { rel: "preload", href: "/fonts/jost-variable.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" as const },
-      { rel: "preload", href: "/fonts/instrument-serif-normal.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" as const },
+      { rel: "preload", href: "/fonts/outfit-latin.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" as const },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: favicon, type: favicon.endsWith(".svg") ? "image/svg+xml" : undefined },
       { rel: "apple-touch-icon", href: "/assets/brand/favicon-180.png" },
@@ -304,6 +305,7 @@ function RootComponent() {
       <SiteFooter />
       <SoundToggle />
       <StoreFinderPill />
+      <BackToTop />
     </QueryClientProvider>
   );
 }

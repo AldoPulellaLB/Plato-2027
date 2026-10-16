@@ -68,52 +68,6 @@ export function ringGlowTexture(size = 512, peak = 0.62, width = 0.22) {
   return finish(c);
 }
 
-/** An out-of-focus coffee bean: soft elliptical body, a hint of crease and a highlight. Tinted per instance. */
-export function blurBeanTexture(size = 256) {
-  const { c, g } = canvas(size);
-  const h = size / 2;
-  g.save();
-  g.translate(h, h);
-  g.scale(1, 0.74);
-  const body = g.createRadialGradient(0, 0, 0, 0, 0, h * 0.92);
-  body.addColorStop(0, "rgba(255,255,255,1)");
-  body.addColorStop(0.5, "rgba(236,236,236,0.97)");
-  body.addColorStop(0.74, "rgba(214,214,214,0.62)");
-  body.addColorStop(0.9, "rgba(200,200,200,0.18)");
-  body.addColorStop(1, "rgba(200,200,200,0)");
-  g.fillStyle = body;
-  g.beginPath();
-  g.arc(0, 0, h * 0.92, 0, Math.PI * 2);
-  g.fill();
-  g.restore();
-  // Crease: a soft darker S line along the long axis.
-  g.save();
-  g.translate(h, h);
-  g.globalCompositeOperation = "source-atop";
-  g.strokeStyle = "rgba(60,60,60,0.35)";
-  g.lineWidth = size * 0.07;
-  g.lineCap = "round";
-  g.shadowColor = "rgba(60,60,60,0.5)";
-  g.shadowBlur = size * 0.06;
-  g.beginPath();
-  for (let i = 0; i <= 24; i += 1) {
-    const t = i / 24;
-    const x = (t - 0.5) * size * 0.62;
-    const y = Math.sin(t * Math.PI * 1.2 - 0.6) * size * 0.035;
-    if (i === 0) g.moveTo(x, y);
-    else g.lineTo(x, y);
-  }
-  g.stroke();
-  // Highlight upper left.
-  const hl = g.createRadialGradient(-size * 0.16, -size * 0.12, 0, -size * 0.16, -size * 0.12, size * 0.26);
-  hl.addColorStop(0, "rgba(255,255,255,0.55)");
-  hl.addColorStop(1, "rgba(255,255,255,0)");
-  g.fillStyle = hl;
-  g.fillRect(-h, -h, size, size);
-  g.restore();
-  return finish(c);
-}
-
 /** Spun / brushed steel streaks (roughness + subtle colour). Streaks run along U. */
 export function brushedTexture(w = 512, h = 256) {
   const { c, g } = canvas(w, h);

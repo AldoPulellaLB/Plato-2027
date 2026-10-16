@@ -5,6 +5,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { FRAME_IDS } from "@/experience/story";
 import type { FrameId } from "@/experience/story";
+import { prefersReducedMotion, scrollToTarget } from "@/lib/motion/smooth";
 
 export const MENU_ID = "site-menu";
 export const FOOTER_ID = "site-footer";
@@ -150,6 +151,13 @@ export function focusJumpTarget(el: HTMLElement) {
     el.dataset.jumpTarget = "";
   }
   el.focus({ preventScroll: true });
+}
+
+/** Scroll home and take keyboard focus with it, so the next Tab starts at the top. */
+export function backToTop() {
+  scrollToTarget(0, { duration: 2.4, immediate: prefersReducedMotion() });
+  const main = document.getElementById("main");
+  if (main) focusJumpTarget(main);
 }
 
 /**

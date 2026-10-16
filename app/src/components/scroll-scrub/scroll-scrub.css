@@ -192,7 +192,7 @@
   max-width: 13.5ch;
   margin: 0;
   color: var(--ss-ink);
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(2.75rem, 5.6vw, 6.5rem);
   font-weight: 400;
   line-height: 0.96;
@@ -332,6 +332,11 @@
   --ch-f08-x: 35%;
 }
 @media (min-width: 861px) {
+  /* Frame 06: two balanced lines that clear the portafilter, stream and cup. */
+  #f06 .scroll-scrub__title {
+    max-width: none;
+    font-size: clamp(2.5rem, 4vw, 4.25rem);
+  }
   #f08 .scroll-scrub__copy {
     width: min(34rem, calc(42vw - clamp(1.25rem, 6vw, 6rem)));
   }
@@ -400,6 +405,11 @@
   .scroll-scrub__title {
     max-width: 14ch;
     font-size: clamp(2.4rem, 11vw, 4.25rem);
+  }
+
+  /* Frame 08: a shorter block that sits less of itself on the cup. */
+  #f08 .scroll-scrub__title {
+    font-size: clamp(2.1rem, 9.5vw, 3.6rem);
   }
 
   .scroll-scrub__chapter[data-ss-line] .scroll-scrub__copy {

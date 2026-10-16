@@ -33,7 +33,7 @@
   position: relative;
   z-index: 2;
   margin: clamp(28px, 4vw, 64px) 0 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: var(--eq-h1);
   line-height: 0.84;
@@ -46,7 +46,8 @@
 }
 .eq-hero__l2 {
   padding-left: calc(100% / 3);
-  font-style: italic;
+  font-style: normal;
+  font-weight: 300;
   letter-spacing: -0.045em;
 }
 .eq-hero__stage {
@@ -174,7 +175,7 @@
 .eq-range__title {
   grid-column: 1 / span 6;
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2.5rem, 5vw, 5.25rem);
   line-height: 0.95;
@@ -233,8 +234,8 @@
   text-transform: uppercase;
 }
 .eq-range__model {
-  font-family: var(--font-serif);
-  font-size: clamp(1.9rem, 3.2vw, 3.25rem);
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.8vw, 2.875rem);
   line-height: 1;
   letter-spacing: -0.01em;
   text-wrap: balance;
@@ -290,14 +291,14 @@
 }
 .eq-group__count {
   grid-column: 1 / -1;
-  font-family: var(--font-serif);
-  font-style: italic;
+  font-family: var(--font-display);
+  font-style: normal;
   font-size: clamp(1.25rem, 1.6vw, 1.5rem);
   color: var(--fg-muted);
 }
 .eq-group__title {
   grid-column: 1 / span 8;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(3.25rem, 8.4vw, 9.5rem);
   line-height: 0.88;
@@ -349,7 +350,7 @@
   position: absolute;
   top: 3%;
   left: 3.5%;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(4rem, 9vw, 10rem);
   line-height: 0.8;
   letter-spacing: -0.04em;
@@ -417,7 +418,7 @@
 }
 .eq-spread__title {
   margin: 14px 0 22px;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2.75rem, 4.6vw, 5.25rem);
   line-height: 0.94;
@@ -620,14 +621,14 @@
 }
 .eq-craft__quote p {
   margin: 0;
-  font-family: var(--font-serif);
-  font-size: clamp(2rem, 3.5vw, 3.6rem);
-  line-height: 1.06;
+  font-family: var(--font-display);
+  font-size: clamp(1.625rem, 2.9vw, 3rem);
+  line-height: 1.1;
   letter-spacing: -0.015em;
   text-wrap: pretty;
 }
 .eq-craft__quote em {
-  font-style: italic;
+  font-style: normal;
   color: var(--plato-sage);
 }
 .eq-craft__sign {
@@ -667,7 +668,7 @@
 }
 .eq-advice__title {
   grid-column: 1 / span 9;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(3rem, 7.4vw, 8.5rem);
   line-height: 0.9;
@@ -725,7 +726,7 @@
 }
 .eq-tile__value {
   align-self: end;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(1.9rem, 3.6vw, 3.6rem);
   line-height: 1;
   letter-spacing: -0.01em;

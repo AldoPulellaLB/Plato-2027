@@ -31,7 +31,7 @@
 }
 .st-hero__title {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(4.25rem, 11.2vw, 13rem);
   line-height: 0.84;
@@ -42,8 +42,7 @@
   display: block;
 }
 .st-hero__l2 {
-  font-style: italic;
-  padding-left: 0.6em;
+  padding-left: 0.8em;
 }
 .st-hero__media {
   grid-column: 9 / -1;
@@ -95,7 +94,7 @@
   border: 0;
   background: transparent;
   color: var(--fg);
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(1.75rem, 2.8vw, 2.75rem);
   letter-spacing: -0.01em;
   outline: none;
@@ -198,7 +197,7 @@
   align-items: baseline;
   gap: 8px 16px;
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2.25rem, 4vw, 4rem);
   line-height: 1;
@@ -291,8 +290,8 @@
 }
 .st-card__num {
   color: var(--fg);
-  font-family: var(--font-serif);
-  font-style: italic;
+  font-family: var(--font-display);
+  font-style: normal;
   font-size: clamp(2rem, 2.6vw, 2.5rem);
   line-height: 0.9;
 }
@@ -301,7 +300,7 @@
 }
 .st-card__name {
   margin: clamp(24px, 3vw, 40px) 0 8px;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2rem, 2.8vw, 2.75rem);
   line-height: 1;
@@ -407,7 +406,7 @@
 }
 .st-empty__title {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(2.5rem, 5vw, 4.75rem);
   line-height: 0.95;
   letter-spacing: -0.02em;
@@ -469,11 +468,12 @@
 }
 .st-local__title {
   grid-column: 1 / span 7;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2.75rem, 6vw, 6.75rem);
   line-height: 0.92;
   letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 .st-local__side {
   grid-column: 9 / -1;
@@ -576,7 +576,7 @@
   line-height: 2.2;
 }
 .st-local__name {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(1.6rem, 2vw, 2rem);
   line-height: 1.1;
 }
@@ -615,7 +615,7 @@
 }
 .st-foot__big {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(7rem, 23vw, 25rem);
   line-height: 0.78;
   letter-spacing: -0.06em;
@@ -624,12 +624,19 @@
   display: inline-flex;
   align-items: flex-start;
 }
+/* Outfit's tabular "1" has a slab foot and wide spacing; display figures use the plain ones. */
+.st-count.t-num,
+.st-card__num.t-num,
+.st-results__title .t-num {
+  font-feature-settings: normal;
+  font-variant-numeric: normal;
+}
 /* "About" sits above the counter so the figure reads "About 150 locations". */
 .st-foot__about {
   display: block;
   margin: 0 0 0.12em 0.06em;
   color: var(--plato-green);
-  font-style: italic;
+  font-style: normal;
   font-size: 0.22em;
   line-height: 1;
   letter-spacing: -0.01em;
@@ -648,8 +655,8 @@
 }
 .st-foot__and {
   margin: 0;
-  font-family: var(--font-serif);
-  font-style: italic;
+  font-family: var(--font-display);
+  font-style: normal;
   font-size: clamp(2.75rem, 5.6vw, 6rem);
   line-height: 0.95;
   letter-spacing: -0.025em;
@@ -692,11 +699,12 @@
   grid-column: 6 / -1;
 }
 .st-app__title {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(3rem, 6.8vw, 7.5rem);
   line-height: 0.9;
   letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 .st-app__line {
   margin: 24px 0 0;
@@ -838,7 +846,7 @@
     flex-wrap: wrap;
     gap: 2px 18px;
     margin: 0;
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
     font-size: 1.375rem;
     line-height: 1.25;
   }

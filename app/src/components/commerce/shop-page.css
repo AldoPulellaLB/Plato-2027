@@ -52,11 +52,11 @@
   align-self: end;
   display: flex;
   margin: 0 0 -0.06em -0.05em;
-  font-family: var(--font-serif);
-  font-size: clamp(8rem, 25vw, 27rem);
+  font-family: var(--font-display);
+  font-size: clamp(7rem, 20vw, 21.5rem);
   font-weight: 400;
   line-height: 0.8;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.05em;
   color: var(--fg);
   will-change: transform;
 }
@@ -76,7 +76,7 @@
 .shop-hero__bag {
   position: absolute;
   z-index: 2;
-  left: 36.5%;
+  left: 39%;
   bottom: 2%;
   height: min(42vw, 66svh);
   aspect-ratio: 900 / 1581;
@@ -122,14 +122,14 @@
 }
 .shop-hero__statement {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(1.9rem, 2.9vw, 3.25rem);
   line-height: 1.02;
   letter-spacing: -0.015em;
   text-wrap: balance;
 }
 .shop-hero__statement em {
-  font-style: italic;
+  font-style: normal;
   color: var(--plato-green);
 }
 .shop-hero__blurb {
@@ -348,7 +348,7 @@
 }
 .shop-empty__title {
   margin: 0.5rem 0 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(2.4rem, 4.6vw, 4.5rem);
   font-weight: 400;
   line-height: 1;
@@ -436,11 +436,12 @@
 }
 .shop-promise__title {
   margin: 0.4rem 0 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(1.75rem, 2.3vw, 2.5rem);
   font-weight: 400;
   line-height: 1.04;
   letter-spacing: -0.012em;
+  text-wrap: balance;
 }
 .shop-promise__body {
   max-width: 36ch;
@@ -483,7 +484,7 @@
   transition: transform 900ms var(--ease-out-expo);
 }
 .shop-poured__q {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(3.25rem, 8.6vw, 10rem);
   line-height: 0.9;
   letter-spacing: -0.03em;
@@ -556,7 +557,7 @@
   .shop-hero__title {
     grid-column: 1 / -1;
     grid-row: 3;
-    font-size: clamp(7rem, 30vw, 18rem);
+    font-size: clamp(6rem, 23vw, 14rem);
   }
   .shop-hero__bag {
     left: auto;
@@ -588,7 +589,7 @@
     grid-column: 1;
     grid-row: 2;
     margin-top: clamp(150px, 46vw, 300px);
-    font-size: clamp(6.5rem, 38vw, 12rem);
+    font-size: clamp(5.5rem, 30vw, 9.5rem);
   }
   .shop-hero__bag {
     left: auto;

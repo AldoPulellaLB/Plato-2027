@@ -29,6 +29,12 @@ const _p = new THREE.Vector3();
 const _qi = new THREE.Quaternion();
 const _col = new THREE.Color();
 
+/**
+ * The warm front plate behind the window (sRGB, may exceed 1). It was (2, 0.4, 0.095):
+ * so bright the tone mapper washed it to a pale tan. This is a deeper, calmer toasted tan.
+ */
+const PLATE_COLOUR: [number, number, number] = [1.05, 0.58, 0.3];
+
 export function createDrumSet(kit: Kit, warm: THREE.PointLight): DrumSet {
   const group = new THREE.Group();
   group.name = "drum";
@@ -47,7 +53,7 @@ export function createDrumSet(kit: Kit, warm: THREE.PointLight): DrumSet {
   hole.absarc(0, 0, WINDOW_R + 0.02, 0, TAU, true);
   plateShape.holes.push(hole);
   const plateGeo = new THREE.ShapeGeometry(plateShape, 64);
-  const plateBase = new THREE.Color().setRGB(2, 0.4, 0.095, THREE.SRGBColorSpace);
+  const plateBase = new THREE.Color().setRGB(...PLATE_COLOUR, THREE.SRGBColorSpace);
   const plateMat = new THREE.MeshStandardMaterial({
     color: plateBase.clone(),
     metalness: 0.6,

@@ -18,8 +18,9 @@
   align-items: center;
   text-align: center;
 }
-.ch-f01__label {
-  margin-bottom: clamp(1.5rem, 3.4svh, 2.6rem);
+/* Head-scoped so it beats .ch-label { margin: 0 } (chapters.css loads later). */
+.ch-f01__head .ch-f01__label {
+  margin-bottom: clamp(1rem, 2.4svh, 1.75rem);
 }
 .ch-f01__title-wrap {
   width: 100%;
@@ -29,6 +30,10 @@
 .ch-f01__title {
   max-width: 13ch;
   color: var(--fg);
+  /* Keeps the cream lines legible where they cross the white cup. */
+  text-shadow:
+    0 0.02em 0.5em color-mix(in srgb, var(--plato-roast) 70%, transparent),
+    0 0 0.12em color-mix(in srgb, var(--plato-roast) 45%, transparent);
 }
 
 /* The theme cup behind the headline (hero-cup.tsx), with its soft glow. The
@@ -143,13 +148,15 @@
   margin: 0 0 0.35rem;
   color: var(--fg-muted);
 }
-/* A soft roast floor under the foot row, so the labels read over the drifting beans. */
+/* A soft roast floor under the foot row, so the labels read over the drifting beans.
+ * Fixed to the bottom of the viewport: it fades in place while the page scrolls, so its
+ * edge never travels up across the (fixed) GL beans. */
 .ch-f01__inner::before {
-  position: absolute;
+  position: fixed;
   z-index: 0;
-  right: calc(-1 * max(var(--gutter), env(safe-area-inset-right)));
+  right: 0;
   bottom: 0;
-  left: calc(-1 * max(var(--gutter), env(safe-area-inset-left)));
+  left: 0;
   height: calc(clamp(4.75rem, 11svh, 7rem) + env(safe-area-inset-bottom) + 18svh);
   content: "";
   /* Densest on the label row (about 30% to 50% up), lighter below it, so the
@@ -267,7 +274,7 @@
   color: var(--fg-muted);
 }
 .ch-origin__name {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(3rem, 6.2vw, 7rem);
   line-height: 0.98;
   letter-spacing: -0.02em;
@@ -290,16 +297,19 @@
   position: absolute;
   top: var(--ch-top);
   left: 0;
-  max-width: 14rem;
+  max-width: none;
 }
 .ch-f03__h {
+  /* 7.4em: 'The roast / changes colour.' at every size. */
+  max-width: 7.4em;
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(1.75rem, 2.5vw, 2.6rem);
   line-height: 1.04;
   letter-spacing: -0.012em;
   color: var(--fg);
+  text-wrap: balance;
 }
 
 .ch-roast {
@@ -493,7 +503,7 @@
   align-items: center;
 }
 .ch-f04__copy {
-  width: min(46vw, 44rem);
+  width: min(52vw, 50rem);
 }
 .ch-f04__kicker {
   margin: 0 0 clamp(1.25rem, 3svh, 2rem);
@@ -506,8 +516,8 @@
 .ch-f04__line {
   display: block;
   overflow: hidden;
-  padding-bottom: 0.1em;
-  margin-bottom: -0.1em;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
 }
 .ch-f04__in {
   display: inline-flex;
@@ -515,6 +525,10 @@
   transition:
     transform 1300ms var(--ease-out-expo) calc(var(--i, 0) * 90ms),
     opacity 900ms var(--ease-out-quart) calc(var(--i, 0) * 90ms);
+}
+/* Each headline line stays one line inside its mask. */
+.ch-f04__h .ch-f04__in {
+  white-space: nowrap;
 }
 .ch-f04__copy[data-armed]:not([data-in]) .ch-f04__in {
   transform: translateX(-104%);
@@ -677,6 +691,12 @@
 
 /* ================= reduced motion: stills with real text ================= */
 @media (prefers-reduced-motion: reduce) {
+  /* No exit scrub fades the floor here, so it stays with the cold open instead of the viewport. */
+  .ch-f01__inner::before {
+    position: absolute;
+    right: calc(-1 * max(var(--gutter), env(safe-area-inset-right)));
+    left: calc(-1 * max(var(--gutter), env(safe-area-inset-left)));
+  }
   .ch-f01__foot-in,
   .ch-f04__in {
     transition: none;

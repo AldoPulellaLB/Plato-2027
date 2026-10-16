@@ -47,7 +47,7 @@
 }
 .mb-hero__title {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(4rem, 10.6vw, 12.5rem);
   line-height: 0.84;
@@ -58,8 +58,7 @@
   display: block;
 }
 .mb-hero__l2 {
-  font-style: italic;
-  letter-spacing: -0.045em;
+  font-weight: 300;
 }
 .mb-hero__lede {
   margin: clamp(28px, 3.4vw, 48px) 0 0;
@@ -220,11 +219,11 @@
 }
 .mb-sec__head {
   display: grid;
-  gap: 14px;
+  gap: clamp(16px, 1.6vw, 24px);
   margin-bottom: clamp(20px, 2.4vw, 36px);
 }
 .mb-sec__title {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(3rem, 6.4vw, 7.25rem);
   line-height: 0.88;
@@ -445,11 +444,12 @@
   grid-column: 8 / -1;
 }
 .mb-visit__title {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2.75rem, 5.4vw, 6rem);
   line-height: 0.92;
   letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 .mb-visit__line {
   margin: 24px 0 0;
@@ -620,6 +620,10 @@
   }
   .mb-sections {
     padding-top: 40px;
+  }
+  .mb-sec__title {
+    font-size: clamp(2.5rem, 12.5vw, 3rem);
+    text-wrap: balance;
   }
   .mb-row > * {
     padding: 16px 0;

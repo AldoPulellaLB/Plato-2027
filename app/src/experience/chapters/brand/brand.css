@@ -115,7 +115,7 @@
   color: var(--fg-muted);
 }
 .ch-cup__name {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(1.35rem, 1.9vw, 2rem);
   line-height: 1;
 }
@@ -158,12 +158,13 @@
 }
 .ch-f11__h {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2rem, 3.4vw, 3.6rem);
   line-height: 1;
   letter-spacing: -0.015em;
   color: var(--fg);
+  text-wrap: balance;
 }
 .ch-f11__note {
   max-width: 32ch;
@@ -350,8 +351,8 @@
   background: var(--plato-paper);
   color: var(--plato-ink);
   box-shadow:
-    0 -1px 0 color-mix(in srgb, var(--plato-ink) 8%, transparent),
-    0 -30px 50px -36px color-mix(in srgb, var(--plato-ink) 40%, transparent);
+    0 -1px 0 color-mix(in srgb, var(--plato-ink) 5%, transparent),
+    0 -30px 50px -5px color-mix(in srgb, var(--plato-ink) 5%, transparent);
 }
 .ch-band__edge {
   position: absolute;
@@ -360,11 +361,11 @@
   top: 100%;
   height: 12px;
   background: linear-gradient(to bottom, var(--plato-stone-deep), var(--plato-stone));
-  box-shadow: 0 18px 30px -16px color-mix(in srgb, var(--plato-ink) 28%, transparent);
+  box-shadow: 0 18px 30px -16px color-mix(in srgb, var(--plato-ink) 5%, transparent);
 }
 .ch-band__top {
   display: grid;
-  grid-template-columns: auto minmax(10rem, 15rem) 1fr auto;
+  grid-template-columns: auto minmax(10rem, 19rem) 1fr auto;
   align-items: center;
   gap: clamp(0.85rem, 1.6vw, 1.5rem);
 }
@@ -393,7 +394,7 @@
   text-overflow: ellipsis;
 }
 .ch-band__roll--name {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(1.5rem, 2vw, 2.1rem);
 }
 .ch-band__roll--line {
@@ -509,12 +510,13 @@
 }
 .ch-f12__copy .ch-f12__h {
   margin: 1.1rem 0 1.5rem;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2.5rem, 4.4vw, 4.75rem);
   line-height: 1;
   letter-spacing: -0.018em;
   color: var(--fg);
+  text-wrap: balance;
 }
 .ch-f12__body {
   max-width: 40ch;
@@ -765,7 +767,7 @@
   color: var(--fg-muted);
 }
 .ch-academy__title {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(1.4rem, 1.8vw, 1.85rem);
   line-height: 1.08;
 }
@@ -962,6 +964,10 @@
   .ch-academy {
     grid-template-columns: 5rem 1fr auto;
   }
+  .ch-academy__title {
+    font-size: 1.25rem;
+    text-wrap: balance;
+  }
   .ch-academy__text {
     display: none;
   }
@@ -1064,7 +1070,7 @@
     margin-top: 0.75rem;
   }
   .ch-panel__name {
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
     font-size: 1.5rem;
   }
   .ch-panel__line {

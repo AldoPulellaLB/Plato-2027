@@ -1,8 +1,8 @@
 .wr-w {
   display: inline-block;
   overflow: clip;
-  padding-bottom: 0.12em;
-  margin-bottom: -0.12em;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
   vertical-align: top;
 }
 .wr-i {
@@ -11,7 +11,7 @@
   animation-delay: calc(var(--wr-delay, 120ms) + var(--i, 0) * 40ms);
 }
 .wr-i[data-italic] {
-  font-style: italic;
+  font-style: normal;
 }
 @keyframes wr-rise {
   from {

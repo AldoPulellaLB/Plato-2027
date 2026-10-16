@@ -1,0 +1,68 @@
+/* BackToTop: the sound toggle's backed capsule as a 44px circle, bottom right.
+   Lifts above the store pill (48px tall at the same gutter) while the pill is up. */
+.totop {
+  position: fixed;
+  right: var(--gutter);
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  z-index: var(--z-float);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--fg);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(18px);
+  pointer-events: none;
+  transition:
+    opacity 520ms var(--ease-out-quart),
+    transform 800ms var(--ease-out-expo),
+    bottom 700ms var(--ease-out-expo),
+    color 700ms var(--ease-out-quart),
+    background-color 700ms var(--ease-out-quart),
+    border-color 700ms var(--ease-out-quart);
+}
+.totop[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.totop[data-lift="true"] {
+  /* The pill's bottom (18px) + its height (48px) + a 12px gap. */
+  bottom: calc(78px + env(safe-area-inset-bottom));
+}
+/* Over the bright milk film, before the theme flips: ink on a paper capsule (as .snd). */
+.totop[data-tone="ink"] {
+  --bg: var(--plato-paper);
+  --fg: var(--plato-ink);
+  --line: color-mix(in srgb, var(--plato-ink) 14%, transparent);
+}
+.totop:focus-visible {
+  outline-offset: 3px;
+}
+.totop__arrow {
+  width: 18px;
+  height: 18px;
+  transition: transform 520ms var(--ease-out-expo);
+}
+@media (hover: hover) {
+  .totop:hover .totop__arrow {
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .totop {
+    transform: none;
+    transition: opacity 300ms var(--ease-out-quart);
+  }
+  .totop__arrow {
+    transition: none;
+  }
+}

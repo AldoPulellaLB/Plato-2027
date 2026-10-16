@@ -277,8 +277,8 @@
 }
 .pdp-title {
   margin: 0;
-  font-family: var(--font-serif);
-  font-size: clamp(2.75rem, 4.6vw, 5.5rem);
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 4vw, 4.75rem);
   font-weight: 400;
   line-height: 0.96;
   letter-spacing: -0.025em;
@@ -450,7 +450,7 @@
   gap: 2px;
 }
 .pdp-option__date {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: 1.6rem;
   line-height: 1.05;
   letter-spacing: -0.01em;
@@ -611,7 +611,7 @@
 }
 .pdp-soon__title {
   margin: 6px 0 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(2rem, 2.8vw, 2.75rem);
   font-weight: 400;
   line-height: 1;
@@ -688,9 +688,9 @@
 }
 .pdp-story__lede {
   margin: 0;
-  font-family: var(--font-serif);
-  font-size: clamp(2rem, 3.7vw, 3.9rem);
-  line-height: 1.06;
+  font-family: var(--font-display);
+  font-size: clamp(1.625rem, 3.1vw, 3.25rem);
+  line-height: 1.1;
   letter-spacing: -0.016em;
   text-wrap: balance;
 }
@@ -792,11 +792,12 @@
 }
 .pdp-related__title {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(2.5rem, 5.2vw, 5.5rem);
   font-weight: 400;
   line-height: 0.95;
   letter-spacing: -0.022em;
+  text-wrap: balance;
 }
 .pdp-related__all {
   display: inline-flex;

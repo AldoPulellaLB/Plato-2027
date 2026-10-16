@@ -7,13 +7,13 @@ import type { CSSProperties, RefObject } from "react";
 import { RollText, useReveal } from "@/components/site/text/reveal";
 import { Wordmark } from "@/components/site/wordmark";
 import { CATEGORIES } from "@/lib/catalog";
-import { prefersReducedMotion, scrollToTarget } from "@/lib/motion/smooth";
+import { prefersReducedMotion } from "@/lib/motion/smooth";
 import { CONTACT, LEGAL, SOCIALS, VISIT, WORK_WITH_US } from "@/lib/site";
 import type { LinkItem } from "@/lib/site";
 
 import { ArrowRightIcon, ArrowUpIcon, ArrowUpRightIcon } from "./icons";
 import { ChromeLink } from "./link";
-import { FOOTER_ID, focusJumpTarget } from "./shared";
+import { FOOTER_ID, backToTop } from "./shared";
 import "./footer.css";
 
 const SHOP_LINKS: LinkItem[] = CATEGORIES.map((c) => ({ label: c.label, href: `/shop?c=${c.id}` }));
@@ -193,13 +193,6 @@ export function SiteFooter() {
       </div>
     </footer>
   );
-}
-
-/** Scroll home and take keyboard focus with it, so the next Tab starts at the top. */
-function backToTop() {
-  scrollToTarget(0, { duration: 2.4 });
-  const main = document.getElementById("main");
-  if (main) focusJumpTarget(main);
 }
 
 function FooterColumn({

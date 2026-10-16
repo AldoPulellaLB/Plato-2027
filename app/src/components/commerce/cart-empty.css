@@ -41,14 +41,15 @@
 }
 .ce-title {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(2.4rem, 3.4vw, 3.25rem);
   font-weight: 400;
   line-height: 1;
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 .ce[data-variant="page"] .ce-title {
-  font-size: clamp(2.75rem, 5vw, 5rem);
+  font-size: clamp(2.25rem, 3.5vw, 3.6rem);
 }
 .ce-body {
   max-width: 34ch;
@@ -101,7 +102,7 @@
   font-size: 0.625rem;
 }
 .ce-start__title {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: 1.6rem;
   line-height: 1.02;
   letter-spacing: -0.01em;
@@ -129,7 +130,7 @@
 }
 .ce[data-variant="page"] .ce-row {
   min-height: 72px;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(1.75rem, 2.4vw, 2.4rem);
   font-weight: 400;
   letter-spacing: -0.01em;

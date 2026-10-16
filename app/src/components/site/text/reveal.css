@@ -2,6 +2,7 @@
 .ghost {
   position: relative;
   margin: 0;
+  text-wrap: balance; /* inherited, so the sharp and ghost copies wrap identically */
 }
 .ghost__sharp {
   display: block;
@@ -40,20 +41,20 @@
   transform: translateY(0);
 }
 
-/* Split words */
+/* Split words. The 0.16em pad keeps Outfit's g/p/y descenders inside the mask at tight line-heights. */
 .split__w {
   display: inline-block;
   overflow: hidden;
   vertical-align: top;
-  padding-bottom: 0.08em;
-  margin-bottom: -0.08em;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
 }
 .split__i {
   display: inline-block;
   transition: transform 1000ms var(--ease-out-expo) calc(var(--reveal-delay, 0ms) + var(--i) * var(--split-stagger, 38ms));
 }
 .split[data-reveal="idle"] .split__i {
-  transform: translateY(108%);
+  transform: translateY(125%);
   transition: none;
 }
 
@@ -64,9 +65,9 @@
 }
 .roll__c {
   display: inline-block;
-  height: 1.12em;
+  height: 1.2em;
   overflow: hidden;
-  line-height: 1.12;
+  line-height: 1.2;
   vertical-align: top;
 }
 .roll__c > span {

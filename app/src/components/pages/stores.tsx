@@ -468,7 +468,7 @@ function LocalStrip() {
     <section aria-labelledby="st-local-title" className="st-local">
       <div className="pg-wrap st-local__head">
         <GhostHeadline className="st-local__title" id="st-local-title">
-          Same Platō, a little bit local.
+          {"Same Platō, a little bit local."}
         </GhostHeadline>
         <div className="st-local__side">
           <SplitReveal className="st-local__line" delay={120}>

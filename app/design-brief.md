@@ -44,7 +44,7 @@ Defense: these are Platō's own colours (logo green, cup colours, burgundy crew,
 ## Locked type
 
 - **Jost** (variable 300 to 600, self-hosted): the brand's own web face on plato.coffee. UI, labels, prices, and the menu's wide-tracked uppercase drink names (0.24em), echoing the in-store menu board.
-- **Instrument Serif** (regular and italic, self-hosted): statement lines only (one per frame), set huge (clamp 56px to 176px) and resolving from a blurred ghost double. Justification: the client brief specifies ghosted serif statements; a classical serif speaks to the philosopher behind the name and gives 10:1 scale contrast against the geometric sans.
+- **Outfit** (Google Fonts, variable, self-hosted, regular 400, upright only): statement lines and titles (one statement per frame), set huge (clamp 56px to 176px) and resolving from a blurred ghost double. Changed at the client's request from Instrument Serif (regular and italic); the former italic accent lines are now upright.
 - The **PLATŌ wordmark is always the real SVG** (letter paths P, L, A, T, Ō). Never typeset, never generated.
 
 ## Section plan (after the four chapters)

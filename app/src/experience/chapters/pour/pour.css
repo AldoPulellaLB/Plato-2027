@@ -298,7 +298,7 @@
   position: absolute;
   top: -0.32em;
   left: 0.4em;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: 4.5rem;
   line-height: 1;
   color: var(--accent);
@@ -308,7 +308,7 @@
 }
 .ch-quote__text p {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(1.35rem, 1.65vw, 1.7rem);
   line-height: 1.22;
   letter-spacing: -0.005em;

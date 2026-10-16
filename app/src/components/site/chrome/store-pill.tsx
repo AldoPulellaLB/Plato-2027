@@ -16,7 +16,8 @@ import "./store-pill.css";
 
 const COMMUNITY_INDEX = frameIndex("f09");
 
-export function StoreFinderPill() {
+/** Whether the pill is up (also read by BackToTop, which sits above it). */
+export function useStorePillVisible() {
   const pathname = usePathname();
   const { frame } = useStory();
   const { menuOpen } = useUi();
@@ -25,7 +26,7 @@ export function StoreFinderPill() {
   const footerInView = useFooterInView(160);
 
   const isHome = pathname === "/";
-  const visible =
+  return (
     isHome &&
     storyOnScreen &&
     frameIndex(frame) >= COMMUNITY_INDEX &&
@@ -33,7 +34,12 @@ export function StoreFinderPill() {
     frame !== "f14" &&
     !footerInView &&
     !menuOpen &&
-    !cartOpen;
+    !cartOpen
+  );
+}
+
+export function StoreFinderPill() {
+  const visible = useStorePillVisible();
 
   return (
     <ChromeLink

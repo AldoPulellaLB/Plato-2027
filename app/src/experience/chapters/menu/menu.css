@@ -30,7 +30,7 @@
 /* The statement resolves from its ghost (GhostHeadline); it is not part of the armed fade. */
 .ch-f13__titles .ch-f13__h {
   margin: 1.1rem 0 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2rem, 3.4vw, 3.6rem);
   line-height: 1;
@@ -247,10 +247,12 @@
 }
 .ch-drink__note {
   margin: 0.8rem 0 0;
-  font-family: var(--font-serif);
-  font-style: italic;
+  font-family: var(--font-display);
+  font-style: normal;
+  font-weight: 300;
   font-size: clamp(1.05rem, 1.25vw, 1.25rem);
   line-height: 1.3;
+  text-wrap: balance;
   color: var(--plato-cream);
   opacity: calc(0.15 + var(--near) * 0.85);
   transform: translateY(calc((1 - var(--near)) * 8px));
@@ -315,7 +317,7 @@
   color: var(--accent);
 }
 .ch-drink-end__title {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(2rem, 3vw, 3rem);
   line-height: 1;
 }
@@ -375,6 +377,7 @@
 }
 .ch-f14__h {
   max-width: 11ch;
+  font-size: clamp(3.25rem, 7.6vw, 9rem);
   color: var(--fg);
 }
 .ch-f14__ctas {
@@ -533,10 +536,11 @@
   will-change: transform;
 }
 .ch-phone__screen {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 0.85rem 1rem 0.9rem;
+  padding: 0.85rem 0 0.9rem;
   overflow: hidden;
   border-radius: 2.4rem;
   background: var(--plato-paper);
@@ -550,7 +554,7 @@
   align-items: center;
   justify-content: space-between;
   height: 1.5rem;
-  padding: 0 0.6rem;
+  padding: 0 1.6rem;
   font-size: 0.7rem;
   font-weight: 500;
 }
@@ -596,128 +600,191 @@
     inset 0 0 0 1px var(--plato-paper);
   background: currentColor;
 }
-.ch-phone__bar {
+/* The Platō app home screen, laid out in the app's own pixels: --u is one pixel of
+ * the 977px-wide app screenshot, scaled to this screen (container query units), so
+ * the screen matches the real app at any phone size. */
+.ch-pa {
+  --u: calc(100cqw / 977);
+  --pa-ink: #03110d;
+  --pa-green: #013625;
+  --pa-tile: #ececea;
+  --pa-sage: #9eb1a8;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: calc(30 * var(--u)) calc(57 * var(--u)) 0;
+  color: var(--pa-ink);
+}
+.ch-pa__bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: calc(100 * var(--u));
+}
+.ch-pa__icon {
+  width: calc(58 * var(--u));
+  height: calc(58 * var(--u));
+}
+.ch-pa__bar > .ch-pa__icon:last-child {
+  justify-self: end;
+}
+.ch-pa__logo {
+  width: calc(427 * var(--u));
+  color: var(--pa-green);
+}
+.ch-pa__hello {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 1.1rem;
-}
-.ch-phone__logo {
-  width: 4.4rem;
-  color: var(--plato-green);
-}
-.ch-phone__avatar {
-  display: grid;
-  place-items: center;
-  width: 1.9rem;
-  height: 1.9rem;
-  border-radius: 50%;
-  background: var(--plato-stone);
-}
-.ch-phone__hello {
-  margin: 1.1rem 0 0.85rem;
-  font-family: var(--font-serif);
-  font-size: 1.6rem;
+  margin-top: calc(100 * var(--u));
+  font-family: var(--font-display);
+  font-size: calc(66 * var(--u));
   line-height: 1;
+  letter-spacing: -0.01em;
 }
-.ch-phone__card {
+.ch-pa__greet,
+.ch-pa__balance {
+  margin: 0;
+}
+.ch-pa__greet span {
+  font-weight: 300;
+}
+.ch-pa__greet b,
+.ch-pa__balance b {
+  font-weight: 700;
+}
+.ch-pa__balance {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(20 * var(--u));
+}
+.ch-pa__wallet {
+  width: calc(60 * var(--u));
+  height: calc(60 * var(--u));
+}
+.ch-pa__tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(52 * var(--u));
+  margin-top: calc(70 * var(--u));
+}
+.ch-pa__tile,
+.ch-pa__promo {
   position: relative;
   overflow: hidden;
-  padding: 1rem 0.95rem 0.9rem;
-  border-radius: 1.1rem;
-  background: var(--plato-green);
-  color: var(--plato-paper);
-  box-shadow: 0 18px 30px -20px color-mix(in srgb, var(--plato-green) 90%, transparent);
+  border-radius: calc(34 * var(--u));
+  background: var(--pa-tile);
 }
-.ch-phone__card-top {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  font-size: 0.625rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+.ch-pa__tile {
+  aspect-ratio: 406 / 598;
 }
-.ch-phone__card-logo {
-  width: 3.6rem;
-  color: var(--plato-paper);
-}
-.ch-phone__card-ghost {
+.ch-pa__img {
   position: absolute;
-  right: -12%;
-  bottom: -30%;
-  width: 62%;
-  color: var(--plato-paper);
-  opacity: 0.07;
-  pointer-events: none;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: 50% 80%;
 }
-/* The member code: a QR-style block of plain squares on a paper tile. */
-.ch-phone__code {
+.ch-pa__tile-label {
+  position: relative;
+  display: block;
+  font-family: var(--font-display);
+  font-size: calc(46 * var(--u));
+  font-weight: 500;
+  line-height: 1.16;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+.ch-pa__tile .ch-pa__tile-label {
+  padding: calc(54 * var(--u)) 0 0 calc(50 * var(--u));
+}
+.ch-pa__rule {
+  height: 1px;
+  margin: calc(34 * var(--u)) 0 calc(36 * var(--u));
+  border: 0;
+  background: color-mix(in srgb, var(--pa-ink) 16%, transparent);
+}
+.ch-pa__promo {
+  overflow: visible;
+  aspect-ratio: 861 / 532;
+}
+.ch-pa__promo .ch-pa__img {
+  border-radius: inherit;
+}
+.ch-pa__promo-text {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(11, 1fr);
-  gap: 2px;
-  width: 64%;
-  aspect-ratio: 1;
-  margin: 1rem auto 0.15rem;
-  padding: 0.55rem;
-  border-radius: 0.6rem;
-  background: var(--plato-paper);
+  gap: calc(34 * var(--u));
+  padding: calc(70 * var(--u)) 0 0 calc(48 * var(--u));
 }
-.ch-phone__code i {
-  display: block;
-  border-radius: 1px;
+.ch-pa__promo-link {
+  font-family: var(--font-display);
+  font-size: calc(40 * var(--u));
+  font-weight: 300;
+  letter-spacing: 0.07em;
 }
-.ch-phone__code i[data-on] {
-  background: var(--plato-forest);
-  transition: opacity 500ms var(--ease-out-quart) calc(900ms + var(--i) * 24ms);
-}
-.ch-phone[data-armed]:not([data-in]) .ch-phone__code i[data-on] {
-  opacity: 0;
-  transition-duration: 200ms;
-  transition-delay: 0ms;
-}
-.ch-phone__row {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  margin-top: 0.85rem;
-  padding: 0.75rem 0.8rem;
-  border-radius: 0.9rem;
-  background: var(--plato-paper-warm);
-  border: 1px solid color-mix(in srgb, var(--plato-ink) 8%, transparent);
-}
-.ch-phone__row svg {
-  flex: none;
-  color: var(--plato-green);
-}
-.ch-phone__row-text {
+.ch-pa__fab {
+  position: absolute;
+  right: calc(-24 * var(--u));
+  bottom: calc(-33 * var(--u));
   display: grid;
-  gap: 0.1rem;
-  min-width: 0;
+  place-items: center;
+  width: calc(84 * var(--u));
+  height: calc(84 * var(--u));
+  border-radius: 50%;
+  background: var(--pa-sage);
+  color: #fff;
 }
-.ch-phone__row-label {
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--plato-ink) 55%, transparent);
+.ch-pa__chevron {
+  width: 58%;
+  height: 58%;
 }
-.ch-phone__row-sub {
-  color: color-mix(in srgb, var(--plato-ink) 55%, transparent);
-}
-.ch-phone__tabs {
-  display: flex;
-  justify-content: space-around;
+.ch-pa__nav {
+  display: grid;
+  justify-items: center;
   margin-top: auto;
-  padding-top: 0.8rem;
-  border-top: 1px solid color-mix(in srgb, var(--plato-ink) 8%, transparent);
-  color: color-mix(in srgb, var(--plato-ink) 45%, transparent);
+  padding-top: calc(44 * var(--u));
 }
-.ch-phone__tabs svg:first-child {
-  color: var(--plato-green);
+.ch-pa__dock {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr calc(160 * var(--u)) 1fr;
+  align-items: center;
+  justify-items: center;
+  width: calc(439 * var(--u));
+  height: calc(118 * var(--u));
+  border-radius: 999px;
+  background: #f5f5f5;
+}
+.ch-pa__dock > .ch-pa__icon {
+  width: calc(54 * var(--u));
+  height: calc(54 * var(--u));
+}
+.ch-pa__loyalty {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: calc(160 * var(--u));
+  height: calc(160 * var(--u));
+  border: calc(10 * var(--u)) solid #fff;
+  border-radius: 50%;
+  background: var(--pa-green);
+  color: #fff;
+  box-shadow: 0 calc(10 * var(--u)) calc(24 * var(--u)) calc(-10 * var(--u)) rgb(0 0 0 / 0.25);
+}
+.ch-pa__loyalty-mark {
+  width: 38%;
+}
+.ch-pa__redeem {
+  /* Clears the raised loyalty button, which overhangs the dock by 21px (app pixels). */
+  margin-top: calc(64 * var(--u));
+  font-family: var(--font-display);
+  font-size: calc(38 * var(--u));
+  font-weight: 300;
+  letter-spacing: 0.05em;
 }
 .ch-phone__shadow {
   position: absolute;
@@ -851,7 +918,6 @@
   .ch-drink-end__link,
   .ch-f14__seal,
   .ch-f14__ctas > *,
-  .ch-phone__code i[data-on],
   .ch-find,
   .ch-find__arrow,
   .ch-find__arrow svg,

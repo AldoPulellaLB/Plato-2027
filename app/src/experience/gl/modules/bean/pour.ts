@@ -9,10 +9,17 @@ import { composeBean, hideInstance, makeBeanParams, makeInstanced, steelMaterial
 import type { Shot } from "./rig";
 import { shotQuaternion } from "./rig";
 import { DustField, SpriteBatch } from "./sprites";
-import { beamTexture, blurBeanTexture } from "./textures";
+import { beamTexture } from "./textures";
 import { clamp, fract, hash, mix, range, smooth } from "./util";
 
 /** Hopper rim (the circle that becomes the drum window). */
+/** The client's photo of an out-of-focus green bean (portrait, straight alpha), for the foreground layer. */
+const FG_BEAN_SRC = "/assets/bean/bean-blur.png";
+/** Its height over width (595 x 798 px). */
+const FG_BEAN_ASPECT = 798 / 595;
+/** Brightness of the foreground beans against the photo's own colour (it is already green). */
+const FG_BEAN_LEVEL = 0.8;
+
 export const HOPPER_RIM_RADIUS = 1.47;
 export const HOPPER_RIM_TUBE = 0.09;
 /** The outlet flange under the slide gate: the lowest part of the hopper when the stem is off. */
@@ -172,7 +179,8 @@ export function createPourSet(kit: Kit): PourSet {
   group.add(mass);
 
   /* Foreground blur, beams, dust -------------------------------------- */
-  const blurTex = blurBeanTexture(256);
+  // Loads in the background; the layer only shows from f02, long after.
+  const blurTex = new THREE.TextureLoader().load(FG_BEAN_SRC);
   const nFg = m ? 7 : 15;
   const fg = new SpriteBatch(nFg, blurTex, { renderOrder: 40 });
   group.add(fg.mesh);
@@ -338,8 +346,10 @@ export function createPourSet(kit: Kit): PourSet {
         .addScaledVector(anchorRight, xr * fgHalfW)
         .addScaledVector(anchorUp, yr * fgHalfH);
       const size = (0.3 + hash(i, 54) * 0.3) * fgHalfH;
-      const l = 0.5 + hash(i, 55) * 0.3;
-      fg.set(i, _p, cam.quaternion, hash(i, 56) * 6.28 + b * 0.9 * (hash(i, 57) - 0.5), size * 1.35, size, 0.2 * l, 0.23 * l, 0.15 * l, 0.9 * fgFade);
+      const l = (0.5 + hash(i, 55) * 0.3) * FG_BEAN_LEVEL;
+      // Same area as before (1.35 size^2), in the photo's portrait proportions.
+      const w = size * Math.sqrt(1.35 / FG_BEAN_ASPECT);
+      fg.set(i, _p, cam.quaternion, hash(i, 56) * 6.28 + b * 0.9 * (hash(i, 57) - 0.5), w, w * FG_BEAN_ASPECT, l, l, l, 0.9 * fgFade);
     }
     fg.commit();
 

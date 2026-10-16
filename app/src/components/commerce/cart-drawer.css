@@ -103,7 +103,7 @@
   align-items: flex-start;
   gap: 4px;
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: clamp(2rem, 2.6vw, 2.5rem);
   font-weight: 400;
   line-height: 1;

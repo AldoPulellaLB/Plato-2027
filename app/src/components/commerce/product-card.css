@@ -250,7 +250,7 @@
     aspect-ratio: auto;
   }
   .pc[data-feature] .pc-title {
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
     font-size: clamp(2rem, 2.6vw, 2.75rem);
     font-weight: 400;
     line-height: 1.02;

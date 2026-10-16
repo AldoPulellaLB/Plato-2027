@@ -1,7 +1,6 @@
 // Chapter four: the menu (frames 13 and 14). A pinned sideways gallery of the
 // signature drinks on deep green, then the close: the opening line returns,
 // with the way in (find a store, get the app) and the loyalty card on a phone.
-import { Clock, Coffee, House, MapPin, UserRound } from "lucide-react";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
@@ -388,24 +387,56 @@ function SignatureMenu() {
 /* ------------------------------------------------------------------ */
 /* Frame 14: find your Platō                                           */
 
-/**
- * The member code on the card: a QR-style block of plain squares (a fixed,
- * deterministic pattern so server and client render the same markup).
- */
-const CODE_SIZE = 11;
-const CODE_CELLS = Array.from({ length: CODE_SIZE * CODE_SIZE }, (_, i) => {
-  const x = i % CODE_SIZE;
-  const y = Math.floor(i / CODE_SIZE);
-  const far = CODE_SIZE - 3;
-  // Three solid corner blocks, like a scan code, each with a quiet ring around it.
-  const inBlock = (bx: number, by: number) => x >= bx && x < bx + 3 && y >= by && y < by + 3;
-  if (inBlock(0, 0) || inBlock(far, 0) || inBlock(0, far)) return true;
-  const inRing = (x < 4 && y < 4) || (x >= far - 1 && y < 4) || (x < 4 && y >= far - 1);
-  if (inRing) return false;
-  // A fixed integer hash: scattered like a scan code, identical on server and client.
-  const h = Math.imul(x + 1, 0x9e3779b1) ^ Math.imul(y + 1, 0x85ebca77);
-  return ((h ^ (h >>> 15)) >>> 0) % 9 < 4;
-});
+/* The app's own glyphs (thin strokes, as in the Platō app). */
+const APP_STROKE = { fill: "none", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round" } as const;
+
+function AppMenuIcon() {
+  return (
+    <svg aria-hidden="true" className="ch-pa__icon" viewBox="0 0 24 24" {...APP_STROKE} strokeWidth="1.6">
+      <path d="M3 6h17M3 12h13M3 18h15" />
+    </svg>
+  );
+}
+function AppChatIcon() {
+  return (
+    <svg aria-hidden="true" className="ch-pa__icon" viewBox="0 0 24 24" {...APP_STROKE} strokeWidth="1.6">
+      <path d="M4 4.5h16v11.5h-5.2L12 19.5 9.2 16H4z" />
+      <path d="M9 9h6" />
+    </svg>
+  );
+}
+function AppWalletIcon() {
+  return (
+    <svg aria-hidden="true" className="ch-pa__wallet" viewBox="0 0 24 24" {...APP_STROKE} strokeWidth="1.8">
+      <path d="M4.5 9.5h15a1.5 1.5 0 0 1 1.5 1.5v7.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5V11a1.5 1.5 0 0 1 1.5-1.5Z" />
+      <path d="M6 9.5 13 5l2.2 4.5" />
+      <circle cx="16.5" cy="14.75" r="1.6" />
+    </svg>
+  );
+}
+function AppChevronIcon() {
+  return (
+    <svg aria-hidden="true" className="ch-pa__chevron" viewBox="0 0 24 24" {...APP_STROKE} strokeWidth="2.6">
+      <path d="m6.5 9.5 5.5 5.5 5.5-5.5" />
+    </svg>
+  );
+}
+function AppHomeIcon() {
+  return (
+    <svg aria-hidden="true" className="ch-pa__icon" viewBox="0 0 24 24" {...APP_STROKE} strokeWidth="1.5">
+      <path d="M4 10.5 12 4l8 6.5V20h-5.5v-5.5h-5V20H4z" />
+    </svg>
+  );
+}
+function AppPinIcon() {
+  return (
+    <svg aria-hidden="true" className="ch-pa__icon" viewBox="0 0 24 24" {...APP_STROKE} strokeWidth="1.5">
+      <path d="M12 18.5s-5.5-5-5.5-9.5a5.5 5.5 0 0 1 11 0c0 4.5-5.5 9.5-5.5 9.5Z" />
+      <circle cx="12" cy="9" r="2" />
+      <path d="M8.5 21h7" />
+    </svg>
+  );
+}
 
 function FindYourPlato() {
   const ref = useRef<HTMLDivElement>(null);
@@ -417,13 +448,14 @@ function FindYourPlato() {
     const phone = el.querySelector<HTMLElement>(".ch-phone");
     const stop = revealOn(
       ScrollTrigger,
-      [el.querySelector(".ch-f14__ctas"), phone, el.querySelector(".ch-f14__seal")],
+      [el.querySelector(".ch-f14__ctas"), el.querySelector(".ch-f14__seal")],
       frame,
       "top 45%",
     );
 
     // The phone rises on the right as the close arrives.
     if (phone) {
+      const dockEnd = isMobile ? "top 30%" : "top top";
       gsap.fromTo(
         phone.querySelector(".ch-phone__device"),
         { y: () => window.innerHeight * (isMobile ? 0.12 : 0.32), rotate: 5 },
@@ -434,11 +466,24 @@ function FindYourPlato() {
           scrollTrigger: {
             trigger: frame,
             start: "top bottom",
-            end: isMobile ? "top 30%" : "top top",
+            end: dockEnd,
             scrub: true,
             invalidateOnRefresh: true,
           },
         },
+      );
+      // The app screen builds top to bottom over the last stretch of the dock,
+      // landing complete as the phone settles (and unbuilding on the way back).
+      const scrub = { trigger: frame, start: isMobile ? "top 80%" : "top 65%", end: dockEnd, scrub: 0.4 };
+      gsap.fromTo(
+        phone.querySelectorAll("[data-dock]"),
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, ease: "power2.out", stagger: 0.14, scrollTrigger: scrub },
+      );
+      gsap.fromTo(
+        phone.querySelectorAll(".ch-pa__img"),
+        { scale: 1.12 },
+        { scale: 1, ease: "power2.out", stagger: 0.14, scrollTrigger: scrub },
       );
     }
 
@@ -532,49 +577,64 @@ function FindYourPlato() {
                   <b />
                 </span>
               </div>
-              <div className="ch-phone__bar">
-                <Wordmark className="ch-phone__logo" title="" />
-                <span className="ch-phone__avatar">
-                  <UserRound size={14} strokeWidth={1.5} />
-                </span>
-              </div>
-              <p className="ch-phone__hello">Good morning.</p>
-              <div className="ch-phone__card">
-                <PlatoSymbol className="ch-phone__card-ghost" title="" />
-                <div className="ch-phone__card-top">
-                  <Wordmark className="ch-phone__card-logo" title="" />
-                  <span>Your Platō card</span>
+              {/* The real Platō app home screen. [data-dock] items build in as the phone docks. */}
+              <div className="ch-pa">
+                <div className="ch-pa__bar" data-dock="">
+                  <AppMenuIcon />
+                  <Wordmark className="ch-pa__logo" title="" />
+                  <AppChatIcon />
                 </div>
-                <div className="ch-phone__code">
-                  {CODE_CELLS.map((on, i) => (
-                    <i
-                      data-on={on ? "" : undefined}
-                      key={i}
-                      style={{ "--i": (i % CODE_SIZE) + Math.floor(i / CODE_SIZE) } as CSSProperties}
-                    />
-                  ))}
+                <div className="ch-pa__hello" data-dock="">
+                  <p className="ch-pa__greet">
+                    <span>Hellō</span> <b>Stephan</b>
+                  </p>
+                  <p className="ch-pa__balance">
+                    <AppWalletIcon />
+                    <b className="t-num">R150.00</b>
+                  </p>
                 </div>
-              </div>
-              <div className="ch-phone__row">
-                <MapPin size={16} strokeWidth={1.5} />
-                <span className="ch-phone__row-text">
-                  <span className="ch-phone__row-label">Nearest store</span>
-                  <span>Irene, Café #1</span>
-                </span>
-              </div>
-              <div className="ch-phone__row">
-                <Clock size={16} strokeWidth={1.5} />
-                <span className="ch-phone__row-text">
-                  <span className="ch-phone__row-label">Hours</span>
-                  <span>{CONTACT.hours[0]}</span>
-                  <span className="ch-phone__row-sub">{CONTACT.hours[1]}</span>
-                </span>
-              </div>
-              <div className="ch-phone__tabs">
-                <House size={18} strokeWidth={1.5} />
-                <MapPin size={18} strokeWidth={1.5} />
-                <Coffee size={18} strokeWidth={1.5} />
-                <UserRound size={18} strokeWidth={1.5} />
+                <div className="ch-pa__tiles">
+                  <div className="ch-pa__tile" data-dock="">
+                    <img alt="" className="ch-pa__img" decoding="async" loading="lazy" src="/assets/app/tile-gift.webp" />
+                    <span className="ch-pa__tile-label">
+                      Send
+                      <br />a gift
+                    </span>
+                  </div>
+                  <div className="ch-pa__tile" data-dock="">
+                    <img alt="" className="ch-pa__img" decoding="async" loading="lazy" src="/assets/app/tile-vouchers.webp" />
+                    <span className="ch-pa__tile-label">
+                      My
+                      <br />
+                      vouchers
+                    </span>
+                  </div>
+                </div>
+                <hr className="ch-pa__rule" data-dock="" />
+                <div className="ch-pa__promo" data-dock="">
+                  <img alt="" className="ch-pa__img" decoding="async" loading="lazy" src="/assets/app/promo.webp" />
+                  <span className="ch-pa__promo-text">
+                    <span className="ch-pa__tile-label">
+                      New in
+                      <br />
+                      store
+                    </span>
+                    <span className="ch-pa__promo-link">Shop the latest &gt;&gt;</span>
+                  </span>
+                  <span className="ch-pa__fab" data-dock="">
+                    <AppChevronIcon />
+                  </span>
+                </div>
+                <div className="ch-pa__nav" data-dock="">
+                  <span className="ch-pa__dock">
+                    <AppHomeIcon />
+                    <span className="ch-pa__loyalty">
+                      <PlatoSymbol className="ch-pa__loyalty-mark" title="" />
+                    </span>
+                    <AppPinIcon />
+                  </span>
+                  <span className="ch-pa__redeem">Redeem Loyalty</span>
+                </div>
               </div>
             </div>
           </div>
