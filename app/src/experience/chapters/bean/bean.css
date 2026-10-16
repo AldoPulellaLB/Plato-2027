@@ -18,9 +18,18 @@
   align-items: center;
   text-align: center;
 }
-/* Head-scoped so it beats .ch-label { margin: 0 } (chapters.css loads later). */
+/* The chapter label sits above this load's cup, the same gap over each lid: out of
+ * the flow, its bottom edge a gap above the cup top (the cup is centred on the
+ * headline, so its top is half its height above the head's middle). Centred with
+ * auto margins, not translate, which GSAP takes over for the exit scrub.
+ * Head-scoped so it beats .ch-label { margin: 0 } (chapters.css loads later). */
 .ch-f01__head .ch-f01__label {
-  margin-bottom: clamp(1rem, 2.4svh, 1.75rem);
+  position: absolute;
+  right: 0;
+  bottom: calc(50% + var(--cup-h) * var(--cup-u) / 2 + clamp(1.25rem, 3svh, 2.25rem));
+  left: 0;
+  width: max-content;
+  margin: 0 auto;
 }
 .ch-f01__title-wrap {
   width: 100%;
@@ -50,30 +59,33 @@
   position: relative;
   z-index: 1;
 }
-.ch-f01__cup {
+/* The theme's cup size lives on the head, so the cup and the label above it share it. */
+.ch-f01__head {
   --cup-w: 657;
   --cup-h: 1095;
   --cup-photo: url("/assets/hero/cup-seagreen.webp");
   --cup-glow: url("/assets/hero/glow-seagreen.png");
   /* px per photo pixel */
   --cup-u: calc(min(53svh, 110vw) / 1095);
+}
+.ch-f01__cup {
   position: absolute;
   z-index: 0;
   left: 50%;
-  /* Centred on the headline, not the label above it (half the label row). */
-  top: calc(50% + 0.5rem);
+  /* Centred on the headline (the label is out of the flow). */
+  top: 50%;
   width: calc(var(--cup-w) * var(--cup-u));
   height: calc(var(--cup-h) * var(--cup-u));
   translate: -50% -50%;
   pointer-events: none;
 }
-:root[data-roast="magenta"] .ch-f01__cup {
+:root[data-roast="magenta"] .ch-f01__head {
   --cup-w: 655;
   --cup-h: 910;
   --cup-photo: url("/assets/hero/cup-magenta.webp");
   --cup-glow: url("/assets/hero/glow-magenta.png");
 }
-:root[data-roast="olive"] .ch-f01__cup {
+:root[data-roast="olive"] .ch-f01__head {
   --cup-w: 597;
   --cup-h: 998;
   --cup-photo: url("/assets/hero/cup-olive.webp");

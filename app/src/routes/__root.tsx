@@ -6,6 +6,7 @@ import {
   useRouterState,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 
@@ -104,7 +105,7 @@ function buildHead(meta: AppMeta, notFound = false) {
   };
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -136,7 +137,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   // An unknown URL (or a loader that throws notFound) gets a real "not found"
   // title in the server HTML, not the home page's.
   head: ({ match, matches }) =>
-    buildHead(appMeta, Boolean(match.globalNotFound) || matches.some((m) => m.status === "notFound")),
+    buildHead(appMeta, Boolean(match._notFound) || matches.some((m) => m.status === "notFound")),
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundPage,

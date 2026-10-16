@@ -6,6 +6,7 @@ import {
   higgsfieldDesignSourceBabelPlugin,
 } from "./src/module/design-inspector/vite";
 import svgr from "vite-plugin-svgr";
+import { nitro } from "nitro/vite";
 import { defaultServerConditions, defineConfig } from "vite";
 import { fileURLToPath } from "node:url";
 
@@ -20,6 +21,11 @@ const QUANTA_ICONS_SHIM = fileURLToPath(
 
 export default defineConfig(({ command, mode }) => {
   const designInspectorEnabled = process.env.HF_DESIGN_INSPECTOR === "1" || mode === "design";
+  // Vercel sets VERCEL=1 in its build. There the server runs on Node through
+  // Nitro (.vercel/output), so none of the Worker-only SSR settings apply. Every
+  // other build is the Higgsfield Worker and stays exactly as it was.
+  const vercelBuild = command === "build" && Boolean(process.env.VERCEL);
+  const workerBuild = command === "build" && !vercelBuild;
 
   return {
     // fsevents can miss edits under some setups (bun-launched dev, synced/virtual
@@ -47,7 +53,7 @@ export default defineConfig(({ command, mode }) => {
       // both variants bundle their edge build (react-dom's web-streams server,
       // etc.) instead of the Node variant leaning on nodejs_compat shims.
       // `vite dev` SSR runs in Node, where default node resolution is correct.
-      ...(command === "build"
+      ...(workerBuild
         ? {
             target: "webworker" as const,
             resolve: {
@@ -60,7 +66,7 @@ export default defineConfig(({ command, mode }) => {
             },
           }
         : {}),
-      noExternal: command === "build" ? true : undefined,
+      noExternal: workerBuild ? true : undefined,
       // `cloudflare:workers` is a workerd runtime built-in that exposes the Worker
       // env / bindings (D1 `DB`, R2 `STORAGE`). Like node: builtins it must NOT be
       // bundled; the runtime provides it. (`ssr.external` is typed string[].)
@@ -70,6 +76,10 @@ export default defineConfig(({ command, mode }) => {
       // Keep `cloudflare:*` external in the SSR rollup pass too — `noExternal`
       // above would otherwise try to resolve+bundle it and fail.
       rollupOptions: { external: [/^cloudflare:/] },
+      // Vercel only: Nitro caches the build's assetsDir for a year (immutable).
+      // public/assets (films, posters, photos, audio) keeps unhashed names, so
+      // the hashed chunks move to /_build and /assets revalidates as before.
+      ...(vercelBuild ? { assetsDir: "_build" } : {}),
     },
     plugins: [
       // Local SVG assets (e.g. the branded generate-button sparkle) import as
@@ -100,6 +110,10 @@ export default defineConfig(({ command, mode }) => {
       tanstackStart({
         server: { entry: "server" },
       }),
+      // Vercel only: Nitro wraps the same server entry as a Vercel function.
+      // `cloudflare:workers` is absent there, so the D1 accounts and order
+      // history degrade to "no database", as they do in `vite dev`.
+      ...(vercelBuild ? [nitro({ preset: "vercel" })] : []),
       higgsfieldDesignInspectorVitePlugin(designInspectorEnabled),
       react({
         babel: {
