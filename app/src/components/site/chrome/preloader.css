@@ -4,8 +4,9 @@
  *   0.30-2.30s  the ring draws round from 12 o'clock (a time-based dial)
  *   2.15-2.90s  the macron settles on top as the ring closes
  *   3.00s       exit: the mark lifts away, the panel and its trail wipe up
- * On the home page the ring also waits for the films (preloader.tsx): same timeline
- * when they are in, else it holds where the downloads have reached, up to 8s. */
+ * On the home page the ring also waits for the films and the ambient audio
+ * (preloader.tsx): same timeline when they are in, else it fills with the bytes as
+ * they arrive. */
 .pl {
   position: fixed;
   inset: 0;

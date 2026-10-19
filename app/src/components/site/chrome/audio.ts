@@ -2,7 +2,8 @@
 // Two seamless loops (roaster hum, café murmur) on their own gain nodes, crossfaded
 // with WebAudio ramps, plus a procedural first-crack crackle: short noise bursts
 // through a bandpass. Sound is on by default, but browsers only let audio start
-// from a gesture, so nothing is created or fetched until the first one (unlock).
+// from a gesture, so the context is created on the first one (unlock). The loops
+// themselves are downloaded by the preloader, so the sound starts at once.
 import { useSyncExternalStore } from "react";
 
 export type Bed = "roaster" | "cafe";
@@ -11,6 +12,8 @@ const SOURCES: Record<Bed, string> = {
   roaster: "/assets/audio/roaster.mp3",
   cafe: "/assets/audio/cafe.mp3",
 };
+/** The loops the preloader downloads with the films (the roaster hum plays first). */
+export const AUDIO_SOURCES = [SOURCES.roaster, SOURCES.cafe];
 const LEVEL: Record<Bed, number> = { roaster: 0.5, cafe: 0.42 };
 
 interface Channel {
@@ -163,12 +166,16 @@ class AmbientEngine {
     const channel = this.channels.get(bed);
     if (!ctx || !channel) return Promise.resolve();
     if (channel.loading) return channel.loading;
-    channel.loading = fetch(SOURCES[bed])
-      .then((res) => {
-        if (!res.ok) throw new Error(`Audio ${res.status}`);
-        return res.arrayBuffer();
-      })
-      .then((data) => ctx.decodeAudioData(data))
+    // The preloader has usually downloaded the loop already (clip-preload.ts).
+    const shared = window.__platoClip?.(SOURCES[bed]);
+    const data = shared
+      ? shared.blob.then((blob) => blob.arrayBuffer())
+      : fetch(SOURCES[bed]).then((res) => {
+          if (!res.ok) throw new Error(`Audio ${res.status}`);
+          return res.arrayBuffer();
+        });
+    channel.loading = data
+      .then((buffer) => ctx.decodeAudioData(buffer))
       .then((buffer) => {
         channel.buffer = buffer;
         const source = ctx.createBufferSource();

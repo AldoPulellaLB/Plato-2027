@@ -1,14 +1,14 @@
 /**
- * Whole-clip downloads shared by the preloader and the film engine.
+ * Whole-file downloads shared by the preloader, the film engine and the ambient sound.
  *
  * The engine needs each clip as one Blob before it can scrub it, and on its own it
  * only starts a download when the film is 1.5 screens away, so the poster sat on
  * screen while the clip arrived. Here the downloads start as the HTML is parsed: a
- * head script (clipPreloadScript, rendered by the preloader) fetches the clips in
- * scroll order at low priority, keeps their progress for the loader's ring, and
- * holds the finished Blobs for the session. The engine takes a held or in-flight
- * download instead of fetching the clip again (clipBlob), so a return to the film
- * is instant too.
+ * head script (clipPreloadScript, rendered by the preloader) fetches the ambient
+ * audio and the films together at low priority, keeps their progress for the
+ * loader's ring, and holds the finished Blobs for the session. The engine and the
+ * audio take a held or in-flight download instead of fetching again (clipBlob,
+ * window.__platoClip), so the films play and the sound starts at once.
  *
  * Nothing here runs at module top level, so it is SSR safe.
  */
@@ -31,9 +31,9 @@ declare global {
     __platoClips?: Record<string, ClipDownload>;
     /** Start (or join) the download of one clip. A failed download starts again. */
     __platoClip?: (url: string) => ClipDownload;
-    /** Download the story's films for this screen, one after another; false when skipped. */
+    /** Download the ambient audio and the story's films for this screen; true when the films are included. */
     __platoPreloadFilms?: () => boolean;
-    /** The film URLs the preload is fetching, in scroll order. */
+    /** Every URL the preload is fetching (audio, then the films in scroll order). */
     __platoFilmQueue?: string[];
     /** The head script's stand-in for the loader's CSS failsafe while it waits for the films. */
     __platoPlFailsafe?: number;
@@ -47,12 +47,13 @@ interface FilmSources {
 
 /**
  * The head script. It defines the shared download registry on every page, and on
- * the home page starts the films and tells the loader to wait for them: <html
- * data-pl="wait"> stands the CSS failsafe down, and a timer of its own fades the
- * loader after `failsafeMs` in case the app never arrives to take over. No films on
- * reduced motion (the engine shows posters only) or on Save-Data and 2G connections.
+ * the home page starts the audio and the films (all at once, so the loader's ring
+ * can count real bytes) and tells the loader to wait for them: <html data-pl="wait">
+ * stands the CSS failsafe down, and a timer of its own fades the loader after
+ * `failsafeMs` in case the app never arrives to take over. Reduced motion gets the
+ * audio only (the engine shows posters, never the films); Save-Data gets nothing.
  */
-export function clipPreloadScript(films: readonly FilmSources[], failsafeMs: number) {
+export function clipPreloadScript(films: readonly FilmSources[], audio: readonly string[], failsafeMs: number) {
   const sources = JSON.stringify(films.map((film) => [film.clip, film.mobileClip ?? film.clip]));
   return `(function(){try{var w=window,d=document.documentElement;
 if(!w.__platoClip){var clips=w.__platoClips={};
@@ -64,37 +65,46 @@ if(!res.body||!res.body.getReader)return res.blob();var reader=res.body.getReade
 function pump(){return reader.read().then(function(r){if(r.done)return new Blob(parts,{type:type});parts.push(r.value);c.loaded+=r.value.byteLength;return pump();});}
 return pump();}).then(function(blob){c.done=true;c.loaded=blob.size;if(!c.total)c.total=blob.size;return blob;},function(e){c.failed=true;throw e;});
 return c;};
-w.__platoPreloadFilms=function(){var n=navigator.connection;
-if(w.matchMedia("(prefers-reduced-motion: reduce)").matches||(n&&(n.saveData||/2g$/.test(n.effectiveType||""))))return false;
-var films=${sources},pick=function(f){return w.matchMedia(${JSON.stringify(FILM_MOBILE_QUERY)}).matches?f[1]:f[0];},queue=w.__platoFilmQueue=films.map(pick);
-films.reduce(function(chain,f,i){return chain.then(function(){var url=queue[i]=pick(f);return w.__platoClip(url).blob;}).catch(function(){});},Promise.resolve());
-return true;};}
+w.__platoPreloadFilms=function(){var n=navigator.connection;if(n&&n.saveData)return false;
+var still=w.matchMedia("(prefers-reduced-motion: reduce)").matches,m=w.matchMedia(${JSON.stringify(FILM_MOBILE_QUERY)}).matches;
+var queue=w.__platoFilmQueue=${JSON.stringify(audio)}.concat(still?[]:${sources}.map(function(f){return m?f[1]:f[0];}));
+queue.forEach(function(url){w.__platoClip(url).blob.catch(function(){});});
+return !still;};}
 if(location.pathname==="/"&&w.__platoPreloadFilms()){d.setAttribute("data-pl","wait");
 w.__platoPlFailsafe=setTimeout(function(){d.setAttribute("data-pl","timeout");},${failsafeMs});}
 }catch(e){}})();`;
 }
 
-/** Start the films for this screen (a no-op once they are under way, or where the head script skips them). */
+/** Start the audio and the films for this screen (a no-op once they are under way, or where the head script skips them). */
 export function preloadFilms() {
   if (typeof window !== "undefined") window.__platoPreloadFilms?.();
 }
 
 /**
- * How far the film preload has come, 0 to 1 (each clip counts equally; a failed
- * clip counts as finished so it never holds the loader), or null when none is running.
+ * How far the preload has come, 0 to 1, by bytes across every file (a failed file
+ * drops out so it never holds the loader), or null when none is running. Until every
+ * file has reported its size the count stops short of 1.
  */
 export function filmPreloadProgress(): number | null {
   if (typeof window === "undefined") return null;
   const urls = window.__platoFilmQueue;
   const clips = window.__platoClips;
   if (!urls?.length || !clips) return null;
-  let sum = 0;
+  let loaded = 0;
+  let total = 0;
+  let unsized = 0;
   for (const url of urls) {
     const clip = clips[url];
-    if (!clip) continue;
-    sum += clip.done || clip.failed ? 1 : clip.total ? Math.min(clip.loaded / clip.total, 1) : 0;
+    if (clip?.failed) continue;
+    if (!clip || !clip.total) {
+      unsized += 1;
+      continue;
+    }
+    loaded += clip.done ? clip.total : Math.min(clip.loaded, clip.total);
+    total += clip.total;
   }
-  return sum / urls.length;
+  if (!total) return unsized ? 0 : 1;
+  return (loaded / total) * (unsized ? 0.95 : 1);
 }
 
 const abortError = () => new DOMException("The clip load was aborted", "AbortError");

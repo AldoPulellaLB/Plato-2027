@@ -4,11 +4,11 @@
 // load of the home page (each refresh brings a new hero colour), and only the first
 // load of the session elsewhere.
 //
-// On the home page it also loads the story's films (clip-preload.ts): the downloads
-// start as the HTML is parsed, and the ring only closes once they are in. On a fast
-// connection that is the usual three seconds; on a slower one the ring holds where
-// the downloads have reached, for up to FILM_WAIT_MAX, after which the page opens
-// and the films finish in the background.
+// On the home page it also loads the story's films and the ambient audio
+// (clip-preload.ts): the downloads start as the HTML is parsed, and the ring only
+// closes once they are all in. On a fast connection that is the usual three
+// seconds; on a slower one the ring fills with the bytes as they arrive. Only a
+// stalled connection is let through, after FILM_WAIT_MAX.
 //
 // Never traps content: the markup is server rendered and a CSS animation fades it
 // out after ~3.2s even if JavaScript never runs (the head script's own timer while
@@ -21,14 +21,18 @@ import { lockScroll, prefersReducedMotion } from "@/lib/motion/smooth";
 import { ui } from "@/lib/ui";
 import { scrollScrubScenes } from "@/scroll-scrub-scenes";
 
+import { AUDIO_SOURCES } from "./audio";
+
 import { PRELOADED_KEY, readSession, writeSession } from "./shared";
 import "./preloader.css";
 
 /** On screen this long from when it first paints (ms); a still card for reduced motion. */
 const VISIBLE = 3000;
 const VISIBLE_REDUCED = 1200;
-/** The longest it waits for the films (ms from first paint) before the page opens anyway. */
-const FILM_WAIT_MAX = 8000;
+/** The longest it waits for the films and audio (ms from first paint): a safety net for a stalled connection. */
+const FILM_WAIT_MAX = 45000;
+/** The head script fades the loader after this if the app never arrives to take over. */
+const HEAD_FAILSAFE = 15000;
 /** The panel starts lifting this long after the exit begins, and is gone by DONE_AFTER. */
 const READY_AFTER = 320;
 const DONE_AFTER = 1300;
@@ -43,8 +47,7 @@ const CLOSE_TO_EXIT = 700;
 const CATCH_UP = 1.6;
 
 const SKIP_SCRIPT = `(function(){try{if(location.pathname!=="/"&&sessionStorage.getItem(${JSON.stringify(PRELOADED_KEY)})==="1"){document.documentElement.setAttribute("data-pl","skip")}}catch(e){}})();`;
-// Its timer fades the loader a second after the film wait would have ended, if the app never takes over.
-const PRELOAD_SCRIPT = SKIP_SCRIPT + clipPreloadScript(scrollScrubScenes, FILM_WAIT_MAX + 1000);
+const PRELOAD_SCRIPT = SKIP_SCRIPT + clipPreloadScript(scrollScrubScenes, AUDIO_SOURCES, HEAD_FAILSAFE);
 
 /** The Ō of the wordmark (its SVG units): ring centre, mid radius and band width, and the macron. */
 const RING = { cx: 1361.86, cy: 223.06, r: 107.13, width: 47.45 };
