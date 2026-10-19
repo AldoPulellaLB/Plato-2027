@@ -1,19 +1,17 @@
 // SoundToggle: bottom-left, on by default (a visitor who turns it off stays off
-// on later loads). The beds belong to the story: roaster hum through the bean
-// chapter and the shot, café murmur from the pour on, one procedural crackle at
-// first crack. The toggle only exists while the story is on screen; anywhere else
+// on later loads). The ambience belongs to the story: the roastery track all the
+// way through, and one procedural crackle at first crack. The toggle only exists while the story is on screen; anywhere else
 // it steps away and the audio sleeps (the visitor's choice is kept for when they
 // return). Browsers only allow audio after a gesture, so it starts with the first
 // click, tap or key press anywhere (scrolling does not count).
 import { useEffect } from "react";
 import type { CSSProperties } from "react";
 
-import { onStoryEvent, useStory } from "@/experience/story";
+import { onStoryEvent } from "@/experience/story";
 import { ui, useUi } from "@/lib/ui";
 
 import { ambient, useAudioStarted } from "./audio";
-import type { Bed } from "./audio";
-import { frameIndex, useChrome, useFooterInView, usePathname } from "./shared";
+import { useChrome, useFooterInView, usePathname } from "./shared";
 import "./sound.css";
 
 const BARS = [
@@ -23,7 +21,6 @@ const BARS = [
   { d: "880ms", lo: 0.38, delay: "-120ms" },
 ];
 
-const POUR_INDEX = frameIndex("f07");
 /** localStorage: "off" once the visitor has turned sound off. */
 const SOUND_KEY = "plato.sound";
 /** Events that count as a gesture for starting audio (the HTML user-activation list). */
@@ -31,7 +28,6 @@ const GESTURES = ["pointerdown", "pointerup", "touchend", "keydown", "click"] as
 
 export function SoundToggle() {
   const { soundOn, ready, menuOpen } = useUi();
-  const { frame } = useStory();
   const { storyOnScreen, inkTone } = useChrome();
   const pathname = usePathname();
   const footerInView = useFooterInView();
@@ -40,7 +36,6 @@ export function SoundToggle() {
 
   const isHome = pathname === "/";
   const inStory = isHome && storyOnScreen;
-  const bed: Bed = isHome && frameIndex(frame) < POUR_INDEX ? "roaster" : "cafe";
   // What the visitor hears: on, and the browser has let it start.
   const playing = soundOn && started;
 
@@ -72,10 +67,6 @@ export function SoundToggle() {
     for (const type of GESTURES) window.addEventListener(type, unlock, { capture: true, passive: true });
     return stop;
   }, [soundOn, started]);
-
-  useEffect(() => {
-    ambient().setBed(bed);
-  }, [bed]);
 
   // Outside the story, and under the loader (the films have the bandwidth): fade
   // out and sleep, without touching the saved choice.

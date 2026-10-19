@@ -1,20 +1,19 @@
 // Ambient sound for the story (client only, created on the visitor's first gesture).
-// Two seamless loops (roaster hum, café murmur) on their own gain nodes, crossfaded
-// with WebAudio ramps, plus a procedural first-crack crackle: short noise bursts
-// through a bandpass. Sound is on by default, but browsers only let audio start
+// One seamless loop (the roastery ambience, plays through the whole story) on its
+// own gain node, faded with WebAudio ramps, plus a procedural first-crack crackle:
+// short noise bursts through a bandpass. Sound is on by default, but browsers only let audio start
 // from a gesture, so the context is created on the first one (unlock). The loops
 // themselves are downloaded by the preloader, so the sound starts at once.
 import { useSyncExternalStore } from "react";
 
-export type Bed = "roaster" | "cafe";
+export type Bed = "roaster";
 
 const SOURCES: Record<Bed, string> = {
   roaster: "/assets/audio/roaster.mp3",
-  cafe: "/assets/audio/cafe.mp3",
 };
-/** The loops the preloader downloads with the films (the roaster hum plays first). */
-export const AUDIO_SOURCES = [SOURCES.roaster, SOURCES.cafe];
-const LEVEL: Record<Bed, number> = { roaster: 0.5, cafe: 0.42 };
+/** The loop the preloader downloads with the films. */
+export const AUDIO_SOURCES = [SOURCES.roaster];
+const LEVEL: Record<Bed, number> = { roaster: 0.5 };
 
 interface Channel {
   gain: GainNode;
@@ -74,11 +73,6 @@ class AmbientEngine {
   setEnabled(on: boolean) {
     this.enabled = on;
     if (on && this.unlocked) this.ensure();
-    this.apply();
-  }
-
-  setBed(bed: Bed) {
-    this.bed = bed;
     this.apply();
   }
 
@@ -205,7 +199,7 @@ class AmbientEngine {
 
     if (audible) {
       if (ctx.state === "suspended") void ctx.resume().catch(() => undefined);
-      void this.load(this.bed).then(() => this.load(this.bed === "roaster" ? "cafe" : "roaster"));
+      void this.load(this.bed);
     }
 
     master.gain.cancelScheduledValues(now);
@@ -216,7 +210,7 @@ class AmbientEngine {
       const g = channel.gain.gain;
       g.cancelScheduledValues(now);
       g.setValueAtTime(g.value, now);
-      // Slow, overlapping crossfade between the roastery and the café.
+      // A slow swell in (the master gain does the fading in and out).
       g.setTargetAtTime(bed === this.bed ? LEVEL[bed] : 0, now, 0.9);
     }
 
