@@ -304,6 +304,8 @@ export function createBeanModule(): SceneModule {
       rig.aim(camera, _t, 8, 0);
       await prewarmScene(ctx.renderer, scene, camera, { show: groups });
       for (const g of groups) g.visible = false;
+      // The f05 cup photographs upload as they arrive, not on their first frame.
+      cups.warm(ctx.renderer);
     },
 
     resize(ctx: GLContext) {

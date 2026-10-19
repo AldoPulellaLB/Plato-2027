@@ -15,6 +15,7 @@ import { ensureGsap, prefersReducedMotion } from "@/lib/motion/smooth";
 import { scrollScrubScenes, scrollScrubTheme } from "@/scroll-scrub-scenes";
 
 import { ChapterLabel } from "../shared/parts";
+import { CupNote } from "./cup-note";
 import {
   easeInOutCubic,
   playOn,
@@ -130,9 +131,14 @@ function OneTaste() {
 const WHITE_FROM = POUR_WHITE_WINDOW.from;
 const WHITE_COVER = POUR_WHITE_WINDOW.cover;
 const FILM_IDS: FrameId[] = ["f06", "f07", "f08"];
+/** f08's length in screens (its scene's scroll): its timings below are in screens from its start. */
+const F08_SCREENS = scrollScrubScenes[2]?.scroll ?? 1.5;
 
 function PourFilm() {
   const ref = useRef<HTMLDivElement>(null);
+  // The film's root, once mounted: the cup note portals into its f08 layer.
+  const [filmRoot, setFilmRoot] = useState<HTMLDivElement | null>(null);
+  useEffect(() => setFilmRoot(ref.current), []);
 
   // Arriving from another page (no preloader): start the films now, not as they near.
   useEffect(() => preloadFilms(), []);
@@ -145,6 +151,8 @@ function PourFilm() {
     const articles = FILM_IDS.map((id) => document.getElementById(id));
     if (articles.some((a) => !a)) return;
     const [a06, a07, a08] = articles as HTMLElement[];
+    // Phones stack the f08 copy over the bottom of the cup, where the note is written.
+    const narrow = window.matchMedia("(max-width: 860px)");
     // Under reduced motion the stills stack; flip once the pour still is on screen.
     const flipAt = reduced ? 0.35 : WHITE_COVER;
     let white = false;
@@ -171,14 +179,18 @@ function PourFilm() {
     const apply = () => {
       const p7 = story.progress.f07;
       const p8 = story.progress.f08;
+      // f08 in screens scrolled, so its beats keep their place whatever the scene's length.
+      const v8 = p8 * F08_SCREENS;
       const grow = range(p7, WHITE_FROM, WHITE_COVER);
       const wash = range(p7, WHITE_COVER - 0.05, WHITE_COVER + 0.01);
-      const veil = 1 - range(p8, 0.03, 0.18);
+      const veil = 1 - range(v8, 0.045, 0.27);
       const lineIn = range(p7, WHITE_COVER + 0.005, WHITE_COVER + 0.07);
-      const lineOut = range(p8, 0.05, 0.15);
-      const copy8 = range(p8, 0.12, 0.28);
-      // The f08 line leaves before the stage scrolls it under the header.
-      const copy8Out = range(p8, 0.3, 0.42);
+      const lineOut = range(v8, 0.075, 0.225);
+      const copy8 = range(v8, 0.18, 0.42);
+      // The f08 line stays while the cup turns and the note is written, then leaves as
+      // the stage starts to scroll away (one screen before the end), before the header.
+      // On phones it covers the note, so it leaves just before the note is written.
+      const copy8Out = narrow.matches ? range(v8, 0.98, 1.12) : range(v8, F08_SCREENS - 1.05, F08_SCREENS - 0.87);
       const s = root.style;
       s.setProperty("--ss-white", (grow * grow * (3 - 2 * grow)).toFixed(4));
       s.setProperty("--ss-wash", wash.toFixed(4));
@@ -274,6 +286,7 @@ function PourFilm() {
   return (
     <div className="ch-film" ref={ref}>
       <ScrollScrub className="ch-scrub" firstHeading="h2" scenes={scrollScrubScenes} theme={scrollScrubTheme} />
+      <CupNote root={filmRoot} />
     </div>
   );
 }

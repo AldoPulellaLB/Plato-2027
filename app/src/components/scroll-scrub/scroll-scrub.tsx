@@ -25,6 +25,8 @@ export interface ScrollScrubScene {
   scroll?: number;
   /** 0..0.6. Slow the middle of the clip without changing either seam frame. */
   linger?: number;
+  /** 0..0.9. Hold the clip's last frame over this final fraction of the scene's scroll. */
+  hold?: number;
   objectPosition?: string;
   mobileObjectPosition?: string;
 }
@@ -71,6 +73,7 @@ interface Segment {
   mobileClip?: string;
   weight: number;
   linger: number;
+  hold: number;
   objectPosition: string;
   mobileObjectPosition: string;
   scene?: ScrollScrubScene;
@@ -129,6 +132,7 @@ function buildSegments(
       key: `scene:${scene.id}`,
       kind: "scene",
       linger: scene.linger ?? 0,
+      hold: clamp(scene.hold ?? 0, 0, 0.9),
       mobileClip: scene.mobileClip,
       mobilePoster: scene.mobilePoster,
       mobileObjectPosition:
@@ -154,6 +158,7 @@ function buildSegments(
         key: `connector:${scene.id}:${nextScene.id}`,
         kind: "connector",
         linger: 0,
+        hold: 0,
         mobileClip: connector.mobileClip,
         mobilePoster: connector.mobilePoster,
         mobileObjectPosition:
@@ -433,9 +438,10 @@ export function ScrollScrub({
 
         const length = Math.max(segment.end - segment.start, 1);
         const local = clamp((y - segment.start) / length);
+        const played = segment.hold ? clamp(local / (1 - segment.hold)) : local;
         segment.target = segment.linger
-          ? lingerEase(local, segment.linger)
-          : local;
+          ? lingerEase(played, segment.linger)
+          : played;
 
         let outside = 0;
         if (y < segment.start) {

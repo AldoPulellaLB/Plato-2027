@@ -437,3 +437,71 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Frame 08: the note written on the back of the turned cup (cup-note.tsx). Marker
+ * ink that sinks into the paper (multiply), each line revealed left to right as the
+ * scroll writes it; the mark draws on as a stroke. Placed in px by the component. */
+.cup-note {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  container-type: size;
+  color: #1d1b18;
+  font-family: "Lacquer", var(--font-display);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  white-space: nowrap;
+  opacity: 0.88;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  transform: rotate(var(--tilt, -3deg));
+  transform-origin: 30% 40%;
+}
+/* Sized from the note box (its own container units only reach its children). */
+/* Only over the playing film: the poster (frame 0: the cup's front and the barista's
+ * hands) shows until the clip paints, and for good if it fails. */
+.scroll-scrub__layer:not([data-video-painted="true"]) > .cup-note {
+  visibility: hidden;
+}
+.cup-note__line,
+.cup-note__gap {
+  font-size: 15.2cqh;
+}
+.cup-note__line {
+  display: block;
+  clip-path: inset(-20% calc((1 - var(--w, 0)) * 102%) -20% -8%);
+}
+/* The name sits right of the sage corner; the lines start lower, clear of it. */
+.cup-note__line:first-child {
+  margin-left: 2.1em;
+}
+.cup-note__line:nth-child(4) {
+  margin-left: 0.12em;
+}
+.cup-note__gap {
+  display: block;
+  height: 1.55em;
+}
+.cup-note__line--mark {
+  clip-path: none;
+  margin: 0.15em 0 0 3.6em;
+}
+.cup-note__mark {
+  display: block;
+  width: 1.35em;
+  height: 1.35em;
+  /* Hidden until it starts drawing: a zero-length dash still paints its round caps as dots. */
+  opacity: clamp(0, calc(var(--w, 0) * 40), 1);
+}
+.cup-note__mark path {
+  stroke: currentColor;
+  stroke-width: 4.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--w, 0));
+}

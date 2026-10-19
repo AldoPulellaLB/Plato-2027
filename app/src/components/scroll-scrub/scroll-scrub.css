@@ -363,6 +363,13 @@
     --ch-f08-x: 62%;
   }
 }
+/* Portrait screens in the desktop layout (tablets upright): centre the frame, which
+ * keeps the whole cup (and the note written on it) on screen, clear of the copy. */
+@media (min-width: 861px) and (max-aspect-ratio: 1 / 1) {
+  .ch-film {
+    --ch-f08-x: 50%;
+  }
+}
 
 @media (max-width: 860px) {
   .scroll-scrub__poster,
